@@ -1,0 +1,1743 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script>
+var osType = 'android';
+</script>
+<div>
+<button onclick = "login()"> 
+	登录
+</button >
+</div>
+<button onclick = "goback()">
+	返回
+</button>
+<button onclick = "getapptype">
+	获取手机端类型
+</button >
+<button onclick = "bindphone()">
+	绑定手机号
+</button >
+<button onclick = "closeAll()">
+	关闭整个网页
+</button >
+<button onclick = "contactseller()">
+	联系商家
+</button >
+<button onclick = "getsessionanduserid()">
+	获取sessionId 和userId
+</button >
+<button onclick = "hideTitle()">
+	隐藏标题
+</button >
+<button onclick = "isUserLogin()">
+	用户是否登录
+</button >
+<button onclick = "jointopid()">
+	加入聊天
+</button >
+<button onclick = "downloadapp()">
+	下载app
+</button >
+<button onclick = "getnetstate()">
+	获取网络状态
+</button >
+<button onclick = "getaostype()">
+	获取操作系统类型
+</button >
+<button onclick = "reLogin()">
+	session过期 重新登录
+</button >
+<button onclick = "showdialog()">
+	显示弹出框 并定义确定按钮事件
+</button >
+<button onclick = "startgold()">
+	前往金币
+</button >
+<button onclick = "toast()">
+	手机端吐司
+</button >
+<button onclick = "refresh()">
+	刷新
+</button >
+
+<div>
+<button onclick = "getLocation()"> 
+	获取地理位置
+</button >
+</div>
+<div>
+<button onclick = "selectImg()"> 
+	选择图片
+</button >
+</div>
+<body>
+1.Your package name must be unique across all packages installed on the Android system. For this reason, 
+it's generally best if you use a name that begins with the reverse domain name of your organization or publisher entity. 
+you cannot publish your app on Google Play using the "com.example" namespace.
+
+2.Before you publish your app, you should be sure your icon meets the specifications defined in the Iconography design guide.
+
+3.Library projects cannot be installed onto a device, however, they are pulled into the .apk file at build time.
+
+4.assets/
+This is empty. 
+You can use it to store raw asset files.
+Files that you save here are compiled into an .apk file as-is, and the original filename is preserved. 
+You can navigate this directory in the same way as a typical file system using URIs and read files as a stream of bytes using the AssetManager. 
+For example, this is a good location for textures and game data.
+
+5.raw/
+For arbitrary raw asset files. 
+Saving asset files here instead of in the assets/ directory only differs in the way that you access them. 
+These files are processed by aapt and must be referenced from the application using a resource identifier in the R class.
+For example, this is a good place for media, such as MP3 or Ogg files.
+
+6.Library Projects
+ Here are some common scenarios in which you could make use of library projects:
+	(1)If you are developing multiple related applications that use some of the same components, 
+	you move the redundant components out of their respective application projects and create a single, reuseable set of the same components in a library project.
+	(2)If you are creating an application that exists in both free and paid versions. 
+	You move the part of the application that is common to both versions into a library project. 
+	The two dependent projects, with their different package names, will reference the library project and provide only the difference between the two application versions.
+ Development considerations
+	As you develop your library project and dependent applications, keep the points listed below in mind:
+	(1)Resource conflicts
+		Since the tools merge the resources of a library project with those of a dependent application project, a given resource ID might be defined in both projects.
+		In this case, the tools select the resource from the application, or the library with highest priority, and discard the other resource.
+		As you develop your applications, be aware that common resource IDs are likely to be defined in more than one project and will be merged, 
+		with the resource from the application or highest-priority library taking precedence.
+	(2)Use prefixes to avoid resource conflicts
+	(3)You cannot export a library project to a JAR file
+	(4)A library project can include a JAR library
+	(5)A library project can depend on an external JAR library
+	(6)Library projects cannot include raw assets
+	(7)Platform version must be lower than or equal to the Android project
+	(8)No restriction on library package names
+	(9)Each library project creates its own R class
+	(10)Library project storage location
+7.Source Revision Control system
+8.Testing a Library Project
+	There are two recommended ways of setting up testing on code and resources in a library project:
+	(1)You can set up a test project that instruments an application project that depends on the library project. 
+	   You can then add tests to the project for library-specific features.
+	(2)You can set up a standard application project that depends on the library and put the instrumentation in that project. 
+	   This lets you create a self-contained project that contains both the tests/instrumentations and the code to test.
+	   
+1.Although the emulator does not allow you to test every device feature (such as the accelerometer), 
+it does allow you to verify that your application functions properly on different versions of the Android platform, in different screen sizes and orientations, and more.
+
+2.Set up your system to detect your device.
+	（1）If you're developing on Windows, you need to install a USB driver for adb. 
+	For an installation guide and links to OEM drivers, see the OEM USB Drivers document.
+	（2）If you're developing on Mac OS X, it just works. Skip this step.
+	（3）If you're developing on Ubuntu Linux, you need to add a udev rules file that contains a USB configuration for each type of device you want to use for development.
+	In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the ATTR{idVendor} property.
+	For a list of vendor IDs, see USB Vendor IDs, below. 
+	To set up device detection on Ubuntu Linux:
+		Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
+		Use this format to add each vendor to the file:
+		SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666", GROUP="plugdev" 
+
+	In this example, the vendor ID is for HTC. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
+	Note: The rule syntax may vary slightly depending on your environment. 
+	Consult the udev documentation for your system as needed. 
+	For an overview of rule syntax, see this guide to writing udev rules.
+	Now execute:
+	chmod a+r /etc/udev/rules.d/51-android.rules
+
+3.Keep these points in mind when you are selecting a system image target for your AVD:
+	（1）The API Level of the target is important, because your application will not be able to run on a system image whose API Level is less than that required by your application, 
+	as specified in the minSdkVersion attribute of the application's manifest file. 
+	（2）You should create at least one AVD that uses a target whose API Level is greater than that required by your application, 
+	because it allows you to test the forward-compatibility of your application.
+	Forward-compatibility testing ensures that, when users who have downloaded your application receive a system update, your application will continue to function normally.
+	（3）If your application declares a uses-library element in its manifest file, the application can only run on a system image in which that external library is present. 
+	If you want to run your application on an emulator, create an AVD that includes the required library. 
+	Usually, you must create such an AVD using an Add-on component for the AVD's platform (for example, the Google APIs Add-on contains the Google Maps library).
+
+4.UI	User Interface
+
+5.Declaring your UI layout in XML rather than runtime code is useful for several reasons,
+but it's especially important so you can create different layouts for different screen sizes. 
+
+6.WYSIWYG ： What You See Is What You Get
+
+7.The other two attributes, android:layout_width and android:layout_height, are required for all views in order to specify their size.
+Because the LinearLayout is the root view in the layout, it should fill the entire screen area that's available to the app by setting the width and height to "match_parent". 
+This value declares that the view should expand its width or height to match the width or height of the parent view.
+
+1.The plus sign (+) before the resource type is needed only when you're defining a resource ID for the first time.
+Once the resource ID is declared once this way, other references to the ID do not need the plus sign. 
+Using the plus sign is necessary only when specifying a new resource ID and not needed for concrete resources such as strings or layouts. 
+
+2. Instead of using a hard-coded string as the value, the "@string/edit_message" value refers to a string resource defined in a separate file. 
+Because this refers to a concrete resource (not just an identifier), it does not need the plus sign.
+
+3.The default weight for all views is 0, so if you specify any weight value greater than 0 to only one view, then that view fills whatever space remains after all views are given the space they require. 
+So, to fill the remaining space in your layout with the EditText element, give it a weight of 1 and leave the button with no weight.
+
+***4.In order to improve the layout efficiency when you specify the weight, you should change the width of the EditText to be zero (0dp). 
+Setting the width to zero improves layout performance because using "wrap_content" as the width requires the system to calculate a width that is ultimately irrelevant because the weight value requires another width calculation to fill the remaining space.
+
+5.The advantage to declaring your UI in XML is that it enables you to better separate the presentation of your application from the code that controls its behavior. 
+Your UI descriptions are external to your application code, which means that you can modify or adapt it without having to modify your source code and recompile.
+For example, you can create XML layouts for different screen orientations, different device screen sizes, and different languages.
+Additionally, declaring the layout in XML makes it easier to visualize the structure of your UI, so it's easier to debug problems.
+
+6.In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods.
+
+7.An ID need not be unique throughout the entire tree, but it should be unique within the part of the tree you are searching (which may often be the entire tree, so it's best to be completely unique when possible).
+
+8.The geometry of a view is that of a rectangle.
+A view has a location, expressed as a pair of left and top coordinates, and two dimensions, expressed as a width and a height. 
+The unit for location and dimensions is the pixel.
+
+9.getLeft() 
+For instance, when getLeft() returns 20, that means the view is located 20 pixels to the right of the left edge of its direct parent.
+These methods both return the location of the view relative to its parent. 
+
+10.getRight()
+ For instance, calling getRight() is similar to the following computation: getLeft() + getWidth().
+ These methods return the coordinates of the right and bottom edges of the rectangle representing the view. 
+ 
+ 1.Your package name must be unique across all packages installed on the Android system. For this reason, 
+it's generally best if you use a name that begins with the reverse domain name of your organization or publisher entity. 
+you cannot publish your app on Google Play using the "com.example" namespace.
+
+2.Before you publish your app, you should be sure your icon meets the specifications defined in the Iconography design guide.
+
+3.Library projects cannot be installed onto a device, however, they are pulled into the .apk file at build time.
+
+4.assets/
+This is empty. 
+You can use it to store raw asset files.
+Files that you save here are compiled into an .apk file as-is, and the original filename is preserved. 
+You can navigate this directory in the same way as a typical file system using URIs and read files as a stream of bytes using the AssetManager. 
+For example, this is a good location for textures and game data.
+
+5.raw/
+For arbitrary raw asset files. 
+Saving asset files here instead of in the assets/ directory only differs in the way that you access them. 
+These files are processed by aapt and must be referenced from the application using a resource identifier in the R class.
+For example, this is a good place for media, such as MP3 or Ogg files.
+
+6.Library Projects
+ Here are some common scenarios in which you could make use of library projects:
+	(1)If you are developing multiple related applications that use some of the same components, 
+	you move the redundant components out of their respective application projects and create a single, reuseable set of the same components in a library project.
+	(2)If you are creating an application that exists in both free and paid versions. 
+	You move the part of the application that is common to both versions into a library project. 
+	The two dependent projects, with their different package names, will reference the library project and provide only the difference between the two application versions.
+ Development considerations
+	As you develop your library project and dependent applications, keep the points listed below in mind:
+	(1)Resource conflicts
+		Since the tools merge the resources of a library project with those of a dependent application project, a given resource ID might be defined in both projects.
+		In this case, the tools select the resource from the application, or the library with highest priority, and discard the other resource.
+		As you develop your applications, be aware that common resource IDs are likely to be defined in more than one project and will be merged, 
+		with the resource from the application or highest-priority library taking precedence.
+	(2)Use prefixes to avoid resource conflicts
+	(3)You cannot export a library project to a JAR file
+	(4)A library project can include a JAR library
+	(5)A library project can depend on an external JAR library
+	(6)Library projects cannot include raw assets
+	(7)Platform version must be lower than or equal to the Android project
+	(8)No restriction on library package names
+	(9)Each library project creates its own R class
+	(10)Library project storage location
+7.Source Revision Control system
+8.Testing a Library Project
+	There are two recommended ways of setting up testing on code and resources in a library project:
+	(1)You can set up a test project that instruments an application project that depends on the library project. 
+	   You can then add tests to the project for library-specific features.
+	(2)You can set up a standard application project that depends on the library and put the instrumentation in that project. 
+	   This lets you create a self-contained project that contains both the tests/instrumentations and the code to test.
+	   
+1.Although the emulator does not allow you to test every device feature (such as the accelerometer), 
+it does allow you to verify that your application functions properly on different versions of the Android platform, in different screen sizes and orientations, and more.
+
+2.Set up your system to detect your device.
+	（1）If you're developing on Windows, you need to install a USB driver for adb. 
+	For an installation guide and links to OEM drivers, see the OEM USB Drivers document.
+	（2）If you're developing on Mac OS X, it just works. Skip this step.
+	（3）If you're developing on Ubuntu Linux, you need to add a udev rules file that contains a USB configuration for each type of device you want to use for development.
+	In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the ATTR{idVendor} property.
+	For a list of vendor IDs, see USB Vendor IDs, below. 
+	To set up device detection on Ubuntu Linux:
+		Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
+		Use this format to add each vendor to the file:
+		SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666", GROUP="plugdev" 
+
+	In this example, the vendor ID is for HTC. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
+	Note: The rule syntax may vary slightly depending on your environment. 
+	Consult the udev documentation for your system as needed. 
+	For an overview of rule syntax, see this guide to writing udev rules.
+	Now execute:
+	chmod a+r /etc/udev/rules.d/51-android.rules
+
+3.Keep these points in mind when you are selecting a system image target for your AVD:
+	（1）The API Level of the target is important, because your application will not be able to run on a system image whose API Level is less than that required by your application, 
+	as specified in the minSdkVersion attribute of the application's manifest file. 
+	（2）You should create at least one AVD that uses a target whose API Level is greater than that required by your application, 
+	because it allows you to test the forward-compatibility of your application.
+	Forward-compatibility testing ensures that, when users who have downloaded your application receive a system update, your application will continue to function normally.
+	（3）If your application declares a uses-library element in its manifest file, the application can only run on a system image in which that external library is present. 
+	If you want to run your application on an emulator, create an AVD that includes the required library. 
+	Usually, you must create such an AVD using an Add-on component for the AVD's platform (for example, the Google APIs Add-on contains the Google Maps library).
+
+4.UI	User Interface
+
+5.Declaring your UI layout in XML rather than runtime code is useful for several reasons,
+but it's especially important so you can create different layouts for different screen sizes. 
+
+6.WYSIWYG ： What You See Is What You Get
+
+7.The other two attributes, android:layout_width and android:layout_height, are required for all views in order to specify their size.
+Because the LinearLayout is the root view in the layout, it should fill the entire screen area that's available to the app by setting the width and height to "match_parent". 
+This value declares that the view should expand its width or height to match the width or height of the parent view.
+
+1.The plus sign (+) before the resource type is needed only when you're defining a resource ID for the first time.
+Once the resource ID is declared once this way, other references to the ID do not need the plus sign. 
+Using the plus sign is necessary only when specifying a new resource ID and not needed for concrete resources such as strings or layouts. 
+
+2. Instead of using a hard-coded string as the value, the "@string/edit_message" value refers to a string resource defined in a separate file. 
+Because this refers to a concrete resource (not just an identifier), it does not need the plus sign.
+
+3.The default weight for all views is 0, so if you specify any weight value greater than 0 to only one view, then that view fills whatever space remains after all views are given the space they require. 
+So, to fill the remaining space in your layout with the EditText element, give it a weight of 1 and leave the button with no weight.
+
+***4.In order to improve the layout efficiency when you specify the weight, you should change the width of the EditText to be zero (0dp). 
+Setting the width to zero improves layout performance because using "wrap_content" as the width requires the system to calculate a width that is ultimately irrelevant because the weight value requires another width calculation to fill the remaining space.
+
+5.The advantage to declaring your UI in XML is that it enables you to better separate the presentation of your application from the code that controls its behavior. 
+Your UI descriptions are external to your application code, which means that you can modify or adapt it without having to modify your source code and recompile.
+For example, you can create XML layouts for different screen orientations, different device screen sizes, and different languages.
+Additionally, declaring the layout in XML makes it easier to visualize the structure of your UI, so it's easier to debug problems.
+
+6.In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods.
+
+7.An ID need not be unique throughout the entire tree, but it should be unique within the part of the tree you are searching (which may often be the entire tree, so it's best to be completely unique when possible).
+
+8.The geometry of a view is that of a rectangle.
+A view has a location, expressed as a pair of left and top coordinates, and two dimensions, expressed as a width and a height. 
+The unit for location and dimensions is the pixel.
+
+9.getLeft() 
+For instance, when getLeft() returns 20, that means the view is located 20 pixels to the right of the left edge of its direct parent.
+These methods both return the location of the view relative to its parent. 
+
+10.getRight()
+ For instance, calling getRight() is similar to the following computation: getLeft() + getWidth().
+ These methods return the coordinates of the right and bottom edges of the rectangle representing the view. 
+ 
+ 1.Your package name must be unique across all packages installed on the Android system. For this reason, 
+it's generally best if you use a name that begins with the reverse domain name of your organization or publisher entity. 
+you cannot publish your app on Google Play using the "com.example" namespace.
+
+2.Before you publish your app, you should be sure your icon meets the specifications defined in the Iconography design guide.
+
+3.Library projects cannot be installed onto a device, however, they are pulled into the .apk file at build time.
+
+4.assets/
+This is empty. 
+You can use it to store raw asset files.
+Files that you save here are compiled into an .apk file as-is, and the original filename is preserved. 
+You can navigate this directory in the same way as a typical file system using URIs and read files as a stream of bytes using the AssetManager. 
+For example, this is a good location for textures and game data.
+
+5.raw/
+For arbitrary raw asset files. 
+Saving asset files here instead of in the assets/ directory only differs in the way that you access them. 
+These files are processed by aapt and must be referenced from the application using a resource identifier in the R class.
+For example, this is a good place for media, such as MP3 or Ogg files.
+
+6.Library Projects
+ Here are some common scenarios in which you could make use of library projects:
+	(1)If you are developing multiple related applications that use some of the same components, 
+	you move the redundant components out of their respective application projects and create a single, reuseable set of the same components in a library project.
+	(2)If you are creating an application that exists in both free and paid versions. 
+	You move the part of the application that is common to both versions into a library project. 
+	The two dependent projects, with their different package names, will reference the library project and provide only the difference between the two application versions.
+ Development considerations
+	As you develop your library project and dependent applications, keep the points listed below in mind:
+	(1)Resource conflicts
+		Since the tools merge the resources of a library project with those of a dependent application project, a given resource ID might be defined in both projects.
+		In this case, the tools select the resource from the application, or the library with highest priority, and discard the other resource.
+		As you develop your applications, be aware that common resource IDs are likely to be defined in more than one project and will be merged, 
+		with the resource from the application or highest-priority library taking precedence.
+	(2)Use prefixes to avoid resource conflicts
+	(3)You cannot export a library project to a JAR file
+	(4)A library project can include a JAR library
+	(5)A library project can depend on an external JAR library
+	(6)Library projects cannot include raw assets
+	(7)Platform version must be lower than or equal to the Android project
+	(8)No restriction on library package names
+	(9)Each library project creates its own R class
+	(10)Library project storage location
+7.Source Revision Control system
+8.Testing a Library Project
+	There are two recommended ways of setting up testing on code and resources in a library project:
+	(1)You can set up a test project that instruments an application project that depends on the library project. 
+	   You can then add tests to the project for library-specific features.
+	(2)You can set up a standard application project that depends on the library and put the instrumentation in that project. 
+	   This lets you create a self-contained project that contains both the tests/instrumentations and the code to test.
+	   
+1.Although the emulator does not allow you to test every device feature (such as the accelerometer), 
+it does allow you to verify that your application functions properly on different versions of the Android platform, in different screen sizes and orientations, and more.
+
+2.Set up your system to detect your device.
+	（1）If you're developing on Windows, you need to install a USB driver for adb. 
+	For an installation guide and links to OEM drivers, see the OEM USB Drivers document.
+	（2）If you're developing on Mac OS X, it just works. Skip this step.
+	（3）If you're developing on Ubuntu Linux, you need to add a udev rules file that contains a USB configuration for each type of device you want to use for development.
+	In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the ATTR{idVendor} property.
+	For a list of vendor IDs, see USB Vendor IDs, below. 
+	To set up device detection on Ubuntu Linux:
+		Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
+		Use this format to add each vendor to the file:
+		SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666", GROUP="plugdev" 
+
+	In this example, the vendor ID is for HTC. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
+	Note: The rule syntax may vary slightly depending on your environment. 
+	Consult the udev documentation for your system as needed. 
+	For an overview of rule syntax, see this guide to writing udev rules.
+	Now execute:
+	chmod a+r /etc/udev/rules.d/51-android.rules
+
+3.Keep these points in mind when you are selecting a system image target for your AVD:
+	（1）The API Level of the target is important, because your application will not be able to run on a system image whose API Level is less than that required by your application, 
+	as specified in the minSdkVersion attribute of the application's manifest file. 
+	（2）You should create at least one AVD that uses a target whose API Level is greater than that required by your application, 
+	because it allows you to test the forward-compatibility of your application.
+	Forward-compatibility testing ensures that, when users who have downloaded your application receive a system update, your application will continue to function normally.
+	（3）If your application declares a uses-library element in its manifest file, the application can only run on a system image in which that external library is present. 
+	If you want to run your application on an emulator, create an AVD that includes the required library. 
+	Usually, you must create such an AVD using an Add-on component for the AVD's platform (for example, the Google APIs Add-on contains the Google Maps library).
+
+4.UI	User Interface
+
+5.Declaring your UI layout in XML rather than runtime code is useful for several reasons,
+but it's especially important so you can create different layouts for different screen sizes. 
+
+6.WYSIWYG ： What You See Is What You Get
+
+7.The other two attributes, android:layout_width and android:layout_height, are required for all views in order to specify their size.
+Because the LinearLayout is the root view in the layout, it should fill the entire screen area that's available to the app by setting the width and height to "match_parent". 
+This value declares that the view should expand its width or height to match the width or height of the parent view.
+
+1.The plus sign (+) before the resource type is needed only when you're defining a resource ID for the first time.
+Once the resource ID is declared once this way, other references to the ID do not need the plus sign. 
+Using the plus sign is necessary only when specifying a new resource ID and not needed for concrete resources such as strings or layouts. 
+
+2. Instead of using a hard-coded string as the value, the "@string/edit_message" value refers to a string resource defined in a separate file. 
+Because this refers to a concrete resource (not just an identifier), it does not need the plus sign.
+
+3.The default weight for all views is 0, so if you specify any weight value greater than 0 to only one view, then that view fills whatever space remains after all views are given the space they require. 
+So, to fill the remaining space in your layout with the EditText element, give it a weight of 1 and leave the button with no weight.
+
+***4.In order to improve the layout efficiency when you specify the weight, you should change the width of the EditText to be zero (0dp). 
+Setting the width to zero improves layout performance because using "wrap_content" as the width requires the system to calculate a width that is ultimately irrelevant because the weight value requires another width calculation to fill the remaining space.
+
+5.The advantage to declaring your UI in XML is that it enables you to better separate the presentation of your application from the code that controls its behavior. 
+Your UI descriptions are external to your application code, which means that you can modify or adapt it without having to modify your source code and recompile.
+For example, you can create XML layouts for different screen orientations, different device screen sizes, and different languages.
+Additionally, declaring the layout in XML makes it easier to visualize the structure of your UI, so it's easier to debug problems.
+
+6.In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods.
+
+7.An ID need not be unique throughout the entire tree, but it should be unique within the part of the tree you are searching (which may often be the entire tree, so it's best to be completely unique when possible).
+
+8.The geometry of a view is that of a rectangle.
+A view has a location, expressed as a pair of left and top coordinates, and two dimensions, expressed as a width and a height. 
+The unit for location and dimensions is the pixel.
+
+9.getLeft() 
+For instance, when getLeft() returns 20, that means the view is located 20 pixels to the right of the left edge of its direct parent.
+These methods both return the location of the view relative to its parent. 
+
+10.getRight()
+ For instance, calling getRight() is similar to the following computation: getLeft() + getWidth().
+ These methods return the coordinates of the right and bottom edges of the rectangle representing the view. 
+ 1.Your package name must be unique across all packages installed on the Android system. For this reason, 
+it's generally best if you use a name that begins with the reverse domain name of your organization or publisher entity. 
+you cannot publish your app on Google Play using the "com.example" namespace.
+
+2.Before you publish your app, you should be sure your icon meets the specifications defined in the Iconography design guide.
+
+3.Library projects cannot be installed onto a device, however, they are pulled into the .apk file at build time.
+
+4.assets/
+This is empty. 
+You can use it to store raw asset files.
+Files that you save here are compiled into an .apk file as-is, and the original filename is preserved. 
+You can navigate this directory in the same way as a typical file system using URIs and read files as a stream of bytes using the AssetManager. 
+For example, this is a good location for textures and game data.
+
+5.raw/
+For arbitrary raw asset files. 
+Saving asset files here instead of in the assets/ directory only differs in the way that you access them. 
+These files are processed by aapt and must be referenced from the application using a resource identifier in the R class.
+For example, this is a good place for media, such as MP3 or Ogg files.
+
+6.Library Projects
+ Here are some common scenarios in which you could make use of library projects:
+	(1)If you are developing multiple related applications that use some of the same components, 
+	you move the redundant components out of their respective application projects and create a single, reuseable set of the same components in a library project.
+	(2)If you are creating an application that exists in both free and paid versions. 
+	You move the part of the application that is common to both versions into a library project. 
+	The two dependent projects, with their different package names, will reference the library project and provide only the difference between the two application versions.
+ Development considerations
+	As you develop your library project and dependent applications, keep the points listed below in mind:
+	(1)Resource conflicts
+		Since the tools merge the resources of a library project with those of a dependent application project, a given resource ID might be defined in both projects.
+		In this case, the tools select the resource from the application, or the library with highest priority, and discard the other resource.
+		As you develop your applications, be aware that common resource IDs are likely to be defined in more than one project and will be merged, 
+		with the resource from the application or highest-priority library taking precedence.
+	(2)Use prefixes to avoid resource conflicts
+	(3)You cannot export a library project to a JAR file
+	(4)A library project can include a JAR library
+	(5)A library project can depend on an external JAR library
+	(6)Library projects cannot include raw assets
+	(7)Platform version must be lower than or equal to the Android project
+	(8)No restriction on library package names
+	(9)Each library project creates its own R class
+	(10)Library project storage location
+7.Source Revision Control system
+8.Testing a Library Project
+	There are two recommended ways of setting up testing on code and resources in a library project:
+	(1)You can set up a test project that instruments an application project that depends on the library project. 
+	   You can then add tests to the project for library-specific features.
+	(2)You can set up a standard application project that depends on the library and put the instrumentation in that project. 
+	   This lets you create a self-contained project that contains both the tests/instrumentations and the code to test.
+	   
+1.Although the emulator does not allow you to test every device feature (such as the accelerometer), 
+it does allow you to verify that your application functions properly on different versions of the Android platform, in different screen sizes and orientations, and more.
+
+2.Set up your system to detect your device.
+	（1）If you're developing on Windows, you need to install a USB driver for adb. 
+	For an installation guide and links to OEM drivers, see the OEM USB Drivers document.
+	（2）If you're developing on Mac OS X, it just works. Skip this step.
+	（3）If you're developing on Ubuntu Linux, you need to add a udev rules file that contains a USB configuration for each type of device you want to use for development.
+	In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the ATTR{idVendor} property.
+	For a list of vendor IDs, see USB Vendor IDs, below. 
+	To set up device detection on Ubuntu Linux:
+		Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
+		Use this format to add each vendor to the file:
+		SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666", GROUP="plugdev" 
+
+	In this example, the vendor ID is for HTC. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
+	Note: The rule syntax may vary slightly depending on your environment. 
+	Consult the udev documentation for your system as needed. 
+	For an overview of rule syntax, see this guide to writing udev rules.
+	Now execute:
+	chmod a+r /etc/udev/rules.d/51-android.rules
+
+3.Keep these points in mind when you are selecting a system image target for your AVD:
+	（1）The API Level of the target is important, because your application will not be able to run on a system image whose API Level is less than that required by your application, 
+	as specified in the minSdkVersion attribute of the application's manifest file. 
+	（2）You should create at least one AVD that uses a target whose API Level is greater than that required by your application, 
+	because it allows you to test the forward-compatibility of your application.
+	Forward-compatibility testing ensures that, when users who have downloaded your application receive a system update, your application will continue to function normally.
+	（3）If your application declares a uses-library element in its manifest file, the application can only run on a system image in which that external library is present. 
+	If you want to run your application on an emulator, create an AVD that includes the required library. 
+	Usually, you must create such an AVD using an Add-on component for the AVD's platform (for example, the Google APIs Add-on contains the Google Maps library).
+
+4.UI	User Interface
+
+5.Declaring your UI layout in XML rather than runtime code is useful for several reasons,
+but it's especially important so you can create different layouts for different screen sizes. 
+
+6.WYSIWYG ： What You See Is What You Get
+
+7.The other two attributes, android:layout_width and android:layout_height, are required for all views in order to specify their size.
+Because the LinearLayout is the root view in the layout, it should fill the entire screen area that's available to the app by setting the width and height to "match_parent". 
+This value declares that the view should expand its width or height to match the width or height of the parent view.
+
+1.The plus sign (+) before the resource type is needed only when you're defining a resource ID for the first time.
+Once the resource ID is declared once this way, other references to the ID do not need the plus sign. 
+Using the plus sign is necessary only when specifying a new resource ID and not needed for concrete resources such as strings or layouts. 
+
+2. Instead of using a hard-coded string as the value, the "@string/edit_message" value refers to a string resource defined in a separate file. 
+Because this refers to a concrete resource (not just an identifier), it does not need the plus sign.
+
+3.The default weight for all views is 0, so if you specify any weight value greater than 0 to only one view, then that view fills whatever space remains after all views are given the space they require. 
+So, to fill the remaining space in your layout with the EditText element, give it a weight of 1 and leave the button with no weight.
+
+***4.In order to improve the layout efficiency when you specify the weight, you should change the width of the EditText to be zero (0dp). 
+Setting the width to zero improves layout performance because using "wrap_content" as the width requires the system to calculate a width that is ultimately irrelevant because the weight value requires another width calculation to fill the remaining space.
+
+5.The advantage to declaring your UI in XML is that it enables you to better separate the presentation of your application from the code that controls its behavior. 
+Your UI descriptions are external to your application code, which means that you can modify or adapt it without having to modify your source code and recompile.
+For example, you can create XML layouts for different screen orientations, different device screen sizes, and different languages.
+Additionally, declaring the layout in XML makes it easier to visualize the structure of your UI, so it's easier to debug problems.
+
+6.In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods.
+
+7.An ID need not be unique throughout the entire tree, but it should be unique within the part of the tree you are searching (which may often be the entire tree, so it's best to be completely unique when possible).
+
+8.The geometry of a view is that of a rectangle.
+A view has a location, expressed as a pair of left and top coordinates, and two dimensions, expressed as a width and a height. 
+The unit for location and dimensions is the pixel.
+
+9.getLeft() 
+For instance, when getLeft() returns 20, that means the view is located 20 pixels to the right of the left edge of its direct parent.
+These methods both return the location of the view relative to its parent. 
+
+10.getRight()
+ For instance, calling getRight() is similar to the following computation: getLeft() + getWidth().
+ These methods return the coordinates of the right and bottom edges of the rectangle representing the view. 
+ 
+ 1.Your package name must be unique across all packages installed on the Android system. For this reason, 
+it's generally best if you use a name that begins with the reverse domain name of your organization or publisher entity. 
+you cannot publish your app on Google Play using the "com.example" namespace.
+
+2.Before you publish your app, you should be sure your icon meets the specifications defined in the Iconography design guide.
+
+3.Library projects cannot be installed onto a device, however, they are pulled into the .apk file at build time.
+
+4.assets/
+This is empty. 
+You can use it to store raw asset files.
+Files that you save here are compiled into an .apk file as-is, and the original filename is preserved. 
+You can navigate this directory in the same way as a typical file system using URIs and read files as a stream of bytes using the AssetManager. 
+For example, this is a good location for textures and game data.
+
+5.raw/
+For arbitrary raw asset files. 
+Saving asset files here instead of in the assets/ directory only differs in the way that you access them. 
+These files are processed by aapt and must be referenced from the application using a resource identifier in the R class.
+For example, this is a good place for media, such as MP3 or Ogg files.
+
+6.Library Projects
+ Here are some common scenarios in which you could make use of library projects:
+	(1)If you are developing multiple related applications that use some of the same components, 
+	you move the redundant components out of their respective application projects and create a single, reuseable set of the same components in a library project.
+	(2)If you are creating an application that exists in both free and paid versions. 
+	You move the part of the application that is common to both versions into a library project. 
+	The two dependent projects, with their different package names, will reference the library project and provide only the difference between the two application versions.
+ Development considerations
+	As you develop your library project and dependent applications, keep the points listed below in mind:
+	(1)Resource conflicts
+		Since the tools merge the resources of a library project with those of a dependent application project, a given resource ID might be defined in both projects.
+		In this case, the tools select the resource from the application, or the library with highest priority, and discard the other resource.
+		As you develop your applications, be aware that common resource IDs are likely to be defined in more than one project and will be merged, 
+		with the resource from the application or highest-priority library taking precedence.
+	(2)Use prefixes to avoid resource conflicts
+	(3)You cannot export a library project to a JAR file
+	(4)A library project can include a JAR library
+	(5)A library project can depend on an external JAR library
+	(6)Library projects cannot include raw assets
+	(7)Platform version must be lower than or equal to the Android project
+	(8)No restriction on library package names
+	(9)Each library project creates its own R class
+	(10)Library project storage location
+7.Source Revision Control system
+8.Testing a Library Project
+	There are two recommended ways of setting up testing on code and resources in a library project:
+	(1)You can set up a test project that instruments an application project that depends on the library project. 
+	   You can then add tests to the project for library-specific features.
+	(2)You can set up a standard application project that depends on the library and put the instrumentation in that project. 
+	   This lets you create a self-contained project that contains both the tests/instrumentations and the code to test.
+	   
+1.Although the emulator does not allow you to test every device feature (such as the accelerometer), 
+it does allow you to verify that your application functions properly on different versions of the Android platform, in different screen sizes and orientations, and more.
+
+2.Set up your system to detect your device.
+	（1）If you're developing on Windows, you need to install a USB driver for adb. 
+	For an installation guide and links to OEM drivers, see the OEM USB Drivers document.
+	（2）If you're developing on Mac OS X, it just works. Skip this step.
+	（3）If you're developing on Ubuntu Linux, you need to add a udev rules file that contains a USB configuration for each type of device you want to use for development.
+	In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the ATTR{idVendor} property.
+	For a list of vendor IDs, see USB Vendor IDs, below. 
+	To set up device detection on Ubuntu Linux:
+		Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
+		Use this format to add each vendor to the file:
+		SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666", GROUP="plugdev" 
+
+	In this example, the vendor ID is for HTC. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
+	Note: The rule syntax may vary slightly depending on your environment. 
+	Consult the udev documentation for your system as needed. 
+	For an overview of rule syntax, see this guide to writing udev rules.
+	Now execute:
+	chmod a+r /etc/udev/rules.d/51-android.rules
+
+3.Keep these points in mind when you are selecting a system image target for your AVD:
+	（1）The API Level of the target is important, because your application will not be able to run on a system image whose API Level is less than that required by your application, 
+	as specified in the minSdkVersion attribute of the application's manifest file. 
+	（2）You should create at least one AVD that uses a target whose API Level is greater than that required by your application, 
+	because it allows you to test the forward-compatibility of your application.
+	Forward-compatibility testing ensures that, when users who have downloaded your application receive a system update, your application will continue to function normally.
+	（3）If your application declares a uses-library element in its manifest file, the application can only run on a system image in which that external library is present. 
+	If you want to run your application on an emulator, create an AVD that includes the required library. 
+	Usually, you must create such an AVD using an Add-on component for the AVD's platform (for example, the Google APIs Add-on contains the Google Maps library).
+
+4.UI	User Interface
+
+5.Declaring your UI layout in XML rather than runtime code is useful for several reasons,
+but it's especially important so you can create different layouts for different screen sizes. 
+
+6.WYSIWYG ： What You See Is What You Get
+
+7.The other two attributes, android:layout_width and android:layout_height, are required for all views in order to specify their size.
+Because the LinearLayout is the root view in the layout, it should fill the entire screen area that's available to the app by setting the width and height to "match_parent". 
+This value declares that the view should expand its width or height to match the width or height of the parent view.
+
+1.The plus sign (+) before the resource type is needed only when you're defining a resource ID for the first time.
+Once the resource ID is declared once this way, other references to the ID do not need the plus sign. 
+Using the plus sign is necessary only when specifying a new resource ID and not needed for concrete resources such as strings or layouts. 
+
+2. Instead of using a hard-coded string as the value, the "@string/edit_message" value refers to a string resource defined in a separate file. 
+Because this refers to a concrete resource (not just an identifier), it does not need the plus sign.
+
+3.The default weight for all views is 0, so if you specify any weight value greater than 0 to only one view, then that view fills whatever space remains after all views are given the space they require. 
+So, to fill the remaining space in your layout with the EditText element, give it a weight of 1 and leave the button with no weight.
+
+***4.In order to improve the layout efficiency when you specify the weight, you should change the width of the EditText to be zero (0dp). 
+Setting the width to zero improves layout performance because using "wrap_content" as the width requires the system to calculate a width that is ultimately irrelevant because the weight value requires another width calculation to fill the remaining space.
+
+5.The advantage to declaring your UI in XML is that it enables you to better separate the presentation of your application from the code that controls its behavior. 
+Your UI descriptions are external to your application code, which means that you can modify or adapt it without having to modify your source code and recompile.
+For example, you can create XML layouts for different screen orientations, different device screen sizes, and different languages.
+Additionally, declaring the layout in XML makes it easier to visualize the structure of your UI, so it's easier to debug problems.
+
+6.In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods.
+
+7.An ID need not be unique throughout the entire tree, but it should be unique within the part of the tree you are searching (which may often be the entire tree, so it's best to be completely unique when possible).
+
+8.The geometry of a view is that of a rectangle.
+A view has a location, expressed as a pair of left and top coordinates, and two dimensions, expressed as a width and a height. 
+The unit for location and dimensions is the pixel.
+
+9.getLeft() 
+For instance, when getLeft() returns 20, that means the view is located 20 pixels to the right of the left edge of its direct parent.
+These methods both return the location of the view relative to its parent. 
+
+10.getRight()
+ For instance, calling getRight() is similar to the following computation: getLeft() + getWidth().
+ These methods return the coordinates of the right and bottom edges of the rectangle representing the view. 
+ 
+ 1.Your package name must be unique across all packages installed on the Android system. For this reason, 
+it's generally best if you use a name that begins with the reverse domain name of your organization or publisher entity. 
+you cannot publish your app on Google Play using the "com.example" namespace.
+
+2.Before you publish your app, you should be sure your icon meets the specifications defined in the Iconography design guide.
+
+3.Library projects cannot be installed onto a device, however, they are pulled into the .apk file at build time.
+
+4.assets/
+This is empty. 
+You can use it to store raw asset files.
+Files that you save here are compiled into an .apk file as-is, and the original filename is preserved. 
+You can navigate this directory in the same way as a typical file system using URIs and read files as a stream of bytes using the AssetManager. 
+For example, this is a good location for textures and game data.
+
+5.raw/
+For arbitrary raw asset files. 
+Saving asset files here instead of in the assets/ directory only differs in the way that you access them. 
+These files are processed by aapt and must be referenced from the application using a resource identifier in the R class.
+For example, this is a good place for media, such as MP3 or Ogg files.
+
+6.Library Projects
+ Here are some common scenarios in which you could make use of library projects:
+	(1)If you are developing multiple related applications that use some of the same components, 
+	you move the redundant components out of their respective application projects and create a single, reuseable set of the same components in a library project.
+	(2)If you are creating an application that exists in both free and paid versions. 
+	You move the part of the application that is common to both versions into a library project. 
+	The two dependent projects, with their different package names, will reference the library project and provide only the difference between the two application versions.
+ Development considerations
+	As you develop your library project and dependent applications, keep the points listed below in mind:
+	(1)Resource conflicts
+		Since the tools merge the resources of a library project with those of a dependent application project, a given resource ID might be defined in both projects.
+		In this case, the tools select the resource from the application, or the library with highest priority, and discard the other resource.
+		As you develop your applications, be aware that common resource IDs are likely to be defined in more than one project and will be merged, 
+		with the resource from the application or highest-priority library taking precedence.
+	(2)Use prefixes to avoid resource conflicts
+	(3)You cannot export a library project to a JAR file
+	(4)A library project can include a JAR library
+	(5)A library project can depend on an external JAR library
+	(6)Library projects cannot include raw assets
+	(7)Platform version must be lower than or equal to the Android project
+	(8)No restriction on library package names
+	(9)Each library project creates its own R class
+	(10)Library project storage location
+7.Source Revision Control system
+8.Testing a Library Project
+	There are two recommended ways of setting up testing on code and resources in a library project:
+	(1)You can set up a test project that instruments an application project that depends on the library project. 
+	   You can then add tests to the project for library-specific features.
+	(2)You can set up a standard application project that depends on the library and put the instrumentation in that project. 
+	   This lets you create a self-contained project that contains both the tests/instrumentations and the code to test.
+	   
+1.Although the emulator does not allow you to test every device feature (such as the accelerometer), 
+it does allow you to verify that your application functions properly on different versions of the Android platform, in different screen sizes and orientations, and more.
+
+2.Set up your system to detect your device.
+	（1）If you're developing on Windows, you need to install a USB driver for adb. 
+	For an installation guide and links to OEM drivers, see the OEM USB Drivers document.
+	（2）If you're developing on Mac OS X, it just works. Skip this step.
+	（3）If you're developing on Ubuntu Linux, you need to add a udev rules file that contains a USB configuration for each type of device you want to use for development.
+	In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the ATTR{idVendor} property.
+	For a list of vendor IDs, see USB Vendor IDs, below. 
+	To set up device detection on Ubuntu Linux:
+		Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
+		Use this format to add each vendor to the file:
+		SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666", GROUP="plugdev" 
+
+	In this example, the vendor ID is for HTC. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
+	Note: The rule syntax may vary slightly depending on your environment. 
+	Consult the udev documentation for your system as needed. 
+	For an overview of rule syntax, see this guide to writing udev rules.
+	Now execute:
+	chmod a+r /etc/udev/rules.d/51-android.rules
+
+3.Keep these points in mind when you are selecting a system image target for your AVD:
+	（1）The API Level of the target is important, because your application will not be able to run on a system image whose API Level is less than that required by your application, 
+	as specified in the minSdkVersion attribute of the application's manifest file. 
+	（2）You should create at least one AVD that uses a target whose API Level is greater than that required by your application, 
+	because it allows you to test the forward-compatibility of your application.
+	Forward-compatibility testing ensures that, when users who have downloaded your application receive a system update, your application will continue to function normally.
+	（3）If your application declares a uses-library element in its manifest file, the application can only run on a system image in which that external library is present. 
+	If you want to run your application on an emulator, create an AVD that includes the required library. 
+	Usually, you must create such an AVD using an Add-on component for the AVD's platform (for example, the Google APIs Add-on contains the Google Maps library).
+
+4.UI	User Interface
+
+5.Declaring your UI layout in XML rather than runtime code is useful for several reasons,
+but it's especially important so you can create different layouts for different screen sizes. 
+
+6.WYSIWYG ： What You See Is What You Get
+
+7.The other two attributes, android:layout_width and android:layout_height, are required for all views in order to specify their size.
+Because the LinearLayout is the root view in the layout, it should fill the entire screen area that's available to the app by setting the width and height to "match_parent". 
+This value declares that the view should expand its width or height to match the width or height of the parent view.
+
+1.The plus sign (+) before the resource type is needed only when you're defining a resource ID for the first time.
+Once the resource ID is declared once this way, other references to the ID do not need the plus sign. 
+Using the plus sign is necessary only when specifying a new resource ID and not needed for concrete resources such as strings or layouts. 
+
+2. Instead of using a hard-coded string as the value, the "@string/edit_message" value refers to a string resource defined in a separate file. 
+Because this refers to a concrete resource (not just an identifier), it does not need the plus sign.
+
+3.The default weight for all views is 0, so if you specify any weight value greater than 0 to only one view, then that view fills whatever space remains after all views are given the space they require. 
+So, to fill the remaining space in your layout with the EditText element, give it a weight of 1 and leave the button with no weight.
+
+***4.In order to improve the layout efficiency when you specify the weight, you should change the width of the EditText to be zero (0dp). 
+Setting the width to zero improves layout performance because using "wrap_content" as the width requires the system to calculate a width that is ultimately irrelevant because the weight value requires another width calculation to fill the remaining space.
+
+5.The advantage to declaring your UI in XML is that it enables you to better separate the presentation of your application from the code that controls its behavior. 
+Your UI descriptions are external to your application code, which means that you can modify or adapt it without having to modify your source code and recompile.
+For example, you can create XML layouts for different screen orientations, different device screen sizes, and different languages.
+Additionally, declaring the layout in XML makes it easier to visualize the structure of your UI, so it's easier to debug problems.
+
+6.In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods.
+
+7.An ID need not be unique throughout the entire tree, but it should be unique within the part of the tree you are searching (which may often be the entire tree, so it's best to be completely unique when possible).
+
+8.The geometry of a view is that of a rectangle.
+A view has a location, expressed as a pair of left and top coordinates, and two dimensions, expressed as a width and a height. 
+The unit for location and dimensions is the pixel.
+
+9.getLeft() 
+For instance, when getLeft() returns 20, that means the view is located 20 pixels to the right of the left edge of its direct parent.
+These methods both return the location of the view relative to its parent. 
+
+10.getRight()
+ For instance, calling getRight() is similar to the following computation: getLeft() + getWidth().
+ These methods return the coordinates of the right and bottom edges of the rectangle representing the view.
+ 1.Your package name must be unique across all packages installed on the Android system. For this reason, 
+it's generally best if you use a name that begins with the reverse domain name of your organization or publisher entity. 
+you cannot publish your app on Google Play using the "com.example" namespace.
+
+2.Before you publish your app, you should be sure your icon meets the specifications defined in the Iconography design guide.
+
+3.Library projects cannot be installed onto a device, however, they are pulled into the .apk file at build time.
+
+4.assets/
+This is empty. 
+You can use it to store raw asset files.
+Files that you save here are compiled into an .apk file as-is, and the original filename is preserved. 
+You can navigate this directory in the same way as a typical file system using URIs and read files as a stream of bytes using the AssetManager. 
+For example, this is a good location for textures and game data.
+
+5.raw/
+For arbitrary raw asset files. 
+Saving asset files here instead of in the assets/ directory only differs in the way that you access them. 
+These files are processed by aapt and must be referenced from the application using a resource identifier in the R class.
+For example, this is a good place for media, such as MP3 or Ogg files.
+
+6.Library Projects
+ Here are some common scenarios in which you could make use of library projects:
+	(1)If you are developing multiple related applications that use some of the same components, 
+	you move the redundant components out of their respective application projects and create a single, reuseable set of the same components in a library project.
+	(2)If you are creating an application that exists in both free and paid versions. 
+	You move the part of the application that is common to both versions into a library project. 
+	The two dependent projects, with their different package names, will reference the library project and provide only the difference between the two application versions.
+ Development considerations
+	As you develop your library project and dependent applications, keep the points listed below in mind:
+	(1)Resource conflicts
+		Since the tools merge the resources of a library project with those of a dependent application project, a given resource ID might be defined in both projects.
+		In this case, the tools select the resource from the application, or the library with highest priority, and discard the other resource.
+		As you develop your applications, be aware that common resource IDs are likely to be defined in more than one project and will be merged, 
+		with the resource from the application or highest-priority library taking precedence.
+	(2)Use prefixes to avoid resource conflicts
+	(3)You cannot export a library project to a JAR file
+	(4)A library project can include a JAR library
+	(5)A library project can depend on an external JAR library
+	(6)Library projects cannot include raw assets
+	(7)Platform version must be lower than or equal to the Android project
+	(8)No restriction on library package names
+	(9)Each library project creates its own R class
+	(10)Library project storage location
+7.Source Revision Control system
+8.Testing a Library Project
+	There are two recommended ways of setting up testing on code and resources in a library project:
+	(1)You can set up a test project that instruments an application project that depends on the library project. 
+	   You can then add tests to the project for library-specific features.
+	(2)You can set up a standard application project that depends on the library and put the instrumentation in that project. 
+	   This lets you create a self-contained project that contains both the tests/instrumentations and the code to test.
+	   
+1.Although the emulator does not allow you to test every device feature (such as the accelerometer), 
+it does allow you to verify that your application functions properly on different versions of the Android platform, in different screen sizes and orientations, and more.
+
+2.Set up your system to detect your device.
+	（1）If you're developing on Windows, you need to install a USB driver for adb. 
+	For an installation guide and links to OEM drivers, see the OEM USB Drivers document.
+	（2）If you're developing on Mac OS X, it just works. Skip this step.
+	（3）If you're developing on Ubuntu Linux, you need to add a udev rules file that contains a USB configuration for each type of device you want to use for development.
+	In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the ATTR{idVendor} property.
+	For a list of vendor IDs, see USB Vendor IDs, below. 
+	To set up device detection on Ubuntu Linux:
+		Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
+		Use this format to add each vendor to the file:
+		SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666", GROUP="plugdev" 
+
+	In this example, the vendor ID is for HTC. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
+	Note: The rule syntax may vary slightly depending on your environment. 
+	Consult the udev documentation for your system as needed. 
+	For an overview of rule syntax, see this guide to writing udev rules.
+	Now execute:
+	chmod a+r /etc/udev/rules.d/51-android.rules
+
+3.Keep these points in mind when you are selecting a system image target for your AVD:
+	（1）The API Level of the target is important, because your application will not be able to run on a system image whose API Level is less than that required by your application, 
+	as specified in the minSdkVersion attribute of the application's manifest file. 
+	（2）You should create at least one AVD that uses a target whose API Level is greater than that required by your application, 
+	because it allows you to test the forward-compatibility of your application.
+	Forward-compatibility testing ensures that, when users who have downloaded your application receive a system update, your application will continue to function normally.
+	（3）If your application declares a uses-library element in its manifest file, the application can only run on a system image in which that external library is present. 
+	If you want to run your application on an emulator, create an AVD that includes the required library. 
+	Usually, you must create such an AVD using an Add-on component for the AVD's platform (for example, the Google APIs Add-on contains the Google Maps library).
+
+4.UI	User Interface
+
+5.Declaring your UI layout in XML rather than runtime code is useful for several reasons,
+but it's especially important so you can create different layouts for different screen sizes. 
+
+6.WYSIWYG ： What You See Is What You Get
+
+7.The other two attributes, android:layout_width and android:layout_height, are required for all views in order to specify their size.
+Because the LinearLayout is the root view in the layout, it should fill the entire screen area that's available to the app by setting the width and height to "match_parent". 
+This value declares that the view should expand its width or height to match the width or height of the parent view.
+
+1.The plus sign (+) before the resource type is needed only when you're defining a resource ID for the first time.
+Once the resource ID is declared once this way, other references to the ID do not need the plus sign. 
+Using the plus sign is necessary only when specifying a new resource ID and not needed for concrete resources such as strings or layouts. 
+
+2. Instead of using a hard-coded string as the value, the "@string/edit_message" value refers to a string resource defined in a separate file. 
+Because this refers to a concrete resource (not just an identifier), it does not need the plus sign.
+
+3.The default weight for all views is 0, so if you specify any weight value greater than 0 to only one view, then that view fills whatever space remains after all views are given the space they require. 
+So, to fill the remaining space in your layout with the EditText element, give it a weight of 1 and leave the button with no weight.
+
+***4.In order to improve the layout efficiency when you specify the weight, you should change the width of the EditText to be zero (0dp). 
+Setting the width to zero improves layout performance because using "wrap_content" as the width requires the system to calculate a width that is ultimately irrelevant because the weight value requires another width calculation to fill the remaining space.
+
+5.The advantage to declaring your UI in XML is that it enables you to better separate the presentation of your application from the code that controls its behavior. 
+Your UI descriptions are external to your application code, which means that you can modify or adapt it without having to modify your source code and recompile.
+For example, you can create XML layouts for different screen orientations, different device screen sizes, and different languages.
+Additionally, declaring the layout in XML makes it easier to visualize the structure of your UI, so it's easier to debug problems.
+
+6.In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods.
+
+7.An ID need not be unique throughout the entire tree, but it should be unique within the part of the tree you are searching (which may often be the entire tree, so it's best to be completely unique when possible).
+
+8.The geometry of a view is that of a rectangle.
+A view has a location, expressed as a pair of left and top coordinates, and two dimensions, expressed as a width and a height. 
+The unit for location and dimensions is the pixel.
+
+9.getLeft() 
+For instance, when getLeft() returns 20, that means the view is located 20 pixels to the right of the left edge of its direct parent.
+These methods both return the location of the view relative to its parent. 
+
+10.getRight()
+ For instance, calling getRight() is similar to the following computation: getLeft() + getWidth().
+ These methods return the coordinates of the right and bottom edges of the rectangle representing the view. 
+ 
+ 1.Your package name must be unique across all packages installed on the Android system. For this reason, 
+it's generally best if you use a name that begins with the reverse domain name of your organization or publisher entity. 
+you cannot publish your app on Google Play using the "com.example" namespace.
+
+2.Before you publish your app, you should be sure your icon meets the specifications defined in the Iconography design guide.
+
+3.Library projects cannot be installed onto a device, however, they are pulled into the .apk file at build time.
+
+4.assets/
+This is empty. 
+You can use it to store raw asset files.
+Files that you save here are compiled into an .apk file as-is, and the original filename is preserved. 
+You can navigate this directory in the same way as a typical file system using URIs and read files as a stream of bytes using the AssetManager. 
+For example, this is a good location for textures and game data.
+
+5.raw/
+For arbitrary raw asset files. 
+Saving asset files here instead of in the assets/ directory only differs in the way that you access them. 
+These files are processed by aapt and must be referenced from the application using a resource identifier in the R class.
+For example, this is a good place for media, such as MP3 or Ogg files.
+
+6.Library Projects
+ Here are some common scenarios in which you could make use of library projects:
+	(1)If you are developing multiple related applications that use some of the same components, 
+	you move the redundant components out of their respective application projects and create a single, reuseable set of the same components in a library project.
+	(2)If you are creating an application that exists in both free and paid versions. 
+	You move the part of the application that is common to both versions into a library project. 
+	The two dependent projects, with their different package names, will reference the library project and provide only the difference between the two application versions.
+ Development considerations
+	As you develop your library project and dependent applications, keep the points listed below in mind:
+	(1)Resource conflicts
+		Since the tools merge the resources of a library project with those of a dependent application project, a given resource ID might be defined in both projects.
+		In this case, the tools select the resource from the application, or the library with highest priority, and discard the other resource.
+		As you develop your applications, be aware that common resource IDs are likely to be defined in more than one project and will be merged, 
+		with the resource from the application or highest-priority library taking precedence.
+	(2)Use prefixes to avoid resource conflicts
+	(3)You cannot export a library project to a JAR file
+	(4)A library project can include a JAR library
+	(5)A library project can depend on an external JAR library
+	(6)Library projects cannot include raw assets
+	(7)Platform version must be lower than or equal to the Android project
+	(8)No restriction on library package names
+	(9)Each library project creates its own R class
+	(10)Library project storage location
+7.Source Revision Control system
+8.Testing a Library Project
+	There are two recommended ways of setting up testing on code and resources in a library project:
+	(1)You can set up a test project that instruments an application project that depends on the library project. 
+	   You can then add tests to the project for library-specific features.
+	(2)You can set up a standard application project that depends on the library and put the instrumentation in that project. 
+	   This lets you create a self-contained project that contains both the tests/instrumentations and the code to test.
+	   
+1.Although the emulator does not allow you to test every device feature (such as the accelerometer), 
+it does allow you to verify that your application functions properly on different versions of the Android platform, in different screen sizes and orientations, and more.
+
+2.Set up your system to detect your device.
+	（1）If you're developing on Windows, you need to install a USB driver for adb. 
+	For an installation guide and links to OEM drivers, see the OEM USB Drivers document.
+	（2）If you're developing on Mac OS X, it just works. Skip this step.
+	（3）If you're developing on Ubuntu Linux, you need to add a udev rules file that contains a USB configuration for each type of device you want to use for development.
+	In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the ATTR{idVendor} property.
+	For a list of vendor IDs, see USB Vendor IDs, below. 
+	To set up device detection on Ubuntu Linux:
+		Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
+		Use this format to add each vendor to the file:
+		SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666", GROUP="plugdev" 
+
+	In this example, the vendor ID is for HTC. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
+	Note: The rule syntax may vary slightly depending on your environment. 
+	Consult the udev documentation for your system as needed. 
+	For an overview of rule syntax, see this guide to writing udev rules.
+	Now execute:
+	chmod a+r /etc/udev/rules.d/51-android.rules
+
+3.Keep these points in mind when you are selecting a system image target for your AVD:
+	（1）The API Level of the target is important, because your application will not be able to run on a system image whose API Level is less than that required by your application, 
+	as specified in the minSdkVersion attribute of the application's manifest file. 
+	（2）You should create at least one AVD that uses a target whose API Level is greater than that required by your application, 
+	because it allows you to test the forward-compatibility of your application.
+	Forward-compatibility testing ensures that, when users who have downloaded your application receive a system update, your application will continue to function normally.
+	（3）If your application declares a uses-library element in its manifest file, the application can only run on a system image in which that external library is present. 
+	If you want to run your application on an emulator, create an AVD that includes the required library. 
+	Usually, you must create such an AVD using an Add-on component for the AVD's platform (for example, the Google APIs Add-on contains the Google Maps library).
+
+4.UI	User Interface
+
+5.Declaring your UI layout in XML rather than runtime code is useful for several reasons,
+but it's especially important so you can create different layouts for different screen sizes. 
+
+6.WYSIWYG ： What You See Is What You Get
+
+7.The other two attributes, android:layout_width and android:layout_height, are required for all views in order to specify their size.
+Because the LinearLayout is the root view in the layout, it should fill the entire screen area that's available to the app by setting the width and height to "match_parent". 
+This value declares that the view should expand its width or height to match the width or height of the parent view.
+
+1.The plus sign (+) before the resource type is needed only when you're defining a resource ID for the first time.
+Once the resource ID is declared once this way, other references to the ID do not need the plus sign. 
+Using the plus sign is necessary only when specifying a new resource ID and not needed for concrete resources such as strings or layouts. 
+
+2. Instead of using a hard-coded string as the value, the "@string/edit_message" value refers to a string resource defined in a separate file. 
+Because this refers to a concrete resource (not just an identifier), it does not need the plus sign.
+
+3.The default weight for all views is 0, so if you specify any weight value greater than 0 to only one view, then that view fills whatever space remains after all views are given the space they require. 
+So, to fill the remaining space in your layout with the EditText element, give it a weight of 1 and leave the button with no weight.
+
+***4.In order to improve the layout efficiency when you specify the weight, you should change the width of the EditText to be zero (0dp). 
+Setting the width to zero improves layout performance because using "wrap_content" as the width requires the system to calculate a width that is ultimately irrelevant because the weight value requires another width calculation to fill the remaining space.
+
+5.The advantage to declaring your UI in XML is that it enables you to better separate the presentation of your application from the code that controls its behavior. 
+Your UI descriptions are external to your application code, which means that you can modify or adapt it without having to modify your source code and recompile.
+For example, you can create XML layouts for different screen orientations, different device screen sizes, and different languages.
+Additionally, declaring the layout in XML makes it easier to visualize the structure of your UI, so it's easier to debug problems.
+
+6.In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods.
+
+7.An ID need not be unique throughout the entire tree, but it should be unique within the part of the tree you are searching (which may often be the entire tree, so it's best to be completely unique when possible).
+
+8.The geometry of a view is that of a rectangle.
+A view has a location, expressed as a pair of left and top coordinates, and two dimensions, expressed as a width and a height. 
+The unit for location and dimensions is the pixel.
+
+9.getLeft() 
+For instance, when getLeft() returns 20, that means the view is located 20 pixels to the right of the left edge of its direct parent.
+These methods both return the location of the view relative to its parent. 
+
+10.getRight()
+ For instance, calling getRight() is similar to the following computation: getLeft() + getWidth().
+ These methods return the coordinates of the right and bottom edges of the rectangle representing the view. 
+ 
+ 1.Your package name must be unique across all packages installed on the Android system. For this reason, 
+it's generally best if you use a name that begins with the reverse domain name of your organization or publisher entity. 
+you cannot publish your app on Google Play using the "com.example" namespace.
+
+2.Before you publish your app, you should be sure your icon meets the specifications defined in the Iconography design guide.
+
+3.Library projects cannot be installed onto a device, however, they are pulled into the .apk file at build time.
+
+4.assets/
+This is empty. 
+You can use it to store raw asset files.
+Files that you save here are compiled into an .apk file as-is, and the original filename is preserved. 
+You can navigate this directory in the same way as a typical file system using URIs and read files as a stream of bytes using the AssetManager. 
+For example, this is a good location for textures and game data.
+
+5.raw/
+For arbitrary raw asset files. 
+Saving asset files here instead of in the assets/ directory only differs in the way that you access them. 
+These files are processed by aapt and must be referenced from the application using a resource identifier in the R class.
+For example, this is a good place for media, such as MP3 or Ogg files.
+
+6.Library Projects
+ Here are some common scenarios in which you could make use of library projects:
+	(1)If you are developing multiple related applications that use some of the same components, 
+	you move the redundant components out of their respective application projects and create a single, reuseable set of the same components in a library project.
+	(2)If you are creating an application that exists in both free and paid versions. 
+	You move the part of the application that is common to both versions into a library project. 
+	The two dependent projects, with their different package names, will reference the library project and provide only the difference between the two application versions.
+ Development considerations
+	As you develop your library project and dependent applications, keep the points listed below in mind:
+	(1)Resource conflicts
+		Since the tools merge the resources of a library project with those of a dependent application project, a given resource ID might be defined in both projects.
+		In this case, the tools select the resource from the application, or the library with highest priority, and discard the other resource.
+		As you develop your applications, be aware that common resource IDs are likely to be defined in more than one project and will be merged, 
+		with the resource from the application or highest-priority library taking precedence.
+	(2)Use prefixes to avoid resource conflicts
+	(3)You cannot export a library project to a JAR file
+	(4)A library project can include a JAR library
+	(5)A library project can depend on an external JAR library
+	(6)Library projects cannot include raw assets
+	(7)Platform version must be lower than or equal to the Android project
+	(8)No restriction on library package names
+	(9)Each library project creates its own R class
+	(10)Library project storage location
+7.Source Revision Control system
+8.Testing a Library Project
+	There are two recommended ways of setting up testing on code and resources in a library project:
+	(1)You can set up a test project that instruments an application project that depends on the library project. 
+	   You can then add tests to the project for library-specific features.
+	(2)You can set up a standard application project that depends on the library and put the instrumentation in that project. 
+	   This lets you create a self-contained project that contains both the tests/instrumentations and the code to test.
+	   
+1.Although the emulator does not allow you to test every device feature (such as the accelerometer), 
+it does allow you to verify that your application functions properly on different versions of the Android platform, in different screen sizes and orientations, and more.
+
+2.Set up your system to detect your device.
+	（1）If you're developing on Windows, you need to install a USB driver for adb. 
+	For an installation guide and links to OEM drivers, see the OEM USB Drivers document.
+	（2）If you're developing on Mac OS X, it just works. Skip this step.
+	（3）If you're developing on Ubuntu Linux, you need to add a udev rules file that contains a USB configuration for each type of device you want to use for development.
+	In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the ATTR{idVendor} property.
+	For a list of vendor IDs, see USB Vendor IDs, below. 
+	To set up device detection on Ubuntu Linux:
+		Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
+		Use this format to add each vendor to the file:
+		SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666", GROUP="plugdev" 
+
+	In this example, the vendor ID is for HTC. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
+	Note: The rule syntax may vary slightly depending on your environment. 
+	Consult the udev documentation for your system as needed. 
+	For an overview of rule syntax, see this guide to writing udev rules.
+	Now execute:
+	chmod a+r /etc/udev/rules.d/51-android.rules
+
+3.Keep these points in mind when you are selecting a system image target for your AVD:
+	（1）The API Level of the target is important, because your application will not be able to run on a system image whose API Level is less than that required by your application, 
+	as specified in the minSdkVersion attribute of the application's manifest file. 
+	（2）You should create at least one AVD that uses a target whose API Level is greater than that required by your application, 
+	because it allows you to test the forward-compatibility of your application.
+	Forward-compatibility testing ensures that, when users who have downloaded your application receive a system update, your application will continue to function normally.
+	（3）If your application declares a uses-library element in its manifest file, the application can only run on a system image in which that external library is present. 
+	If you want to run your application on an emulator, create an AVD that includes the required library. 
+	Usually, you must create such an AVD using an Add-on component for the AVD's platform (for example, the Google APIs Add-on contains the Google Maps library).
+
+4.UI	User Interface
+
+5.Declaring your UI layout in XML rather than runtime code is useful for several reasons,
+but it's especially important so you can create different layouts for different screen sizes. 
+
+6.WYSIWYG ： What You See Is What You Get
+
+7.The other two attributes, android:layout_width and android:layout_height, are required for all views in order to specify their size.
+Because the LinearLayout is the root view in the layout, it should fill the entire screen area that's available to the app by setting the width and height to "match_parent". 
+This value declares that the view should expand its width or height to match the width or height of the parent view.
+
+1.The plus sign (+) before the resource type is needed only when you're defining a resource ID for the first time.
+Once the resource ID is declared once this way, other references to the ID do not need the plus sign. 
+Using the plus sign is necessary only when specifying a new resource ID and not needed for concrete resources such as strings or layouts. 
+
+2. Instead of using a hard-coded string as the value, the "@string/edit_message" value refers to a string resource defined in a separate file. 
+Because this refers to a concrete resource (not just an identifier), it does not need the plus sign.
+
+3.The default weight for all views is 0, so if you specify any weight value greater than 0 to only one view, then that view fills whatever space remains after all views are given the space they require. 
+So, to fill the remaining space in your layout with the EditText element, give it a weight of 1 and leave the button with no weight.
+
+***4.In order to improve the layout efficiency when you specify the weight, you should change the width of the EditText to be zero (0dp). 
+Setting the width to zero improves layout performance because using "wrap_content" as the width requires the system to calculate a width that is ultimately irrelevant because the weight value requires another width calculation to fill the remaining space.
+
+5.The advantage to declaring your UI in XML is that it enables you to better separate the presentation of your application from the code that controls its behavior. 
+Your UI descriptions are external to your application code, which means that you can modify or adapt it without having to modify your source code and recompile.
+For example, you can create XML layouts for different screen orientations, different device screen sizes, and different languages.
+Additionally, declaring the layout in XML makes it easier to visualize the structure of your UI, so it's easier to debug problems.
+
+6.In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods.
+
+7.An ID need not be unique throughout the entire tree, but it should be unique within the part of the tree you are searching (which may often be the entire tree, so it's best to be completely unique when possible).
+
+8.The geometry of a view is that of a rectangle.
+A view has a location, expressed as a pair of left and top coordinates, and two dimensions, expressed as a width and a height. 
+The unit for location and dimensions is the pixel.
+
+9.getLeft() 
+For instance, when getLeft() returns 20, that means the view is located 20 pixels to the right of the left edge of its direct parent.
+These methods both return the location of the view relative to its parent. 
+
+10.getRight()
+ For instance, calling getRight() is similar to the following computation: getLeft() + getWidth().
+ These methods return the coordinates of the right and bottom edges of the rectangle representing the view.
+ 1.Your package name must be unique across all packages installed on the Android system. For this reason, 
+it's generally best if you use a name that begins with the reverse domain name of your organization or publisher entity. 
+you cannot publish your app on Google Play using the "com.example" namespace.
+
+2.Before you publish your app, you should be sure your icon meets the specifications defined in the Iconography design guide.
+
+3.Library projects cannot be installed onto a device, however, they are pulled into the .apk file at build time.
+
+4.assets/
+This is empty. 
+You can use it to store raw asset files.
+Files that you save here are compiled into an .apk file as-is, and the original filename is preserved. 
+You can navigate this directory in the same way as a typical file system using URIs and read files as a stream of bytes using the AssetManager. 
+For example, this is a good location for textures and game data.
+
+5.raw/
+For arbitrary raw asset files. 
+Saving asset files here instead of in the assets/ directory only differs in the way that you access them. 
+These files are processed by aapt and must be referenced from the application using a resource identifier in the R class.
+For example, this is a good place for media, such as MP3 or Ogg files.
+
+6.Library Projects
+ Here are some common scenarios in which you could make use of library projects:
+	(1)If you are developing multiple related applications that use some of the same components, 
+	you move the redundant components out of their respective application projects and create a single, reuseable set of the same components in a library project.
+	(2)If you are creating an application that exists in both free and paid versions. 
+	You move the part of the application that is common to both versions into a library project. 
+	The two dependent projects, with their different package names, will reference the library project and provide only the difference between the two application versions.
+ Development considerations
+	As you develop your library project and dependent applications, keep the points listed below in mind:
+	(1)Resource conflicts
+		Since the tools merge the resources of a library project with those of a dependent application project, a given resource ID might be defined in both projects.
+		In this case, the tools select the resource from the application, or the library with highest priority, and discard the other resource.
+		As you develop your applications, be aware that common resource IDs are likely to be defined in more than one project and will be merged, 
+		with the resource from the application or highest-priority library taking precedence.
+	(2)Use prefixes to avoid resource conflicts
+	(3)You cannot export a library project to a JAR file
+	(4)A library project can include a JAR library
+	(5)A library project can depend on an external JAR library
+	(6)Library projects cannot include raw assets
+	(7)Platform version must be lower than or equal to the Android project
+	(8)No restriction on library package names
+	(9)Each library project creates its own R class
+	(10)Library project storage location
+7.Source Revision Control system
+8.Testing a Library Project
+	There are two recommended ways of setting up testing on code and resources in a library project:
+	(1)You can set up a test project that instruments an application project that depends on the library project. 
+	   You can then add tests to the project for library-specific features.
+	(2)You can set up a standard application project that depends on the library and put the instrumentation in that project. 
+	   This lets you create a self-contained project that contains both the tests/instrumentations and the code to test.
+	   
+1.Although the emulator does not allow you to test every device feature (such as the accelerometer), 
+it does allow you to verify that your application functions properly on different versions of the Android platform, in different screen sizes and orientations, and more.
+
+2.Set up your system to detect your device.
+	（1）If you're developing on Windows, you need to install a USB driver for adb. 
+	For an installation guide and links to OEM drivers, see the OEM USB Drivers document.
+	（2）If you're developing on Mac OS X, it just works. Skip this step.
+	（3）If you're developing on Ubuntu Linux, you need to add a udev rules file that contains a USB configuration for each type of device you want to use for development.
+	In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the ATTR{idVendor} property.
+	For a list of vendor IDs, see USB Vendor IDs, below. 
+	To set up device detection on Ubuntu Linux:
+		Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
+		Use this format to add each vendor to the file:
+		SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666", GROUP="plugdev" 
+
+	In this example, the vendor ID is for HTC. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
+	Note: The rule syntax may vary slightly depending on your environment. 
+	Consult the udev documentation for your system as needed. 
+	For an overview of rule syntax, see this guide to writing udev rules.
+	Now execute:
+	chmod a+r /etc/udev/rules.d/51-android.rules
+
+3.Keep these points in mind when you are selecting a system image target for your AVD:
+	（1）The API Level of the target is important, because your application will not be able to run on a system image whose API Level is less than that required by your application, 
+	as specified in the minSdkVersion attribute of the application's manifest file. 
+	（2）You should create at least one AVD that uses a target whose API Level is greater than that required by your application, 
+	because it allows you to test the forward-compatibility of your application.
+	Forward-compatibility testing ensures that, when users who have downloaded your application receive a system update, your application will continue to function normally.
+	（3）If your application declares a uses-library element in its manifest file, the application can only run on a system image in which that external library is present. 
+	If you want to run your application on an emulator, create an AVD that includes the required library. 
+	Usually, you must create such an AVD using an Add-on component for the AVD's platform (for example, the Google APIs Add-on contains the Google Maps library).
+
+4.UI	User Interface
+
+5.Declaring your UI layout in XML rather than runtime code is useful for several reasons,
+but it's especially important so you can create different layouts for different screen sizes. 
+
+6.WYSIWYG ： What You See Is What You Get
+
+7.The other two attributes, android:layout_width and android:layout_height, are required for all views in order to specify their size.
+Because the LinearLayout is the root view in the layout, it should fill the entire screen area that's available to the app by setting the width and height to "match_parent". 
+This value declares that the view should expand its width or height to match the width or height of the parent view.
+
+1.The plus sign (+) before the resource type is needed only when you're defining a resource ID for the first time.
+Once the resource ID is declared once this way, other references to the ID do not need the plus sign. 
+Using the plus sign is necessary only when specifying a new resource ID and not needed for concrete resources such as strings or layouts. 
+
+2. Instead of using a hard-coded string as the value, the "@string/edit_message" value refers to a string resource defined in a separate file. 
+Because this refers to a concrete resource (not just an identifier), it does not need the plus sign.
+
+3.The default weight for all views is 0, so if you specify any weight value greater than 0 to only one view, then that view fills whatever space remains after all views are given the space they require. 
+So, to fill the remaining space in your layout with the EditText element, give it a weight of 1 and leave the button with no weight.
+
+***4.In order to improve the layout efficiency when you specify the weight, you should change the width of the EditText to be zero (0dp). 
+Setting the width to zero improves layout performance because using "wrap_content" as the width requires the system to calculate a width that is ultimately irrelevant because the weight value requires another width calculation to fill the remaining space.
+
+5.The advantage to declaring your UI in XML is that it enables you to better separate the presentation of your application from the code that controls its behavior. 
+Your UI descriptions are external to your application code, which means that you can modify or adapt it without having to modify your source code and recompile.
+For example, you can create XML layouts for different screen orientations, different device screen sizes, and different languages.
+Additionally, declaring the layout in XML makes it easier to visualize the structure of your UI, so it's easier to debug problems.
+
+6.In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods.
+
+7.An ID need not be unique throughout the entire tree, but it should be unique within the part of the tree you are searching (which may often be the entire tree, so it's best to be completely unique when possible).
+
+8.The geometry of a view is that of a rectangle.
+A view has a location, expressed as a pair of left and top coordinates, and two dimensions, expressed as a width and a height. 
+The unit for location and dimensions is the pixel.
+
+9.getLeft() 
+For instance, when getLeft() returns 20, that means the view is located 20 pixels to the right of the left edge of its direct parent.
+These methods both return the location of the view relative to its parent. 
+
+10.getRight()
+ For instance, calling getRight() is similar to the following computation: getLeft() + getWidth().
+ These methods return the coordinates of the right and bottom edges of the rectangle representing the view. 
+ 
+ 1.Your package name must be unique across all packages installed on the Android system. For this reason, 
+it's generally best if you use a name that begins with the reverse domain name of your organization or publisher entity. 
+you cannot publish your app on Google Play using the "com.example" namespace.
+
+2.Before you publish your app, you should be sure your icon meets the specifications defined in the Iconography design guide.
+
+3.Library projects cannot be installed onto a device, however, they are pulled into the .apk file at build time.
+
+4.assets/
+This is empty. 
+You can use it to store raw asset files.
+Files that you save here are compiled into an .apk file as-is, and the original filename is preserved. 
+You can navigate this directory in the same way as a typical file system using URIs and read files as a stream of bytes using the AssetManager. 
+For example, this is a good location for textures and game data.
+
+5.raw/
+For arbitrary raw asset files. 
+Saving asset files here instead of in the assets/ directory only differs in the way that you access them. 
+These files are processed by aapt and must be referenced from the application using a resource identifier in the R class.
+For example, this is a good place for media, such as MP3 or Ogg files.
+
+6.Library Projects
+ Here are some common scenarios in which you could make use of library projects:
+	(1)If you are developing multiple related applications that use some of the same components, 
+	you move the redundant components out of their respective application projects and create a single, reuseable set of the same components in a library project.
+	(2)If you are creating an application that exists in both free and paid versions. 
+	You move the part of the application that is common to both versions into a library project. 
+	The two dependent projects, with their different package names, will reference the library project and provide only the difference between the two application versions.
+ Development considerations
+	As you develop your library project and dependent applications, keep the points listed below in mind:
+	(1)Resource conflicts
+		Since the tools merge the resources of a library project with those of a dependent application project, a given resource ID might be defined in both projects.
+		In this case, the tools select the resource from the application, or the library with highest priority, and discard the other resource.
+		As you develop your applications, be aware that common resource IDs are likely to be defined in more than one project and will be merged, 
+		with the resource from the application or highest-priority library taking precedence.
+	(2)Use prefixes to avoid resource conflicts
+	(3)You cannot export a library project to a JAR file
+	(4)A library project can include a JAR library
+	(5)A library project can depend on an external JAR library
+	(6)Library projects cannot include raw assets
+	(7)Platform version must be lower than or equal to the Android project
+	(8)No restriction on library package names
+	(9)Each library project creates its own R class
+	(10)Library project storage location
+7.Source Revision Control system
+8.Testing a Library Project
+	There are two recommended ways of setting up testing on code and resources in a library project:
+	(1)You can set up a test project that instruments an application project that depends on the library project. 
+	   You can then add tests to the project for library-specific features.
+	(2)You can set up a standard application project that depends on the library and put the instrumentation in that project. 
+	   This lets you create a self-contained project that contains both the tests/instrumentations and the code to test.
+	   
+1.Although the emulator does not allow you to test every device feature (such as the accelerometer), 
+it does allow you to verify that your application functions properly on different versions of the Android platform, in different screen sizes and orientations, and more.
+
+2.Set up your system to detect your device.
+	（1）If you're developing on Windows, you need to install a USB driver for adb. 
+	For an installation guide and links to OEM drivers, see the OEM USB Drivers document.
+	（2）If you're developing on Mac OS X, it just works. Skip this step.
+	（3）If you're developing on Ubuntu Linux, you need to add a udev rules file that contains a USB configuration for each type of device you want to use for development.
+	In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the ATTR{idVendor} property.
+	For a list of vendor IDs, see USB Vendor IDs, below. 
+	To set up device detection on Ubuntu Linux:
+		Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
+		Use this format to add each vendor to the file:
+		SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666", GROUP="plugdev" 
+
+	In this example, the vendor ID is for HTC. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
+	Note: The rule syntax may vary slightly depending on your environment. 
+	Consult the udev documentation for your system as needed. 
+	For an overview of rule syntax, see this guide to writing udev rules.
+	Now execute:
+	chmod a+r /etc/udev/rules.d/51-android.rules
+
+3.Keep these points in mind when you are selecting a system image target for your AVD:
+	（1）The API Level of the target is important, because your application will not be able to run on a system image whose API Level is less than that required by your application, 
+	as specified in the minSdkVersion attribute of the application's manifest file. 
+	（2）You should create at least one AVD that uses a target whose API Level is greater than that required by your application, 
+	because it allows you to test the forward-compatibility of your application.
+	Forward-compatibility testing ensures that, when users who have downloaded your application receive a system update, your application will continue to function normally.
+	（3）If your application declares a uses-library element in its manifest file, the application can only run on a system image in which that external library is present. 
+	If you want to run your application on an emulator, create an AVD that includes the required library. 
+	Usually, you must create such an AVD using an Add-on component for the AVD's platform (for example, the Google APIs Add-on contains the Google Maps library).
+
+4.UI	User Interface
+
+5.Declaring your UI layout in XML rather than runtime code is useful for several reasons,
+but it's especially important so you can create different layouts for different screen sizes. 
+
+6.WYSIWYG ： What You See Is What You Get
+
+7.The other two attributes, android:layout_width and android:layout_height, are required for all views in order to specify their size.
+Because the LinearLayout is the root view in the layout, it should fill the entire screen area that's available to the app by setting the width and height to "match_parent". 
+This value declares that the view should expand its width or height to match the width or height of the parent view.
+
+1.The plus sign (+) before the resource type is needed only when you're defining a resource ID for the first time.
+Once the resource ID is declared once this way, other references to the ID do not need the plus sign. 
+Using the plus sign is necessary only when specifying a new resource ID and not needed for concrete resources such as strings or layouts. 
+
+2. Instead of using a hard-coded string as the value, the "@string/edit_message" value refers to a string resource defined in a separate file. 
+Because this refers to a concrete resource (not just an identifier), it does not need the plus sign.
+
+3.The default weight for all views is 0, so if you specify any weight value greater than 0 to only one view, then that view fills whatever space remains after all views are given the space they require. 
+So, to fill the remaining space in your layout with the EditText element, give it a weight of 1 and leave the button with no weight.
+
+***4.In order to improve the layout efficiency when you specify the weight, you should change the width of the EditText to be zero (0dp). 
+Setting the width to zero improves layout performance because using "wrap_content" as the width requires the system to calculate a width that is ultimately irrelevant because the weight value requires another width calculation to fill the remaining space.
+
+5.The advantage to declaring your UI in XML is that it enables you to better separate the presentation of your application from the code that controls its behavior. 
+Your UI descriptions are external to your application code, which means that you can modify or adapt it without having to modify your source code and recompile.
+For example, you can create XML layouts for different screen orientations, different device screen sizes, and different languages.
+Additionally, declaring the layout in XML makes it easier to visualize the structure of your UI, so it's easier to debug problems.
+
+6.In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods.
+
+7.An ID need not be unique throughout the entire tree, but it should be unique within the part of the tree you are searching (which may often be the entire tree, so it's best to be completely unique when possible).
+
+8.The geometry of a view is that of a rectangle.
+A view has a location, expressed as a pair of left and top coordinates, and two dimensions, expressed as a width and a height. 
+The unit for location and dimensions is the pixel.
+
+9.getLeft() 
+For instance, when getLeft() returns 20, that means the view is located 20 pixels to the right of the left edge of its direct parent.
+These methods both return the location of the view relative to its parent. 
+
+10.getRight()
+ For instance, calling getRight() is similar to the following computation: getLeft() + getWidth().
+ These methods return the coordinates of the right and bottom edges of the rectangle representing the view. 
+ 
+ 1.Your package name must be unique across all packages installed on the Android system. For this reason, 
+it's generally best if you use a name that begins with the reverse domain name of your organization or publisher entity. 
+you cannot publish your app on Google Play using the "com.example" namespace.
+
+2.Before you publish your app, you should be sure your icon meets the specifications defined in the Iconography design guide.
+
+3.Library projects cannot be installed onto a device, however, they are pulled into the .apk file at build time.
+
+4.assets/
+This is empty. 
+You can use it to store raw asset files.
+Files that you save here are compiled into an .apk file as-is, and the original filename is preserved. 
+You can navigate this directory in the same way as a typical file system using URIs and read files as a stream of bytes using the AssetManager. 
+For example, this is a good location for textures and game data.
+
+5.raw/
+For arbitrary raw asset files. 
+Saving asset files here instead of in the assets/ directory only differs in the way that you access them. 
+These files are processed by aapt and must be referenced from the application using a resource identifier in the R class.
+For example, this is a good place for media, such as MP3 or Ogg files.
+
+6.Library Projects
+ Here are some common scenarios in which you could make use of library projects:
+	(1)If you are developing multiple related applications that use some of the same components, 
+	you move the redundant components out of their respective application projects and create a single, reuseable set of the same components in a library project.
+	(2)If you are creating an application that exists in both free and paid versions. 
+	You move the part of the application that is common to both versions into a library project. 
+	The two dependent projects, with their different package names, will reference the library project and provide only the difference between the two application versions.
+ Development considerations
+	As you develop your library project and dependent applications, keep the points listed below in mind:
+	(1)Resource conflicts
+		Since the tools merge the resources of a library project with those of a dependent application project, a given resource ID might be defined in both projects.
+		In this case, the tools select the resource from the application, or the library with highest priority, and discard the other resource.
+		As you develop your applications, be aware that common resource IDs are likely to be defined in more than one project and will be merged, 
+		with the resource from the application or highest-priority library taking precedence.
+	(2)Use prefixes to avoid resource conflicts
+	(3)You cannot export a library project to a JAR file
+	(4)A library project can include a JAR library
+	(5)A library project can depend on an external JAR library
+	(6)Library projects cannot include raw assets
+	(7)Platform version must be lower than or equal to the Android project
+	(8)No restriction on library package names
+	(9)Each library project creates its own R class
+	(10)Library project storage location
+7.Source Revision Control system
+8.Testing a Library Project
+	There are two recommended ways of setting up testing on code and resources in a library project:
+	(1)You can set up a test project that instruments an application project that depends on the library project. 
+	   You can then add tests to the project for library-specific features.
+	(2)You can set up a standard application project that depends on the library and put the instrumentation in that project. 
+	   This lets you create a self-contained project that contains both the tests/instrumentations and the code to test.
+	   
+1.Although the emulator does not allow you to test every device feature (such as the accelerometer), 
+it does allow you to verify that your application functions properly on different versions of the Android platform, in different screen sizes and orientations, and more.
+
+2.Set up your system to detect your device.
+	（1）If you're developing on Windows, you need to install a USB driver for adb. 
+	For an installation guide and links to OEM drivers, see the OEM USB Drivers document.
+	（2）If you're developing on Mac OS X, it just works. Skip this step.
+	（3）If you're developing on Ubuntu Linux, you need to add a udev rules file that contains a USB configuration for each type of device you want to use for development.
+	In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the ATTR{idVendor} property.
+	For a list of vendor IDs, see USB Vendor IDs, below. 
+	To set up device detection on Ubuntu Linux:
+		Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
+		Use this format to add each vendor to the file:
+		SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666", GROUP="plugdev" 
+
+	In this example, the vendor ID is for HTC. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
+	Note: The rule syntax may vary slightly depending on your environment. 
+	Consult the udev documentation for your system as needed. 
+	For an overview of rule syntax, see this guide to writing udev rules.
+	Now execute:
+	chmod a+r /etc/udev/rules.d/51-android.rules
+
+3.Keep these points in mind when you are selecting a system image target for your AVD:
+	（1）The API Level of the target is important, because your application will not be able to run on a system image whose API Level is less than that required by your application, 
+	as specified in the minSdkVersion attribute of the application's manifest file. 
+	（2）You should create at least one AVD that uses a target whose API Level is greater than that required by your application, 
+	because it allows you to test the forward-compatibility of your application.
+	Forward-compatibility testing ensures that, when users who have downloaded your application receive a system update, your application will continue to function normally.
+	（3）If your application declares a uses-library element in its manifest file, the application can only run on a system image in which that external library is present. 
+	If you want to run your application on an emulator, create an AVD that includes the required library. 
+	Usually, you must create such an AVD using an Add-on component for the AVD's platform (for example, the Google APIs Add-on contains the Google Maps library).
+
+4.UI	User Interface
+
+5.Declaring your UI layout in XML rather than runtime code is useful for several reasons,
+but it's especially important so you can create different layouts for different screen sizes. 
+
+6.WYSIWYG ： What You See Is What You Get
+
+7.The other two attributes, android:layout_width and android:layout_height, are required for all views in order to specify their size.
+Because the LinearLayout is the root view in the layout, it should fill the entire screen area that's available to the app by setting the width and height to "match_parent". 
+This value declares that the view should expand its width or height to match the width or height of the parent view.
+
+1.The plus sign (+) before the resource type is needed only when you're defining a resource ID for the first time.
+Once the resource ID is declared once this way, other references to the ID do not need the plus sign. 
+Using the plus sign is necessary only when specifying a new resource ID and not needed for concrete resources such as strings or layouts. 
+
+2. Instead of using a hard-coded string as the value, the "@string/edit_message" value refers to a string resource defined in a separate file. 
+Because this refers to a concrete resource (not just an identifier), it does not need the plus sign.
+
+3.The default weight for all views is 0, so if you specify any weight value greater than 0 to only one view, then that view fills whatever space remains after all views are given the space they require. 
+So, to fill the remaining space in your layout with the EditText element, give it a weight of 1 and leave the button with no weight.
+
+***4.In order to improve the layout efficiency when you specify the weight, you should change the width of the EditText to be zero (0dp). 
+Setting the width to zero improves layout performance because using "wrap_content" as the width requires the system to calculate a width that is ultimately irrelevant because the weight value requires another width calculation to fill the remaining space.
+
+5.The advantage to declaring your UI in XML is that it enables you to better separate the presentation of your application from the code that controls its behavior. 
+Your UI descriptions are external to your application code, which means that you can modify or adapt it without having to modify your source code and recompile.
+For example, you can create XML layouts for different screen orientations, different device screen sizes, and different languages.
+Additionally, declaring the layout in XML makes it easier to visualize the structure of your UI, so it's easier to debug problems.
+
+6.In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods.
+
+7.An ID need not be unique throughout the entire tree, but it should be unique within the part of the tree you are searching (which may often be the entire tree, so it's best to be completely unique when possible).
+
+8.The geometry of a view is that of a rectangle.
+A view has a location, expressed as a pair of left and top coordinates, and two dimensions, expressed as a width and a height. 
+The unit for location and dimensions is the pixel.
+
+9.getLeft() 
+For instance, when getLeft() returns 20, that means the view is located 20 pixels to the right of the left edge of its direct parent.
+These methods both return the location of the view relative to its parent. 
+
+10.getRight()
+ For instance, calling getRight() is similar to the following computation: getLeft() + getWidth().
+ These methods return the coordinates of the right and bottom edges of the rectangle representing the view.
+
+
+</body>
+
+
+<script>
+	function login (){
+		window.MobileActionLogin.start();
+	}
+</script>
+
+<script>
+	function goback(){
+		window.MobileActionGoback. start();
+	}
+</script>
+<script>
+	function startgold(){
+		window.MobileActionStartgold.start();
+	}
+</script>
+<script>
+	 function closeAll(){
+		window.MobileActionCloseall.start ();
+	}
+</script>
+<script>
+	 function bindphone(){
+		window.MobileActionBindphone.start ("zhangsan@163.com","email");
+	}
+</script>
+<script>
+	function reLogin(){
+		Window.MobileActionRelogin.start();
+	}
+</script>
+<script>
+	function hideTitle(){
+		window.MobileActionHidetitle.start();
+	}
+</script>
+<script>
+	function downloadapp(){
+		window.MobileActionLoadapp.start("2010e3d7-305e-4f46-b23d-cf15852f63df");
+	}
+</script>
+<script>
+	function getsessionanduserid(){
+		window.MobileActionGetids.start();
+	}
+</script>
+<script>
+	function showdialog{
+		window.MobileActionShowdialog.start("标题","内容","确定",取消,1);
+	}
+</script>
+<script>
+	function toast(){
+		window.MobileActionToast.start("吐司~~~");
+	}
+</script>
+<script>
+	 function refresh(){
+		window.MobileActionFresh.start();
+	}
+</script>
+<script>
+	 function contactseller(){
+		window.MobileActionContactSeller.start("2010e3d7-305e-4f46-b23d-cf15852f63df")
+	}
+</script>
+<script>
+	 function jointopid(){
+		window.MobileActionJointopic.start("id","name")；
+	}
+</script>
+<script>
+	window.onload = function getnetstate(){
+		window.MobileActionNetState.start();
+	}
+</script>
+<script>
+	function String getaostype(){
+		Window. MobileActionOsType.start);
+	}
+	
+</script>
+<script>
+	 function getapptype(){
+		Window.MobileActionAppType.start()
+	}
+</script>
+<script>
+	 function isUserLogin(){
+		Window.MobileActionIsuserlogin.start();
+	}
+</script>
+<script>
+	 window.onload = function sss(){
+		alert(11);
+		Window.MobileActionLoad.start("MobileActionIsuserlogin,MobileActionAppType,MobileActionOsType")
+	}
+</script>
+<script>
+	function getLocation (){
+		alert(33);
+		window.location.href="locationFuction";
+	}
+</script>
+<script>
+	function getLocationInfo(success,code,tag,info){
+		alert(code);
+	}
+</script>
+<script>
+	function selectImg (){
+		alert(44);
+		window.location.href="selectImgFuction";
+	}
+</script>
+<script>
+	function selectImgInfo(success,code,tag,info){
+		alert(55);
+	}
+</script>
+

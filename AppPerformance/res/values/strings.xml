@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">AppPerformance</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello Memory World!</string>
+    <string name="memory_leak_issues">内存泄漏常见问题</string>
+    <string name="static_context_leak_issues">静态变量引用Context</string>
+    <string name="handler_leak_issues">Handler内存问题</string>
+    <string name="memory_analy_main">内存分析工具页面</string>
+    <string name="memory_analyzer_tools">MAT使用实例页面</string>
+    <string name="memory_optimize_main">内存优化问题页面</string>
+    <string name="memory_caution_customview">慎用自定义view页面</string>
+    <string name="demo_activity">Demo</string>
+    
+    <string name="handler_summary">Handler在android中一个很重要的类，Message,Handler,Looper,MessageQueue应该要通透。</string>
+    
+
+</resources>
