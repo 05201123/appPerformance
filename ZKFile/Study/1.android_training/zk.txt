@@ -1,0 +1,18 @@
+﻿1.在公司进行产品开发；
+2.阅读Android源码和Android官方文档；
+3.在CSDN写技术博客对知识进行总结和分享；
+4.关注Github中优秀的开源项目并提交自己的项目；
+5.在公司内部做技术分享；
+6.阅读相关技术书籍；
+7.业余时间持续学习。
+
+
+高级工程师首先要对Android应用层的理论体系有一个全面的理解，然后对Android Framework层也要有一定的了解，这2个方面都是Android层面的。
+除此之外，高级工程师还要有一定的技术架构能力，包括架构设计、代码规范、性能平衡等，还有很重要的一点，那就是高级工程师要能够指导初中级开发人员。
+
+高级工程师是一个逐渐积累的结果，一个开发人员从初级工程师通过不断地自我学习和自我提高，当技术能力和项目经验都提升到一定程度后，也就达到了高级工程师的状态了。
+至于学习方法，因人而异，但是也不会相差太大，可以参见上一个问题中我对Android学习方式的描述。
+
+The changes we made might not seem like a huge impact, but as our views become more complicated and the number of them grows, inefficiencies will become noticeable. 
+The last thing we want to do as developers is create an app with a negative user experience. 
+Remember, just one sub-par  ListView could be the life or death of an app, so let’s not take the chance!

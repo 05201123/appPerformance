@@ -1,0 +1,271 @@
+knowledge
+
+1.Your package name must be unique across all packages installed on the Android system. For this reason, 
+it's generally best if you use a name that begins with the reverse domain name of your organization or publisher entity. 
+***you cannot publish your app on Google Play using the "com.example" namespace.
+
+2.Before you publish your app, you should be sure your icon meets the specifications defined in the Iconography design guide.
+
+3.Library projects cannot be installed onto a device, however, they are pulled into the .apk file at build time.
+
+4.assets/
+This is empty. 
+You can use it to store raw asset files.
+Files that you save here are compiled into an .apk file as-is, and the original filename is preserved. 
+You can navigate this directory in the same way as a typical file system using URIs and read files as a stream of bytes using the AssetManager. 
+For example, this is a good location for textures and game data.
+
+5.raw/
+For arbitrary raw asset files. 
+Saving asset files here instead of in the assets/ directory only differs in the way that you access them. 
+These files are processed by aapt and must be referenced from the application using a resource identifier in the R class.
+For example, this is a good place for media, such as MP3 or Ogg files.
+
+6.Library Projects
+ Here are some common scenarios in which you could make use of library projects:
+	(1)If you are developing multiple related applications that use some of the same components, 
+	you move the redundant components out of their respective application projects and create a single, reuseable set of the same components in a library project.
+	(2)If you are creating an application that exists in both free and paid versions. 
+	You move the part of the application that is common to both versions into a library project. 
+	The two dependent projects, with their different package names, will reference the library project and provide only the difference between the two application versions.
+ Development considerations
+	As you develop your library project and dependent applications, keep the points listed below in mind:
+	(1)Resource conflicts
+		Since the tools merge the resources of a library project with those of a dependent application project, a given resource ID might be defined in both projects.
+		In this case, the tools select the resource from the application, or the library with highest priority, and discard the other resource.
+		As you develop your applications, be aware that common resource IDs are likely to be defined in more than one project and will be merged, 
+		with the resource from the application or highest-priority library taking precedence.
+	(2)Use prefixes to avoid resource conflicts
+	(3)You cannot export a library project to a JAR file
+	(4)A library project can include a JAR library
+	(5)A library project can depend on an external JAR library
+	(6)Library projects cannot include raw assets
+	(7)Platform version must be lower than or equal to the Android project
+	(8)No restriction on library package names
+	(9)Each library project creates its own R class
+	(10)Library project storage location
+
+7.Source Revision Control system
+
+8.Testing a Library Project
+	There are two recommended ways of setting up testing on code and resources in a library project:
+	(1)You can set up a test project that instruments an application project that depends on the library project. 
+	   You can then add tests to the project for library-specific features.
+	(2)You can set up a standard application project that depends on the library and put the instrumentation in that project. 
+	   This lets you create a self-contained project that contains both the tests/instrumentations and the code to test.
+
+9.Although the emulator does not allow you to test every device feature (such as the accelerometer), 
+it does allow you to verify that your application functions properly on different versions of the Android platform, in different screen sizes and orientations, and more.
+
+10.Set up your system to detect your device.
+	（1）If you're developing on Windows, you need to install a USB driver for adb. 
+	For an installation guide and links to OEM drivers, see the OEM USB Drivers document.
+	（2）If you're developing on Mac OS X, it just works. Skip this step.
+	（3）If you're developing on Ubuntu Linux, you need to add a udev rules file that contains a USB configuration for each type of device you want to use for development.
+	In the rules file, each device manufacturer is identified by a unique vendor ID, as specified by the ATTR{idVendor} property.
+	For a list of vendor IDs, see USB Vendor IDs, below. 
+	To set up device detection on Ubuntu Linux:
+		Log in as root and create this file: /etc/udev/rules.d/51-android.rules.
+		Use this format to add each vendor to the file:
+		SUBSYSTEM=="usb", ATTR{idVendor}=="0bb4", MODE="0666", GROUP="plugdev" 
+
+	In this example, the vendor ID is for HTC. The MODE assignment specifies read/write permissions, and GROUP defines which Unix group owns the device node.
+	Note: The rule syntax may vary slightly depending on your environment. 
+	Consult the udev documentation for your system as needed. 
+	For an overview of rule syntax, see this guide to writing udev rules.
+	Now execute:
+	chmod a+r /etc/udev/rules.d/51-android.rules
+
+11.Keep these points in mind when you are selecting a system image target for your AVD:
+	（1）The API Level of the target is important, because your application will not be able to run on a system image whose API Level is less than that required by your application, 
+	as specified in the minSdkVersion attribute of the application's manifest file. 
+	（2）You should create at least one AVD that uses a target whose API Level is greater than that required by your application, 
+	because it allows you to test the forward-compatibility of your application.
+	Forward-compatibility testing ensures that, when users who have downloaded your application receive a system update, your application will continue to function normally.
+	（3）If your application declares a uses-library element in its manifest file, the application can only run on a system image in which that external library is present. 
+	If you want to run your application on an emulator, create an AVD that includes the required library. 
+	Usually, you must create such an AVD using an Add-on component for the AVD's platform (for example, the Google APIs Add-on contains the Google Maps library).
+
+12.UI	User Interface
+
+13.Declaring your UI layout in XML rather than runtime code is useful for several reasons,
+but it's especially important so you can create different layouts for different screen sizes. 
+
+14.WYSIWYG ： What You See Is What You Get
+
+15.The other two attributes, android:layout_width and android:layout_height, are required for all views in order to specify their size.
+Because the LinearLayout is the root view in the layout, it should fill the entire screen area that's available to the app by setting the width and height to "match_parent". 
+This value declares that the view should expand its width or height to match the width or height of the parent view.
+
+16.The plus sign (+) before the resource type is needed only when you're defining a resource ID for the first time.
+Once the resource ID is declared once this way, other references to the ID do not need the plus sign. 
+Using the plus sign is necessary only when specifying a new resource ID and not needed for concrete resources such as strings or layouts. 
+
+17. Instead of using a hard-coded string as the value, the "@string/edit_message" value refers to a string resource defined in a separate file. 
+Because this refers to a concrete resource (not just an identifier), it does not need the plus sign.
+
+18.The default weight for all views is 0, so if you specify any weight value greater than 0 to only one view, then that view fills whatever space remains after all views are given the space they require. 
+So, to fill the remaining space in your layout with the EditText element, give it a weight of 1 and leave the button with no weight.
+
+***19.In order to improve the layout efficiency when you specify the weight, you should change the width of the EditText to be zero (0dp). 
+Setting the width to zero improves layout performance because using "wrap_content" as the width requires the system to calculate a width that is ultimately irrelevant because the weight value requires another width calculation to fill the remaining space.
+
+20.The advantage to declaring your UI in XML is that it enables you to better separate the presentation of your application from the code that controls its behavior. 
+Your UI descriptions are external to your application code, which means that you can modify or adapt it without having to modify your source code and recompile.
+For example, you can create XML layouts for different screen orientations, different device screen sizes, and different languages.
+Additionally, declaring the layout in XML makes it easier to visualize the structure of your UI, so it's easier to debug problems.
+
+21.In general, the XML vocabulary for declaring UI elements closely follows the structure and naming of the classes and methods, where element names correspond to class names and attribute names correspond to methods.
+
+22.An ID need not be unique throughout the entire tree, but it should be unique within the part of the tree you are searching (which may often be the entire tree, so it's best to be completely unique when possible).
+
+23.The geometry of a view is that of a rectangle.
+A view has a location, expressed as a pair of left and top coordinates, and two dimensions, expressed as a width and a height. 
+The unit for location and dimensions is the pixel.
+
+24.getLeft() 
+For instance, when getLeft() returns 20, that means the view is located 20 pixels to the right of the left edge of its direct parent.
+These methods both return the location of the view relative to its parent. 
+
+25.getRight()
+ For instance, calling getRight() is similar to the following computation: getLeft() + getWidth().
+ These methods return the coordinates of the right and bottom edges of the rectangle representing the view. 
+
+26. measured width and measured height
+These dimensions define how big a view wants to be within its parent.
+
+as width and height, or sometimes drawing width and drawing height.
+These dimensions define the actual size of the view on screen, at drawing time and after layout.
+*****These values may, but do not have to, be different from the measured width and height. 
+
+27.*****Although you can nest one or more layouts within another layout to acheive your UI design, you should strive to keep your layout hierarchy as shallow as possible.
+Your layout draws faster if it has fewer nested layouts (a wide view hierarchy is better than a deep view hierarchy).
+
+question
+
+1.assets and raw different? ok
+系统希望我们用哪个就用哪个，区别不是特别大。
+提供URI的，比如通知栏声音，其他视频，最好用raw
+提供路径的，比如字体，html，最好用assets。
+res/raw中的文件会被映射到R.java文件中，访问的时候直接使用资源ID即R.id.filename；assets文件夹下的文件不会被映射到R.java中，访问的时候需要AssetManager类。
+res/raw不可以有目录结构，而assets则可以有目录结构，也就是assets目录下可以再建立文件夹
+raw需要编译。
+
+2.what is res / xml/ contained?
+
+3.how set library resource priority? ok
+#project.property
+target=android-21
+android.library.reference.1=..\\Demo
+android.library.reference.2=..\\perfdemo
+优先级本应用最高，然后是越前面的引用工程越高，当前demo比perfdemo高。资源文件重名取demo，放弃perfdemo工程的。
+
+
+4.what does “In the AndroidManifest.xml file, add android:debuggable="true" to the <application> element.” means？
+
+5. how  “An ID need not be unique throughout the entire tree” understand？ok
+如果id相同，不会报错，但会警告，这时，findviewbyid，找到的是view中最前面的一个view。而其他同样id的view没有用，所以尽量不要使id
+相同，尤其是用了include的时候，容易发生bug
+
+6.measured width and width different？
+
+7.Linear Layout		 It creates a scrollbar if the length of the window exceeds the length of the screen.???? 未看到效果。
+
+8.how use SimpleCursorAdapter and ArrayAdapter ok
+
+9.different onclick within xml and onclick on code?  ok
+onclick within xml，执行在初始化view的时候，在第一次点击的时候，反射一下（到底慢吗？？？？反射哪里慢*****），以后就不会慢了。
+ case R.styleable.View_onClick:
+                    if (context.isRestricted()) {
+                        throw new IllegalStateException("The android:onClick attribute cannot "
+                                + "be used within a restricted context");
+                    }
+
+                    final String handlerName = a.getString(attr);
+                    if (handlerName != null) {
+                        setOnClickListener(new OnClickListener() {
+                            private Method mHandler;
+
+                            public void onClick(View v) {
+                                if (mHandler == null) {
+                                    try {
+                                        mHandler = getContext().getClass().getMethod(handlerName,
+                                                View.class);
+                                    } catch (NoSuchMethodException e) {
+                                        int id = getId();
+                                        String idText = id == NO_ID ? "" : " with id '"
+                                                + getContext().getResources().getResourceEntryName(
+                                                    id) + "'";
+                                        throw new IllegalStateException("Could not find a method " +
+                                                handlerName + "(View) in the activity "
+                                                + getContext().getClass() + " for onClick handler"
+                                                + " on view " + View.this.getClass() + idText, e);
+                                    }
+                                }
+
+                                try {
+                                    mHandler.invoke(getContext(), View.this);
+                                } catch (IllegalAccessException e) {
+                                    throw new IllegalStateException("Could not execute non "
+                                            + "public method of the activity", e);
+                                } catch (InvocationTargetException e) {
+                                    throw new IllegalStateException("Could not execute "
+                                            + "method of the activity", e);
+                                }
+                            }
+                        });
+                    }
+                    break;
+
+而onclick，执行的比初始化view之后，oncreate（）中，findviewbyId，遍历一遍，在R文件中多了1个id，
+ViewGroup
+ protected View findViewTraversal(int id) {
+        if (id == mID) {
+            return this;
+        }
+
+        final View[] where = mChildren;
+        final int len = mChildrenCount;
+
+        for (int i = 0; i < len; i++) {
+            View v = where[i];
+
+            if ((v.mPrivateFlags & PFLAG_IS_ROOT_NAMESPACE) == 0) {
+                v = v.findViewById(id);
+
+                if (v != null) {
+                    return v;
+                }
+            }
+        }
+
+        return null;
+    }
+
+
+两者速度感觉差不多。区别就在于初始化view一起遍历还是在点击的时候在遍历？如果按钮只有一个点击事件的话，孰优孰劣还很难说，
+但布局越复杂，button越多，用onclick within xml，越好。
+
+10.ok，
+作用不大，或许与Action bar 有化学效果
+<activity
+        android:name="com.example.myfirstapp.DisplayMessageActivity"
+        android:label="@string/title_activity_display_message"
+        android:parentActivityName="com.example.myfirstapp.MainActivity" >
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value="com.example.myfirstapp.MainActivity" />
+    </activity>
+
+
+
+interest
+1.AndroidManifest.xml	file:///D:/sdk/docs/guide/topics/manifest/manifest-intro.html
+2.AssetManager		file:///D:/sdk/docs/reference/android/content/res/AssetManager.html
+3.Application Resources		file:///D:/sdk/docs/guide/topics/resources/index.html
+4.Supporting Different Platform Versions	file:///D:/sdk/docs/training/basics/supporting-devices/platforms.html
+5.Optimizing Your UI	file:///D:/sdk/docs/tools/debugging/debugging-ui.html#hierarchyViewer
+6.Activity		file:///D:/sdk/docs/guide/components/activities.html#Lifecycle
+7.Layout Resource	file:///D:/sdk/docs/guide/topics/resources/layout-resource.html
+8.Dimension	 file:///D:/sdk/docs/guide/topics/resources/more-resources.html#Dimension
+9.Intent	file:///D:/sdk/docs/reference/android/content/Intent.html
