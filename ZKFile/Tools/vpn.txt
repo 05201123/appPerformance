@@ -1,0 +1,47 @@
+﻿
+国家/地区
+
+名称
+
+域名
+
+实时状态
+
+协议
+
+概述
+
+
+日本 日本1号  p1.jp1.didutalk.com 新  正常 PPTP 电信优秀。联通优秀。 
+p2.jp1.didutalk.com 新  正常 L2TP 电信优秀。联通优秀。 
+日本2号  p1.jp2.didutalk.com 新  正常 PPTP 电信良好。联通优秀。 
+p2.jp2.didutalk.com 新  正常 L2TP 电信优秀。联通优秀。 
+日本3号  p1.jp3.didutalk.com  正常 PPTP 电信优秀。联通一般。 
+p2.jp3.didutalk.com  正常 L2TP 电信优秀。联通一般。 
+美国 美国1号  p1.us1.didutalk.com  正常 PPTP 电信良好。联通一般。 
+p2.us1.didutalk.com  正常 L2TP 电信良好。联通一般。 
+美国2号  p2.us2.didutalk.com  正常 L2TP 电信良好。联通一般。 
+p1.us2.didutalk.com  正常 PPTP 电信良好。联通一般。 
+美国3号  p1.us3.didutalk.com  正常 PPTP 电信良好。联通良好。 
+p2.us3.didutalk.com  正常 L2TP 电信良好。联通良好。 
+美国4号  p1.us4.didutalk.com  正常 PPTP 电信一般。联通一般。 
+p2.us4.didutalk.com  正常 L2TP 电信一般。联通一般。 
+美国5号  p1.us5.didutalk.com  正常 PPTP 电信一般。联通一般。 
+p2.us5.didutalk.com  正常 L2TP 电信一般。联通一般。 
+新加坡 新加坡1号  p1.sg1.didutalk.com 新  正常 PPTP 电信较差。联通优秀。 
+p2.sg1.didutalk.com 新  正常 L2TP 电信一般。联通优秀。 
+新加坡2号  p1.sg2.didutalk.com 新  正常 PPTP 电信优秀。联通优秀。 
+p2.sg2.didutalk.com 新  正常 L2TP 电信优秀。联通优秀。 
+香港 香港1号  p1.hk1.didutalk.com  正常 PPTP 电信良好。联通良好。 
+p2.hk1.didutalk.com  正常 L2TP 电信良好。联通良好。香港国际出口带宽小。 
+香港2号  p1.hk2.didutalk.com 新  正常 PPTP 电信优秀。联通优秀。 
+p2.hk2.didutalk.com 新  正常 L2TP 电信优秀。联通优秀。 
+台湾 台湾1号  p1.tw1.didutalk.com  正常 PPTP 电信优秀。联通优秀。 
+p2.tw1.didutalk.com  正常 L2TP 电信优秀。联通优秀。 
+英国 英国1号  p1.uk1.didutalk.com  正常 PPTP 适合要英国或欧洲IP才能访问的互联网服务。 
+p2.uk1.didutalk.com  正常 L2TP 适合要英国或欧洲IP才能访问的互联网服务。 
+
+
+
+http://blog.liangruijun.com/2015/05/31/Android性能优化汇总/
+
