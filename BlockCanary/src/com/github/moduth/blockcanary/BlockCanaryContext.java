@@ -89,7 +89,7 @@ public class BlockCanaryContext implements IBlockCanaryContext {
      * @return 卡慢阙值（毫秒）
      */
     public int getConfigBlockThreshold() {
-        return 500;
+        return 1000;
     }
 
     /**
