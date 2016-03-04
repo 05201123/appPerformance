@@ -1,0 +1,56 @@
+﻿2016年目标规划
+
+晚上2小时
+早上2小时
+工作2小时
+
+
+一、工作 
+	1.2个月1次的培训：关于手机性能的，优先是内存的培训
+	2.《java虚拟机》
+	3.《Effective Java中文版 第2版》
+	4.《JAVA并发编程实践》
+	5.《android内核分析》
+	6.《ThinkingInJava》
+	7.android dalvik and art
+	8.android training
+
+二、财富
+	1.积累10w，准备买房
+	2.无外债
+
+三、家庭
+	1.老婆
+	2.孩子
+	3.父母
+	4.妹妹
+	
+四、兴趣
+	1.Activity
+	2.Fragment
+	3.Viewpager
+	4.WebView
+	5.Glide
+	6.fresco
+	7.LeakCanary
+	8.volley 
+	9.picasso
+	10.listview
+	11.otto 
+	12.bitmap
+	13.dex
+	14.as
+	
+五、健康
+	1.睡眠
+	2.健身
+	3.出游
+	
+六、进修
+	1.车技
+	2.英文
+	3.js学习
+七、交际：秦皇岛认识一些人
+	1.大学同学
+	2.中学同学
+	3.同事，朋友
