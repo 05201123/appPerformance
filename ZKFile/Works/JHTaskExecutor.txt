@@ -1,0 +1,19 @@
+1.必须有可测试的机制，比如打印执行时期线程使用情况，cpu使用情况，任务调度情况的日志，记录task执行时间的日志。
+2.必须有单元测试
+3.紧急任务处理机制
+4.task份额里分为可强行销毁与不可强行销毁的
+5.task分类，有优先级机制
+6.task分类，可延期，上传，下载，必须的task，UI页面分类。
+7.兼容当前的task
+8.task调度excepiton统一处理
+9.关联task，比如埋点的task，它要正常工作，需要调用很多其他接口。目前，这些前置信息接口，很多是在程序已启动调用的，
+可以把这些任务的调用时间，修改到调用之后，这应该是以前思想的问题。埋点的地方改动可能有些工作。
+10.时刻注意接口的位置是否必要，对的位置放对的东西，对的时候遇对的人。
+
+11.task任务 取消概念，超时概念
+12.task任务调度器是单例的，初始化方法init（）只执行一次，如果再执行，要清空以前所有状态。
+
+13.int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+   private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
+   private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
+14.volatile ，AtomicBoolean

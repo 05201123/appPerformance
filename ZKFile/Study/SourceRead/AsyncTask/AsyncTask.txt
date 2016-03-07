@@ -1,0 +1,15 @@
+AsyncTask
+ 1.usage
+	AsyncTasks should ideally be used for short operations (a few seconds at the most.) If you need to keep threads running for long periods of time,
+	it is highly recommended you use the various APIs provided by the <code>java.util.concurrent</code> pacakge such as {@link Executor},{@link ThreadPoolExecutor} and {@link FutureTask}
+ 
+ 2.progress show
+	publishProgress（Integer progress）
+	protected void onProgressUpdate(Integer... progress)
+
+ 3.Threading rules
+	There are a few threading rules that must be followed for this class to work properly:
+	（1）The AsyncTask class must be loaded on the UI thread
+	（2）{@link #execute} must be invoked on the UI thread.
+	（3）Do not call {@link #onPreExecute()}, {@link #onPostExecute},{@link #doInBackground}, {@link #onProgressUpdate} manually.
+	（4）The task can be executed only once (an exception will be thrown if a second execution is attempted.)
