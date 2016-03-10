@@ -1,10 +1,149 @@
+Supporting Different Devices
 knowledge
 
-1.
+1.Some of the important variations that you should consider include ***different languages, ***screen sizes, and ***versions of the Android platform.
+2.supporting different languages
+	It’s always a good practice to extract UI strings from your app code and keep them in an external file. 
+	Android makes this easy with a resources directory in each Android project.
+	MyProject/
+    res/
+       values/
+           strings.xml
+       values-es/
+           strings.xml
+       values-fr/
+           strings.xml
+	To add support for more languages, create additional values directories inside res/ that include a hyphen and the ISO country code at the end of the directory name. 
+	For example, values-es/ is the directory containing simple resourcess for the Locales with the language code "es". 
+	Android loads the appropriate resources according to the locale settings of the device at run time.
 
+3.notice
+	You can use the locale qualifier (or any configuration qualifer) on any resource type, such as if you want to provide localized versions of your bitmap drawable.
+
+4.It is good practice to use the Android resource framework to separate the localized aspects of your application as much as possible from the core Java functionality:
+	•You can put most or all of the contents of your application's user interface into resource files, as described in this document and in Providing Resources.
+	•The behavior of the user interface, on the other hand, is driven by your Java code. (????)
+	For example, if users input data that needs to be formatted or sorted differently depending on locale, then you would use Java to handle the data programmatically.
+ 	This document does not cover how to localize your Java code.
+
+5.Resources are text strings, layouts, sounds, graphics, and any other static data that your Android application needs. 
+An application can include multiple sets of resources, each customized for a different device configuration. 
+When a user runs the application, Android automatically selects and loads the resources that best match the device.
+
+6.Whenever the application runs in a locale for which you have not provided locale-specific text, Android will load the default strings from res/values/strings.xml. 
+If this default file is absent, or if it is missing a string that your application needs, then your application will not run and will show an error.
+	Example: 
+	An application's Java code refers to just two strings, text_a and text_b. 
+	This application includes a localized resource file (res/values-en/strings.xml) that defines text_a and text_b in English. 
+	This application also includes a default resource file (res/values/strings.xml) that includes a definition for text_a, but not for text_b: 
+	•This application might compile without a problem. An IDE such as Eclipse will not highlight any errors if a resource is missing.
+	•When this application is launched on a device with locale set to English, the application might run without a problem, because res/values-en/strings.xml contains both of the needed text strings.
+	•However, the user will see an error message and a Force Close button when this application is launched on a device set to a language other than English. The application will not load.
+Important: Make sure that your application includes a full set of default resources.
+
+7.In your code, examine each reference to an Android resource. 
+	Make sure that a default resource is defined for each one. 
+	Also make sure that the default string file is complete: A  localized string file can contain a subset of the strings, but the default string file must contain them all. 
+
+8.An application can specify many res/<qualifiers>/ directories, each with different qualifiers. 
+	To create an alternative resource for a different locale, you use a qualifier that specifies a language or a language-region combination. 
+	(The name of a resource directory must conform to the naming scheme described in Providing Alternative Resources, or else it will not compile.)
+
+	Example:
+	Suppose that your application's default language is English. 
+	Suppose also that you want to localize all the text in your application to French, and most of the text in your application (everything except the application's title) to Japanese.
+    In this case, you could create three alternative strings.xml files, each stored in a locale-specific resource directory:
+	1.res/values/strings.xml
+ 		Contains English text for all the strings that the application uses, including text for a string named title.
+	2.res/values-fr/strings.xml
+ 		Contain French text for all the strings, including title.
+	3.res/values-ja/strings.xml
+ 		Contain Japanese text for all the strings except title.
+
+	If your Java code refers to R.string.title, here is what will happen at runtime:
+	If the device is set to any language other than French, Android will load title from the res/values/strings.xml file.
+	If the device is set to French, Android will load title from the res/values-fr/strings.xml file.
+	
+	Notice that if the device is set to Japanese, Android will look for title in the res/values-ja/strings.xml file. 
+	But because no such string is included in that file, Android will fall back to the default, and will load title in English from the res/values/strings.xml file. 
+
+9.Which Resources Take Precedence?
+	Example:
+	Assume that an application includes a default set of graphics and two other sets of graphics, each optimized for a different device setup:
+		•res/drawable/
+ 		Contains default graphics.
+		•res/drawable-small-land-stylus/
+ 		Contains graphics optimized for use with a device that expects input from a stylus and has a QVGA low-density screen in landscape orientation.
+		•res/drawable-ja/ 
+ 		Contains graphics optimized for use with Japanese.
+
+	If the application runs on a device that is configured to use Japanese, Android will load graphics from res/drawable-ja/, even if the device happens to be one that expects input from a stylus and has a QVGA low-density screen in landscape orientation.
+	Exception: The only qualifiers that take precedence over locale in the selection process are MCC and MNC (mobile country code and mobile network code). 
+
+	Example:
+	Assume that you have the following situation:
+		•The application code calls for R.string.text_a
+		•Two relevant resource files are available: ◦res/values-mcc404/strings.xml, which includes text_a in the application's default language, in this case English.
+		◦res/values-hi/strings.xml, which includes text_a in Hindi.
+
+		•The application is running on a device that has the following configuration: ◦The SIM card is connected to a mobile network in India (MCC 404).
+		◦The language is set to Hindi (hi).
+	Android will load text_a from res/values-mcc404/strings.xml (in English), even if the device is configured for Hindi. 
+	That is because in the resource-selection process, Android will prefer an MCC match over a language match. 
+
+10.Localization Strategies
+	Design your application to work in any locale
+		Important: Make sure that your application includes a full set of default resources.
+	Design a flexible layout
+		If you need to rearrange your layout to fit a certain language (for example German with its long words), you can create an alternative layout for that language (for example res/layout-de/main.xml). 
+		However, doing this can make your application harder to maintain. 
+		***It is better to create a single layout that is more flexible.
+		Another typical situation is a language that requires something different in its layout. 
+		For example, you might have a contact form that should include two name fields when the application runs in Japanese, but three name fields when the application runs in some other language. 
+		You could handle this in either of two ways:
+			•Create one layout with a field that you can programmatically enable or disable, based on the language, or
+			•Have the main layout include another layout that includes the changeable field. 
+			The second layout can have different configurations for different languages.
+	Avoid creating more resource files and text strings than you need
+			Default language is full,other as possiable as little.
+	Use the Android Context object for manual locale lookup
+			You can look up the locale using the Context object that Android makes available:
+			String locale = context.getResources().getConfiguration().locale.getDisplayName();
+	
+
+11. Testing on an Emulator
+	You can test how your application will run in a custom locale by creating a custom locale in the emulator. 
+	There are two ways to do this:
+		•Use the Custom Locale application, which is accessible from the Application tab. (After you create a custom locale, switch to it by pressing and holding the locale name.)
+			To change the locale on a device, use the Settings application (Home > Menu > Settings > Locale & text > Select locale). 
+		•Change to a custom locale from the adb shell, as described below.
+			To change the locale in the emulator by using the adb shell. 
+				1.Pick the locale you want to test and determine its language and region codes, for example fr for French and CA for Canada.
+				2.Launch an emulator.
+				3.From a command-line shell on the host computer, run the following command:adb shell
+ 				or if you have a device attached, specify that you want the emulator by adding the -e option:adb -e shell
+				4.At the adb shell prompt (#), run this command: 
+				setprop persist.sys.language [language code];setprop persist.sys.country [country code];stop;sleep 5;start 
+			For instance, to test in Canadian French:
+				setprop persist.sys.language fr;setprop persist.sys.country CA;stop;sleep 5;start 
+		This will cause the emulator to restart. (It will look like a full reboot, but it is not.)
+		Once the Home screen appears again, re-launch your application (for example, click the Run icon in Eclipse), and the application will launch with the new locale. 
+			
+
+		
+
+	
+	
 question
 
-1.
+1.at run time , how does Android select appropriate resources ?
+2. knowledge 6 why?
+3. For example, if the application has a layout file called res/layout-land/main.xml but does not contain a file called res/layout-port/main.xml, then set the emulator or device to portrait orientation and see if the application will run. 
+
 
 interest
-1.
+1.App Resources  D:\sdk\docs\guide\topics\resources\index.html
+2.•Designing for Multiple Screens D:\sdk\docs\training\multiscreen\index.html
+3.Providing Resources	D:\sdk\docs\guide\topics\resources\providing-resources.html
+4.Localization Checklist	D:\sdk\docs\distribute\googleplay\publish\localizing.html
+
