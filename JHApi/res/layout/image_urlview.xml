@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+	<ImageView android:id="@+id/image_src"
+	    android:src="@drawable/head_image"
+	    android:background="@android:color/transparent"
+		android:layout_width="fill_parent" 
+		android:minWidth="60dip"
+		android:minHeight="60dip"
+		android:layout_height="fill_parent"
+		android:padding="3dip"
+		android:layout_centerInParent="true"
+		/>
+	<ProgressBar android:layout_gravity="center" 
+	    android:id="@+id/progress"
+	    android:layout_centerInParent="true"
+		android:layout_width="wrap_content" 
+		android:layout_height="wrap_content" />
+</merge>

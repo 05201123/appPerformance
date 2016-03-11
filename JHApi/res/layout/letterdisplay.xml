@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/tanchubeijing">
+    
+    <!--   android:background="#d4f0ff"   -->
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+  	android:id="@+id/letterdisaplay_textview"
+  	android:textSize="70sp"
+    android:textColor="#3399ff"
+  
+    android:minWidth="80dip"  
+    android:maxWidth="80dip"  
+    android:padding="5dip"
+    android:gravity="center" 
+/>
+<ImageView android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:visibility="gone"
+    android:background="@drawable/fanddajingbeijing"
+    android:id="@+id/letterdisplay_imageview"/>
+</RelativeLayout>
