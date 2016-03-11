@@ -5,5 +5,4 @@ package com.jh.app.taskcontrol.task;
  * @since 2016-3-11
  */
 public class JHBaseTask {
-
 }
