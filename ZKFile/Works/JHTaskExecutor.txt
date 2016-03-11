@@ -17,3 +17,24 @@
    private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
    private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
 14.volatile ，AtomicBoolean
+
+
+
+并发线程太多涉及到电量问题。
+
+无效任务的及时清理
+1.任务的取消
+2.超时机制添加。指定任务执行时间
+3.activity关闭，停止任务。
+4.view上在view ondetach上停止任务。
+5.对于首位的activity，其task最优先执行。对于下层的activity，其任务暂停（对于正在执行的不管，对于在等待队列的暂停），当界面onresume时，继续。
+6.对于一个acivity在添加任务时，查看任务池是否已满，如果已满，停止其他activity上执行的线程。
+7.如果线程执行时，超时太久或在等待队列中放的太久，就认定失败。
+
+线程创建的统一调度
+1.不允许自定义线程池。
+2.全局线程池。单线程，不急的任务放入。当CPU任务不多时执行。该任务不能持有大对象。
+3.建立UI线程。
+
+4.建立sharePreference的线程池。（文件操作）
+3.将锁变为队列。任务的依赖关系，需要内存维护一个队列，可以挂在某个任务下，也可以有超时时间。
