@@ -109,7 +109,6 @@ Important: Make sure that your application includes a full set of default resour
 	Use the Android Context object for manual locale lookup
 			You can look up the locale using the Context object that Android makes available:
 			String locale = context.getResources().getConfiguration().locale.getDisplayName();
-	
 
 11. Testing on an Emulator
 	You can test how your application will run in a custom locale by creating a custom locale in the emulator. 
@@ -128,9 +127,47 @@ Important: Make sure that your application includes a full set of default resour
 				setprop persist.sys.language fr;setprop persist.sys.country CA;stop;sleep 5;start 
 		This will cause the emulator to restart. (It will look like a full reboot, but it is not.)
 		Once the Home screen appears again, re-launch your application (for example, click the Run icon in Eclipse), and the application will launch with the new locale. 
-			
 
-		
+12.Supporting Different Screens
+	•There are four generalized sizes: small, normal, large, xlarge
+	•And four generalized densities: low (ldpi), medium (mdpi), high (hdpi), extra high (xhdpi)
+	（1）Create Different Layouts To optimize your user experience on different screen sizes, you should create a unique layout XML file for each screen size you want to support. 
+		For example, a unique layout for large screens should be saved under res/layout-large/.
+		MyProject/
+    	res/
+        	layout/              # default (portrait)
+            	main.xml
+        	layout-land/         # landscape
+            	main.xml
+        	layout-large/        # large (portrait)
+           		main.xml
+        	layout-large-land/   # large landscape
+            	main.xml
+	（2）Create Different Bitmaps
+		To generate these images, you should start with your raw resource in vector format and generate the images for each density using the following size scale:
+		•xhdpi: 2.0
+		•hdpi: 1.5
+		•mdpi: 1.0 (baseline)
+		•ldpi: 0.75
+		This means that if you generate a 200x200 image for xhdpi devices, you should generate the same resource in 150x150 for hdpi, 100x100 for mdpi, and 75x75 for ldpi devices.
+		***Note: Low-density (ldpi) resources aren’t always necessary.
+				 When you provide hdpi assets, the system scales them down by one half to properly fit ldpi screens.
+
+13.Supporting Different Platform Versions
+		Tip: In order to provide the best features and functionality across several Android versions, you should use the Android Support Library in your app, which allows you to use several recent platform APIs on older versions.	
+		（1）Specify Minimum and Target API Levels
+		 To allow your app to take advantage of these changes and ensure that your app fits the style of each user's device, you should set the targetSdkVersion value to match the latest Android version available.
+		 （2）Check System Version at Runtime
+		 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			。。。 
+		 ｝
+		 
+		 Note: When parsing XML resources, Android ignores XML attributes that aren’t supported by the current device. 
+		 So you can safely use XML attributes that are only supported by newer versions without worrying about older versions breaking when they encounter that code. 
+		 For example, if you set the targetSdkVersion="11", your app includes the ActionBar by default on Android 3.0 and higher. 
+		 To then add menu items to the action bar, you need to set android:showAsAction="ifRoom" in your menu resource XML. 
+		 It's safe to do this in a cross-version XML file, because the older versions of Android simply ignore the showAsAction attribute (that is, you do not need a separate version in res/menu-v11/).
+		（3）Use Platform Styles and Themes
 
 	
 	
@@ -139,6 +176,13 @@ question
 1.at run time , how does Android select appropriate resources ?
 2. knowledge 6 why?
 3. For example, if the application has a layout file called res/layout-land/main.xml but does not contain a file called res/layout-port/main.xml, then set the emulator or device to portrait orientation and see if the application will run. 
+4. sizes and densities，if no have，error？
+5. can crash run on 2.31 because Build.VERSION_CODES.HONEYCOMB is none？
+	if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+    }
+
 
 
 interest
@@ -146,4 +190,6 @@ interest
 2.•Designing for Multiple Screens D:\sdk\docs\training\multiscreen\index.html
 3.Providing Resources	D:\sdk\docs\guide\topics\resources\providing-resources.html
 4.Localization Checklist	D:\sdk\docs\distribute\googleplay\publish\localizing.html
+5.Styles and Themes 	D:\sdk\docs\guide\topics\ui\themes.html
+6.<uses-sdk>	file:///D:/sdk/docs/guide/topics/manifest/uses-sdk-element.html#min
 
