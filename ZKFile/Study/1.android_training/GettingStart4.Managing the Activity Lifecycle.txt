@@ -1,0 +1,21 @@
+Managing the Activity Lifecycle
+knowledge
+1.Within the lifecycle callback methods, you can declare how your activity behaves when the user leaves and re-enters the activity. 
+	For example, if you're building a streaming video player, you might pause the video and terminate the network connection when the user switches to another app. 
+	When the user returns, you can reconnect to the network and allow the user to resume the video from the same spot.
+
+2.While the activity's first lifecycle callback is onCreate(), its very last callback is onDestroy().
+The system calls this method on your activity as the final signal that your activity instance is being completely removed from the system memory.
+
+3.In some cases, such as when your activity operates as a temporary decision maker to launch another activity, you might call finish() from within onCreate() to destroy the activity. 
+In this case, the system immediately calls onDestroy() without calling any of the other lifecycle methods.
+
+
+	
+question
+1. how delay onDestroy() perform£¿
+2.
+
+interest
+
+
