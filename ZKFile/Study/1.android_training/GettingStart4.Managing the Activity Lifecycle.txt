@@ -10,11 +10,28 @@ The system calls this method on your activity as the final signal that your acti
 3.In some cases, such as when your activity operates as a temporary decision maker to launch another activity, you might call finish() from within onCreate() to destroy the activity. 
 In this case, the system immediately calls onDestroy() without calling any of the other lifecycle methods.
 
+4.***You should usually use the onPause() callback to:
+	Stop animations or other ongoing actions that could consume CPU.
+	Commit unsaved changes, but only if users expect such changes to be permanently saved when they leave (such as a draft email).
+	Release system resources, such as broadcast receivers, handles to sensors (like GPS), or any resources that may affect battery life while your activity is paused and the user does not need them.
+
+5.Generally, you should not use onPause() to store user changes (such as personal information entered into a form) to permanent storage. 
+	The only time you should persist user changes to permanent storage within onPause() is when you're certain users expect the changes to be auto-saved (such as when drafting an email).
+	However, you should avoid performing CPU-intensive work during onPause(), such as writing to a database, because it can slow the visible transition to the next activity 
+	(you should instead perform heavy-load shutdown operations during onStop()).
+
+6.When your activity receives a call to the onStop() method, it's no longer visible and should release almost all resources that aren't needed while the user is not using it.
+Once your activity is stopped, the system might destroy the instance if it needs to recover system memory. 
+In extreme cases, the system might simply kill your app process without calling the activity's final onDestroy() callback, so it's important you use onStop() to release resources that might leak memory.
+
+7.Although the onPause() method is called before onStop(), you should use onStop() to perform larger, more CPU intensive shut-down operations, such as writing information to a database.
+
 
 	
 question
 1. how delay onDestroy() perform£¿
-2.
+2. why ¡°(you should instead perform heavy-load shutdown operations during onStop())¡±£¿
+3. onstop is in mainthread, larger,more cpu operations,why?
 
 interest
 
