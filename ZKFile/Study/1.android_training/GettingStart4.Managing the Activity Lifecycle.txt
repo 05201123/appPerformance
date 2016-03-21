@@ -26,13 +26,41 @@ In extreme cases, the system might simply kill your app process without calling 
 
 7.Although the onPause() method is called before onStop(), you should use onStop() to perform larger, more CPU intensive shut-down operations, such as writing information to a database.
 
+8.Even if the system destroys your activity while it's stopped, it still retains the state of the View objects (such as text in an EditText) in a Bundle (a blob of key-value pairs) and restores them if the user navigates back to the same instance of the activity
+	(the next lesson talks more about using a Bundle to save other state data in case your activity is destroyed and recreated).
 
-	
+9.Yet, you also need to instantiate them when your activity is created for the first time (when there's no existing instance of the activity).
+	For this reason, you should usually use the onStart() callback method as the counterpart to the onStop() method, because the system calls onStart() both when it creates your activity and when it restarts the activity from the stopped state.
+
+10.When your activity is destroyed because the user presses Back or the activity finishes itself, the system's concept of that Activity instance is gone forever because the behavior indicates the activity is no longer needed. 
+	However, if the system destroys the activity due to system constraints (rather than normal app behavior), then although the actual Activity instance is gone, the system remembers that it existed such that if the user navigates back to it, the system creates a new instance of the activity using a set of saved data that describes the state of the activity when it was destroyed. 
+	The saved data that the system uses to restore the previous state is called the "instance state" and is a collection of key-value pairs stored in a Bundle object.
+
+11.By default, the system uses the Bundle instance state to save information about each View object in your activity layout (such as the text value entered into an EditText object). 
+	So, if your activity instance is destroyed and recreated, the state of the layout is restored to its previous state with no code required by you. 
+	In order for the Android system to restore the state of the views in your activity, each view must have a unique ID, supplied by the android:id attribute.
+
+12.Caution: Always call the superclass implementation of onSaveInstanceState() so the default implementation can save the state of the view hierarchy.
+
+13.Because the onCreate() method is called whether the system is creating a new instance of your activity or recreating a previous one, you must check whether the state Bundle is null before you attempt to read it. 
+	If it is null, then the system is creating a new instance of the activity, instead of restoring a previous one that was destroyed.
+	The system calls onRestoreInstanceState() only if there is a saved state to restore, so you do not need to check whether the Bundle is null:
+	public void onRestoreInstanceState(Bundle savedInstanceState) {
+		 // Always call the superclass so it can restore the view hierarchy
+		 super.onRestoreInstanceState(savedInstanceState);
+   
+		// Restore state members from saved instance
+		 mCurrentScore = savedInstanceState.getInt(STATE_SCORE);
+		 mCurrentLevel = savedInstanceState.getInt(STATE_LEVEL);
+}
+
 question
 1. how delay onDestroy() perform£¿
 2. why ¡°(you should instead perform heavy-load shutdown operations during onStop())¡±£¿
 3. onstop is in mainthread, larger,more cpu operations,why?
+4. turn  screen orientation£¬edittext data is stored£¿
+5. what is onSaveInstanceState() involed opportunity £¿
 
 interest
 
-
+Handling Runtime Changes.	D:\sdk\docs\guide\topics\resources\runtime-changes.html
