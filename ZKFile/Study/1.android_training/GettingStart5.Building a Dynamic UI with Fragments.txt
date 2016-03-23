@@ -1,7 +1,36 @@
 Building a Dynamic UI with Fragments
+
 knowledge
+
+1. When you add a fragment to an activity layout by defining the fragment in the layout XML file, you cannot remove the fragment at runtime. 
+If you plan to swap your fragments in and out during user interaction, you must add the fragment to the activity when the activity first starts, as shown in the next lesson.
+
+2.If your activity allows the fragments to be removed and replaced, you should add the initial fragment(s) to the activity during the activity's onCreate() method.
+
+3.An important rule when dealing with fragments¡ªespecially those that you add at runtime¡ªis that the fragment must have a container View in the layout in which the fragment's layout will reside.
+
+4. When you remove or replace a fragment and add the transaction to the back stack, the fragment that is removed is stopped (not destroyed). 
+	If the user navigates back to restore the fragment, it restarts. 
+	If you do not add the transaction to the back stack, then the fragment is destroyed when removed or replaced.
+
+5.Often you will want one Fragment to communicate with another, for example to change the content based on a user event. 
+	All Fragment-to-Fragment communication is done through the associated Activity.
+	Two Fragments should never communicate directly.
+
+6.communicate activity and fragment
+	In order to receive event callbacks from the fragment, the activity that hosts it must implement the interface defined in the fragment class.
+	The host activity can deliver messages to a fragment by capturing the Fragment instance with findFragmentById(), then directly call the fragment's public methods.
+
 
 question
 
+1. konwledge 1 is really£¿
+
+2. konwledge 2 is really?
+
+3.transaction.addToBackStack(null); "null" what means?
+
 interest
 
+1.Fragments	D:\sdk\docs\guide\components\fragments.html
+2.Supporting Tablets and Handsets	D:\sdk\docs\guide\practices\tablets-and-handsets.html
