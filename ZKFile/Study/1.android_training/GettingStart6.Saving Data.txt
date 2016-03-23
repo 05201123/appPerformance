@@ -1,0 +1,17 @@
+Building a Dynamic UI with Fragments
+
+knowledge
+
+1.The SharedPreferences APIs are only for reading and writing key-value pairs and you should not confuse them with the Preference APIs, which help you build a user interface for your app settings 
+	(although they use SharedPreferences as their implementation to save the app settings). 
+	For information about using the Preference APIs, see the Settings guide.
+
+question
+
+1. 
+
+interest
+
+1.Preference	D:\sdk\docs\reference\android\preference\Preference.html
+2.Settings	D:\sdk\docs\guide\topics\ui\settings.html
+3.Storage Options	file:///D:/sdk/docs/guide/topics/data/data-storage.html#pref
