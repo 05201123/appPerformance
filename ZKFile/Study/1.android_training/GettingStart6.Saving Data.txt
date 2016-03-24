@@ -6,12 +6,71 @@ knowledge
 	(although they use SharedPreferences as their implementation to save the app settings). 
 	For information about using the Preference APIs, see the Settings guide.
 
+2.A File object is suited to reading or writing large amounts of data in start-to-finish order without skipping around. 
+	For example, it's good for image files or anything exchanged over a network.
+
+3.All Android devices have two file storage areas: "internal" and "external" storage.
+	Internal storage:	It's always available.
+				Files saved here are accessible by only your app by default.
+				When the user uninstalls your app, the system removes all your app's files from internal storage.
+	Internal storage is best when you want to be sure that neither the user nor other apps can access your files.
+	External storage:
+				It's not always available, because the user can mount the external storage as USB storage and in some cases remove it from the device.
+				It's world-readable, so files saved here may be read outside of your control.
+				When the user uninstalls your app, the system removes your app's files from here only if you save them in the directory from getExternalFilesDir().
+	External storage is the best place for files that don't require access restrictions and for files that you want to share with other apps or allow the user to access with a computer.
+
+4.Although apps are installed onto the internal storage by default, you can specify the android:installLocation attribute in your manifest so your app may be installed on external storage.
+	Users appreciate this option when the APK size is very large and they have an external storage space that's larger than the internal storage. 
+	For more information, see App Install Location.
+
+	ps: manifest :android:installLocation=["auto" | "internalOnly" | "preferExternal"] 
+
+5.Save a File on Internal Storage
+	When saving a file to internal storage, you can acquire the appropriate directory as a File by calling one of two methods:
+	context.getFilesDir()
+		Returns a File representing an internal directory for your app.
+	context.getCacheDir()
+		Returns a File representing an internal directory for your app's temporary cache files.
+		***Be sure to delete each file once it is no longer needed and implement a reasonable size limit for the amount of memory you use at any given time, such as 1MB. 
+		If the system begins running low on storage, it may delete your cache files without warning.
+	context.openFileOutput()
+	Alternatively, you can call openFileOutput() to get a FileOutputStream that writes to a file in your internal directory.
+
+6.Your app's internal storage directory is specified by your app's package name in a special location of the Android file system.
+
+7.Save a File on External Storage
+	Remember that getExternalFilesDir() creates a directory inside a directory that is deleted when the user uninstalls your app. 
+	If the files you're saving should remain available after the user uninstalls your app¡ªsuch as when your app is a camera and the user will want to keep the photos¡ªyou should instead use getExternalStoragePublicDirectory().
+	Regardless of whether you use ***getExternalStoragePublicDirectory() for files that are shared or ***getExternalFilesDir() for files that are private to your app, it's important that you use directory names provided by API constants like DIRECTORY_PICTURES. 
+	These directory names ensure that the files are treated properly by the system. 
+	For instance, files saved in DIRECTORY_RINGTONES are categorized by the system media scanner as ringtones instead of music.
+	
+	***getExternalFilesDir() Private files
+	When the user uninstalls your app, the system deletes all files in your app's external private directory. 
+	For example, additional resources downloaded by your app or temporary media files.
+
+	***getExternalStoragePublicDirectory() Public files
+	Files that should be freely available to other apps and to the user. When the user uninstalls your app, these files should remain available to the user. 
+	For example, photos captured by your app or other downloaded files.
+
+8.You aren't required to check the amount of available space before you save your file. 
+	You can instead try writing the file right away, then catch an IOException if one occurs. 
+	You may need to do this if you don't know exactly how much space you need. 
+	For example, if you change the file's encoding before you save it by converting a PNG image to JPEG, you won't know the file's size beforehand.
+
+9.When the user uninstalls your app, the Android system deletes the following:
+	All files you saved on internal storage
+	All files you saved on external storage using getExternalFilesDir().
+	However, you should manually delete all cached files created with getCacheDir() on a regular basis and also regularly delete other files you no longer need.
+	
 question
 
-1. 
+1.   Is External storage deleted when the user uninstalls your app??
 
 interest
 
 1.Preference	D:\sdk\docs\reference\android\preference\Preference.html
 2.Settings	D:\sdk\docs\guide\topics\ui\settings.html
 3.Storage Options	file:///D:/sdk/docs/guide/topics/data/data-storage.html#pref
+4.App Install Location	D:\sdk\docs\guide\topics\data\install-location.html
