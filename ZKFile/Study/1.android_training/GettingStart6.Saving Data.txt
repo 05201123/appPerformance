@@ -63,10 +63,27 @@ knowledge
 	All files you saved on internal storage
 	All files you saved on external storage using getExternalFilesDir().
 	However, you should manually delete all cached files created with getCacheDir() on a regular basis and also regularly delete other files you no longer need.
+
+10. When you use this class to obtain references to your database, the system performs the potentially long-running operations of creating and updating the database only when needed and not during app startup.
+	All you need to do is call getWritableDatabase() or getReadableDatabase().
+	Note: Because they can be long-running, be sure that you call getWritableDatabase() or getReadableDatabase() in a background thread, such as with AsyncTask or IntentService.
+
+11. You may also want to implement onDowngrade (SQLiteDatabase db, int oldVersion, int newVersion) , but it's not required. 数据库新版本小于老版本
+	However, this method is not abstract, so it is not mandatory for a customer to implement it.
+	If not overridden, default implementation will reject downgrade and throws SQLiteException 
+
 	
 question
 
-1.   Is External storage deleted when the user uninstalls your app??
+1.Is External storage deleted when the user uninstalls your app??
+
+2.The first argument for insert() is simply the table name. 
+	The second argument provides the name of a column in which the framework can insert NULL in the event that the ContentValues is empty (if you instead set this to "null", then the framework will not insert a row when there are no values).
+	is really？
+
+3.sqlite:before insert?can perform update()?   
+
+4.sqlite: values =null,what happens? 
 
 interest
 
