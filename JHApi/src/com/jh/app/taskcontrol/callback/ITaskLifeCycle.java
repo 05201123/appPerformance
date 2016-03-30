@@ -1,6 +1,6 @@
 package com.jh.app.taskcontrol.callback;
 
-import com.jh.app.taskcontrol.task.JHBaseTask;
+import com.jh.app.taskcontrol.JHBaseTask;
 import com.jh.exception.JHException;
 
 /**

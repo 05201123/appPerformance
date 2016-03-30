@@ -1,4 +1,4 @@
-package com.jh.app.taskcontrol.task;
+package com.jh.app.taskcontrol;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -29,7 +29,6 @@ public abstract class JHBaseTask implements ITaskLifeCycle{
 	private String taskTraget;
 	/**task权重**/
 	private int taskPriority=TaskPriority.PRIORITY_NORMAL;
-	
 	/**
 	 * 判断任务是否已经取消
 	 * @return
