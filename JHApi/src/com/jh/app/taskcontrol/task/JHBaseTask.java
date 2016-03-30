@@ -2,6 +2,8 @@ package com.jh.app.taskcontrol.task;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import android.os.AsyncTask;
+
 import com.jh.app.taskcontrol.callback.ITaskLifeCycle;
 import com.jh.exception.JHException;
 
@@ -16,7 +18,7 @@ public abstract class JHBaseTask implements ITaskLifeCycle{
 	/**执行超时时间未设置，任务是无限大**/
 	private static final long RUNNING_TIMEOUT_NONE=-1;
 	/**task的状态值*/
-	private volatile int mStatus=TaskStatus.PENDING;
+	private volatile int mStatus=TaskStatus.NONE;
 	/**task是否已经取消*/
 	private final AtomicBoolean mCancelled = new AtomicBoolean();
 	/**等待超时时间**/
@@ -105,6 +107,8 @@ public abstract class JHBaseTask implements ITaskLifeCycle{
 	 * 2----完成
 	 */
 	public static  class TaskStatus{
+		/**初始状态未放到等待队列之中**/
+		static int NONE=-1;
 		/**等待中**/
 		static int PENDING=0;
 		/**执行中**/
@@ -117,17 +121,18 @@ public abstract class JHBaseTask implements ITaskLifeCycle{
 	 * 任务权重静态类
 	 * @author 099
 	 * 1----可延迟
-	 * 2----
-	 * 3----
+	 * 2----普通
+	 * 3----重要
+	 * 4----立即执行
 	 */
 	public static  class TaskPriority{
-		/**等待中**/
+		/**立即执行**/
 		static int PRIORITY_IMMEDIATE=4;
-		/**执行中**/
+		/**重要**/
 		static int PRIORITY_FOREGROUND=3;
-		/**结束中**/
+		/**普通**/
 		static int PRIORITY_NORMAL=2;
-		/**结束中**/
+		/**可延迟**/
 		static int PRIORITY_DELAY=1;
 	}
 	
