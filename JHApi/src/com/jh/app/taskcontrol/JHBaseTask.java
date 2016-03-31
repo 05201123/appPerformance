@@ -2,8 +2,6 @@ package com.jh.app.taskcontrol;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import android.os.AsyncTask;
-
 import com.jh.app.taskcontrol.callback.ITaskLifeCycle;
 import com.jh.exception.JHException;
 
@@ -12,7 +10,7 @@ import com.jh.exception.JHException;
  * @author 099
  * @since 2016-3-11
  */
-public abstract class JHBaseTask implements ITaskLifeCycle{
+public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTask>{
 	/**超时时间未设置，认为是无限大**/
 	private static final long WAIT_TIMEOUT_NONE=-1;
 	/**执行超时时间未设置，任务是无限大**/
@@ -25,10 +23,12 @@ public abstract class JHBaseTask implements ITaskLifeCycle{
 	private long waitTimeOut=WAIT_TIMEOUT_NONE;
 	/**执行超时时间**/
 	private long runningTimeOut=RUNNING_TIMEOUT_NONE;
-	/**用于分组标记**/
-	private String taskTraget;
+	/**用于特有标记比如上传，下载，activity等特殊任务**/
+	private String mTaskTraget;
+	/**task执行顺序，先进先出 */
+    private Integer mSequence;
 	/**task权重**/
-	private int taskPriority=TaskPriority.PRIORITY_NORMAL;
+//	private int mTaskPriority=TaskPriority.PRIORITY_NORMAL;
 	/**
 	 * 判断任务是否已经取消
 	 * @return
@@ -54,7 +54,13 @@ public abstract class JHBaseTask implements ITaskLifeCycle{
 	protected boolean  isNeedWait() {
 		return false;
 	}
-	
+	/***
+	 * 获取Task权重
+	 * @return
+	 */
+	protected int getPriority() {
+	    return TaskPriority.PRIORITY_NORMAL;
+	}
 	/**
 	 * 调用在dotask方法中，用于通知更新UI进度条，{@link ITaskLifeCycle #onProgressChanged(Object, int)}
 	 * @param values
@@ -97,6 +103,20 @@ public abstract class JHBaseTask implements ITaskLifeCycle{
 	public void setTaskStatus(int taskStatus){
 		mStatus=taskStatus;
 	}
+	
+	final JHBaseTask setSequence(int sequence) {
+        mSequence = sequence;
+        return this;
+    }
+	@Override
+	public int compareTo(JHBaseTask another) {
+		int left = this.getPriority();
+        int right = another.getPriority();
+        return left == right ?
+                this.mSequence - another.mSequence :
+                	left-right;
+	}
+	
 	
 	/**
 	 * 任务状态静态类
