@@ -5,5 +5,13 @@ package com.jh.app.taskcontrol.callback;
  *
  */
 public interface IThreadPoolStrategy {
-
+	/**
+	 * 执行runnable
+	 * @param runnable
+	 */
+	public void execute(Runnable runnable);
+	/**线程池是否空闲*/
+	public boolean isFree();
+	/**是否可以执行紧急任务*/
+	public boolean isCanFroceExec();
 }

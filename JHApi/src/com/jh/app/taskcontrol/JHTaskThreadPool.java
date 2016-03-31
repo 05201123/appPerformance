@@ -1,7 +1,11 @@
 package com.jh.app.taskcontrol;
-
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import android.os.Handler;
+import android.os.Looper;
 
 import com.jh.app.taskcontrol.callback.IThreadPoolStrategy;
 
@@ -9,8 +13,10 @@ import com.jh.app.taskcontrol.callback.IThreadPoolStrategy;
  * 任务线程池
  * @author 099
  * @since 2016-3-31
+ *
  */
 public class JHTaskThreadPool {
+	//TODO   temp线程池，打算用延迟销毁的方式，以免频繁的校验
 	/**正常线程数量*/
 	private  int corePoolSize;
 	/**最大线程数量*/
@@ -19,14 +25,21 @@ public class JHTaskThreadPool {
     private IThreadPoolStrategy iThreadPoolStrategy;
     /**当前执行线程数**/
     private volatile int mCurRunningTasksNum;
+    /**子线程Handler*/
+    private Handler mHandler;
     
 	public JHTaskThreadPool(int corePoolSize,
-            int maximumPoolSize,IThreadPoolStrategy iThreadPoolStrategy){
+            int maximumPoolSize,IThreadPoolStrategy iThreadPoolStrategy,Handler handler){
 		if (corePoolSize <= 0 || maximumPoolSize <= 0 ||maximumPoolSize <= corePoolSize){
 			throw new IllegalArgumentException();
 		}
+		if(handler==null){
+			mHandler=new Handler(Looper.getMainLooper());
+		}
+		this.mHandler=handler;
 		this.corePoolSize = corePoolSize;
         this.maximumPoolSize = maximumPoolSize;
+        
         if(iThreadPoolStrategy==null){
         	//如果以后有机会，可以根据手机性能，型号，来决定使用哪种线程策略
         	iThreadPoolStrategy=new JHDefaultThreadPool(corePoolSize,maximumPoolSize-corePoolSize);
@@ -38,14 +51,10 @@ public class JHTaskThreadPool {
 	 * @param runnable
 	 */
 	public void executeRunnable(Runnable runnable){
-		//TODO
-	}
-	/***
-	 * 强制执行runnable
-	 * @param runnable
-	 */
-	public void executeRunnableInForce(Runnable runnable){
-		//TODO
+		if(runnable==null){
+			 throw new NullPointerException();
+		}
+		iThreadPoolStrategy.execute(runnable);
 	}
 	/**
 	 * 是否可以执行runnalbe
@@ -53,8 +62,7 @@ public class JHTaskThreadPool {
 	 * 			false 满栈
 	 */
 	public boolean isCanExecRunnable(){
-		//TODO
-		return true;
+		return iThreadPoolStrategy.isFree();
 	}
 	/**
 	 * 是否可以强制执行runnalbe
@@ -62,8 +70,8 @@ public class JHTaskThreadPool {
 	 * 			false 满栈
 	 */
 	public boolean isCanForceExecRunnable(){
-		//TODO
-		return true;
+		
+		return iThreadPoolStrategy.isCanFroceExec();
 	}
 	
 	
@@ -76,20 +84,66 @@ public class JHTaskThreadPool {
 	 */
 	private class JHDefaultThreadPool implements IThreadPoolStrategy{
 		/**常规线程池**/
-		private ExecutorService executorService;
+		private ThreadPoolExecutor executorService;
 		/**临时线程池**/
-		private ExecutorService tempExecutorService;
+		private ThreadPoolExecutor tempExecutorService;
 		/**临时线程池数量**/
 		private int mTempTreadPoolCount;
+		private static final long OVERLOAD_FREETIMEOUT=1000*60;
+		/**过载空闲超时的runnable**/
+		private Runnable mOverLoadRunnable=new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				if(tempExecutorService!=null){
+					tempExecutorService.shutdown();
+					tempExecutorService=null;
+				}
+			}
+		};
 		
 		private JHDefaultThreadPool(int corePoolSize,int tempPoolSize){
-			executorService=Executors.newFixedThreadPool(corePoolSize);
+			executorService=newFixedThreadPool(tempPoolSize);
 			mTempTreadPoolCount=tempPoolSize;
-//			executorService.
 		}
-		
-		
-		
+		/**
+		 * 生成线程池{@link Executors #newFixedThreadPool(int)}
+		 * @param nThreads
+		 * @return
+		 */
+		private ThreadPoolExecutor newFixedThreadPool(int nThreads){
+			return new ThreadPoolExecutor(corePoolSize, corePoolSize,
+                    0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<Runnable>());
+		}
+		@Override
+		public void execute(Runnable runnable) {
+			if(executorService.getActiveCount()==executorService.getCorePoolSize()){
+				if(tempExecutorService==null){
+					tempExecutorService=newFixedThreadPool(mTempTreadPoolCount);
+				}
+				tempExecutorService.execute(runnable);
+				mHandler.removeCallbacks(mOverLoadRunnable);
+				mHandler.postDelayed(mOverLoadRunnable, OVERLOAD_FREETIMEOUT);
+				
+			}else{
+				executorService.execute(runnable);
+			}
+			
+		}
+		@Override
+		public boolean isFree() {
+			return executorService.getActiveCount()<executorService.getCorePoolSize();
+		}
+		@Override
+		public boolean isCanFroceExec() {
+			/**临时线程池满栈，不执行**/
+			if(tempExecutorService!=null&&tempExecutorService.getActiveCount()==mTempTreadPoolCount){
+				return true;
+			}
+			return false;
+		}
 		
 		
 	}
