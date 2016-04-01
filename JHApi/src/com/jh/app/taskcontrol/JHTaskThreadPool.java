@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.jh.app.taskcontrol.callback.IThreadPoolStrategy;
+import com.jh.app.taskcontrol.handler.JHTaskHandler;
 
 /**
  * 任务线程池
@@ -34,7 +35,7 @@ public class JHTaskThreadPool {
 			throw new IllegalArgumentException();
 		}
 		if(handler==null){
-			mHandler=new Handler(Looper.getMainLooper());
+			mHandler=JHTaskHandler.getTaskHandler();
 		}
 		this.mHandler=handler;
 		this.corePoolSize = corePoolSize;
@@ -74,9 +75,6 @@ public class JHTaskThreadPool {
 		return iThreadPoolStrategy.isCanFroceExec();
 	}
 	
-	
-	
-	
 	/***
 	 * 金和默认线程池
 	 * @author 099
@@ -89,14 +87,13 @@ public class JHTaskThreadPool {
 		private ThreadPoolExecutor tempExecutorService;
 		/**临时线程池数量**/
 		private int mTempTreadPoolCount;
+		/**临时线程池一分钟之内无任务，直接释放*/
 		private static final long OVERLOAD_FREETIMEOUT=1000*60;
 		/**过载空闲超时的runnable**/
 		private Runnable mOverLoadRunnable=new Runnable() {
-			
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
-				if(tempExecutorService!=null){
+				if(tempExecutorService!=null&&tempExecutorService.isTerminated()){
 					tempExecutorService.shutdown();
 					tempExecutorService=null;
 				}
@@ -144,10 +141,5 @@ public class JHTaskThreadPool {
 			}
 			return false;
 		}
-		
-		
 	}
-	
-	
-	
 }

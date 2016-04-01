@@ -3,6 +3,8 @@ package com.jh.app.taskcontrol;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.jh.app.taskcontrol.callback.ITaskLifeCycle;
+import com.jh.app.taskcontrol.exception.JHTaskException;
+import com.jh.app.taskcontrol.exception.JHTaskRemoveException;
 import com.jh.exception.JHException;
 
 /**
@@ -27,8 +29,26 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
 	private String mTaskTraget;
 	/**task执行顺序，先进先出 */
     private Integer mSequence;
+    /**是否激活*/
+    private volatile boolean isActive=true;
 	/**task权重**/
 //	private int mTaskPriority=TaskPriority.PRIORITY_NORMAL;
+    
+    /***
+     * 获取task等待超时时间
+     * @return
+     */
+    protected long getTaskWaitTimeOut(){
+    	return waitTimeOut;
+    }
+    /**
+     * 获取task执行超时时间
+     * @return
+     */
+    protected long getTaskRunningTimeOut(){
+    	return runningTimeOut;
+    }
+    
 	/**
 	 * 判断任务是否已经取消
 	 * @return
@@ -41,7 +61,7 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
 	 * @param mayInterruptIfRunning 是否终止线程
 	 * @return 
 	 */
-	public final boolean cancel(boolean mayInterruptIfRunning) {
+	 final boolean cancel(boolean mayInterruptIfRunning) {
         mCancelled.set(true);
         //TODO 取消任务
         return false;
@@ -96,11 +116,36 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
 		
 		
 	}
+	/***
+	 * 是否已经被调用
+	 * @return true 已经执行过
+	 * 		   false 未执行过
+	 * 一个task应该只能执行一次
+	 */
+	public boolean isInvoked() {
+		return mStatus!=TaskStatus.NONE;
+	}
+	/**
+	 * 是否处于等待状态
+	 * @return true  处于等待状态
+	 * 		   false 处于其他状态
+	 */
+	public boolean isWaiting() {
+		return mStatus==TaskStatus.PENDING;
+	}
+	/**
+	 * 是否处于运行状态
+	 * @return  true  处于等待状态
+	 * 			false 处于其他状态
+	 */
+	public boolean isRunning(){
+		return mStatus==TaskStatus.RUNNING;
+	}
 	/**
 	 * 设置task状态值
 	 * @param taskStatus
 	 */
-	public void setTaskStatus(int taskStatus){
+	 void setTaskStatus(int taskStatus){
 		mStatus=taskStatus;
 	}
 	
@@ -118,6 +163,15 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
 	}
 	
 	
+	/**
+	 * @return the mTaskTraget
+	 */
+	protected String getmTaskTraget() {
+		return mTaskTraget;
+	}
+
+
+
 	/**
 	 * 任务状态静态类
 	 * @author 099
@@ -154,5 +208,26 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
 		/**可延迟**/
 		static int PRIORITY_DELAY=1;
 	}
+	/**
+	 * 设置金和taskException
+	 * @param jhTaskRemoveException
+	 */
+	public void setException(JHTaskException jhTaskRemoveException) {
+		// TODO Auto-generated method stub
+		
+	}
+	/**
+	 * @return the isActive
+	 */
+	 boolean isActive() {
+		return isActive;
+	}
+	/**
+	 * @param isActive the isActive to set
+	 */
+	 void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+
 	
 }
