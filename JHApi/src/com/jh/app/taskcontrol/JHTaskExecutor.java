@@ -1,13 +1,15 @@
 package com.jh.app.taskcontrol;
 import java.util.HashSet;
 
+import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
+
+import com.jh.app.taskcontrol.JHBaseTask.TaskPriority;
 import com.jh.app.taskcontrol.JHBaseTask.TaskStatus;
 import com.jh.app.taskcontrol.callback.ITaskFinishLinsener;
 import com.jh.app.taskcontrol.exception.JHTaskRemoveException;
 import com.jh.app.taskcontrol.handler.JHTaskHandler;
-
-import android.os.Handler;
-import android.os.Message;
  /**
   * JH任务控制器
   * @author 099
@@ -28,6 +30,11 @@ public class JHTaskExecutor {
 	private JHTaskQueue mTaskQueue;
 	/**任务线程池*/
 	private JHTaskThreadPool mTaskThreadPool;
+	/**上一次满栈的时间**/
+	private volatile long lastThredPoolFullTime;
+	/**满栈一分钟前台任务可以运行**/
+	private static final int TASKPOOLS_FULL_TIMEOUT=1000*60;
+	
 	
 	private JHTaskExecutor(){
 		mChildThreadHandler=new Handler(JHTaskHandler.getTaskLooper()){
@@ -87,7 +94,34 @@ public class JHTaskExecutor {
 	 * 执行task
 	 */
 	private void executeTask() {
-		// TODO Auto-generated method stub
+		JHBaseTask task=mTaskQueue.getFirstTask();
+		if(mTaskThreadPool.isCanExecRunnable()){
+			lastThredPoolFullTime=0;
+			
+			prepare(task);
+			return;
+		}else{
+			if(lastThredPoolFullTime!=0){
+				lastThredPoolFullTime=SystemClock.elapsedRealtime();
+			}
+			if(mTaskThreadPool.isCanForceExecRunnable()){
+				if(task.getPriority()==TaskPriority.PRIORITY_IMMEDIATE){
+					prepare(task);
+					return ;
+				}else if(task.getPriority()==TaskPriority.PRIORITY_IMMEDIATE&&SystemClock.elapsedRealtime()-lastThredPoolFullTime>=TASKPOOLS_FULL_TIMEOUT){
+					prepare(task);
+					return;
+				}
+			}
+		}
+		
+		mTaskQueue.reAddTaskQueue(task);
+	}
+	/**
+	 * 执行task
+	 * @param task
+	 */
+	private void prepare(JHBaseTask task) {
 		
 	}
 	/***
