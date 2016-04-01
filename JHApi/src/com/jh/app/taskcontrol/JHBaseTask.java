@@ -220,7 +220,7 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
 	 * @return the isActive
 	 */
 	 boolean isActive() {
-		return isActive&&!isNeedWait();
+		return isActive;
 	}
 	/**
 	 * @param isActive the isActive to set

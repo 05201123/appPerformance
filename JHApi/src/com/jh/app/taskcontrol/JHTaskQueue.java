@@ -113,32 +113,9 @@ public class JHTaskQueue {
 	 boolean contains(String taskTraget) {
 		return mTargetTasks.get(taskTraget)!=null;
 	}
-	 /**
-	  * 获取等待队列中的最前面的task
-	  * @return
-	  */
-	 JHBaseTask getFirstTask() {
-		 JHBaseTask task= mWaitingTasks.poll();
-		 if(task!=null){
-			 if(task.isActive()){
-				 mWaitingTasks.addAll(mTempRunningTasks);
-				 mTempRunningTasks.clear();
-				 removeTargetTask(task);
-				return  task;
-			 }else{
-				 mTempRunningTasks.add(task);
-				 return getFirstTask();
-			 }
-		 }
-		return null;
-	}
-	 /**
-	  * 重新加入的任务队列
-	  * @param task
-	  */
-	 void reAddTaskQueue(JHBaseTask task) {
-		 mWaitingTasks.add(task);
-		
-	}
-
+ 
+	
+	 
+	 
+	 
 }
