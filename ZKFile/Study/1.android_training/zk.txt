@@ -16,3 +16,12 @@
 The changes we made might not seem like a huge impact, but as our views become more complicated and the number of them grows, inefficiencies will become noticeable. 
 The last thing we want to do as developers is create an app with a negative user experience. 
 Remember, just one sub-par  ListView could be the life or death of an app, so let’s not take the chance!
+
+You are the owner of your career.
+你是你职业发展的责任人。
+
+训练应该是系统的（需要教材）、主动的，这两个特点不可或缺，有人会觉得，我真的工作很辛苦，每天都要加班，但是其实，任何被动的痛苦，都没法给人带来进步，你的痛苦倒是可能给老板带来更多收入。
+技术圈里流行一个笑话，说的是一个人，工作了三年，却只有一年的经验，因为后面两年都在重复第一年的工作。
+所以我们要做的事，就是永远不重复劳动，当你觉得现在的工作，越来越舒适，越来越缺少风险的时候，就应该引起警惕了。
+
+
