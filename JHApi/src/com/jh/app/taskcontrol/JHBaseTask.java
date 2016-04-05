@@ -14,9 +14,9 @@ import com.jh.exception.JHException;
  */
 public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTask>{
 	/**超时时间未设置，认为是无限大**/
-	private static final long WAIT_TIMEOUT_NONE=-1;
+	public static final long WAIT_TIMEOUT_NONE=-1;
 	/**执行超时时间未设置，任务是无限大**/
-	private static final long RUNNING_TIMEOUT_NONE=-1;
+	public static final long RUNNING_TIMEOUT_NONE=-1;
 	/**task的状态值*/
 	private volatile int mStatus=TaskStatus.NONE;
 	/**task是否已经取消*/

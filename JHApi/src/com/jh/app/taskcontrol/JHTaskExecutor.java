@@ -1,15 +1,15 @@
 package com.jh.app.taskcontrol;
 import java.util.HashSet;
-
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-
 import com.jh.app.taskcontrol.JHBaseTask.TaskPriority;
-import com.jh.app.taskcontrol.JHBaseTask.TaskStatus;
 import com.jh.app.taskcontrol.callback.ITaskFinishLinsener;
+import com.jh.app.taskcontrol.exception.JHTaskCancelException;
 import com.jh.app.taskcontrol.exception.JHTaskRemoveException;
 import com.jh.app.taskcontrol.handler.JHTaskHandler;
+import com.jh.exception.JHException;
  /**
   * JH任务控制器
   * @author 099
@@ -24,8 +24,12 @@ public class JHTaskExecutor {
 	private int corePoolSize=CPU_COUNT * 2 + 1;	
 	/**任务的等待超时msg**/
 	private static final int MSG_TASK_WAIT_TIMEOUT=100;
+	/**任务的执行超时msg**/
+	private static final int MSG_TASK_RUNNING_TIMEOUT=101;
 	/**子线程Handler**/
 	private Handler mChildThreadHandler;
+	/**主线程Handler**/
+	private Handler mMainHandler ;
 	/**任务队列*/
 	private JHTaskQueue mTaskQueue;
 	/**任务线程池*/
@@ -36,7 +40,9 @@ public class JHTaskExecutor {
 	private static final int TASKPOOLS_FULL_TIMEOUT=1000*60;
 	
 	
+	
 	private JHTaskExecutor(){
+		mMainHandler=new Handler(Looper.getMainLooper());
 		mChildThreadHandler=new Handler(JHTaskHandler.getTaskLooper()){
 			public void handleMessage(Message msg) {
 				switch (msg.what) {
@@ -82,7 +88,6 @@ public class JHTaskExecutor {
 				throw new  RuntimeException("task multiple invoke exception");
 			}
 			if(mTaskQueue.enqueueTask(baseTask, isSetFirst)){
-				baseTask.setTaskStatus(TaskStatus.PENDING);
 				sendWaitDelayTimeOutMessage(baseTask);
 				executeTask();
 			}
@@ -95,9 +100,11 @@ public class JHTaskExecutor {
 	 */
 	private void executeTask() {
 		JHBaseTask task=mTaskQueue.getFirstTask();
+		if(task==null){
+			return;
+		}
 		if(mTaskThreadPool.isCanExecRunnable()){
 			lastThredPoolFullTime=0;
-			
 			prepare(task);
 			return;
 		}else{
@@ -123,6 +130,78 @@ public class JHTaskExecutor {
 	 */
 	private void prepare(JHBaseTask task) {
 		
+		
+		if(!task.isCancelled()){
+			sendRunningDelayTimeOutMessage(task);
+			task.onPreExecute();
+			mTaskThreadPool.executeRunnable(new WorkerRunnable(task) {
+				@Override
+				public void run() {
+					try {
+						doInBackground(mTask);
+					}catch (final JHException e) {
+						e.printStackTrace();
+						//TODO
+//						taskFailed(currentTask, e);
+					}
+					 catch (final Exception e) {
+							e.printStackTrace();
+							//TODO
+//							taskFailed(currentTask, new JHException(e));
+					}finally{
+						removeRunningTask(mTask);
+						executeTask();
+						
+					}
+				}
+			});
+			
+			
+		}else{
+			//TODO 执行cancel
+		}
+		
+		
+	}
+	/**
+	 * 删除正在running队列中task
+	 * @param currentTask
+	 */
+	private void removeRunningTask(JHBaseTask currentTask){
+		mTaskQueue.removeRunningTask(currentTask);
+		clearRunningDelayTimeOutMessage(currentTask);
+	}
+	
+	/***
+	 * 子线程执行的任务
+	 * @param currentTask
+	 * @throws JHException
+	 */
+	private void doInBackground(JHBaseTask currentTask)
+			throws JHException {
+		if(!currentTask.isCancelled()){
+			throw new JHTaskCancelException();
+		}
+		currentTask.doTask();
+		
+		if(!currentTask.isCancelled()){
+			throw new JHTaskCancelException();
+		}
+		//通知主线程执行成功
+		mMainHandler.post(new WorkerRunnable(currentTask) {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				if(!mTask.isCancelled()){
+					mTask.success();
+				}else{
+					//TODO
+//					taskFailed(currentTask, e);
+				}
+			}
+		});
+	
 	}
 	/***
 	 * 发送task等待队列中超时的task
@@ -133,7 +212,7 @@ public class JHTaskExecutor {
 			Message msg=Message.obtain();
 			msg.what=MSG_TASK_WAIT_TIMEOUT;
 			msg.obj=baseTask;
-			mChildThreadHandler.sendMessageDelayed(msg, baseTask.getTaskRunningTimeOut());
+			mChildThreadHandler.sendMessageDelayed(msg, baseTask.getTaskWaitTimeOut());
 		}
 	}
 	/**
@@ -142,6 +221,25 @@ public class JHTaskExecutor {
 	 */
 	private void clearWaitDelayTimeOutMessage(JHBaseTask baseTask) {
 		mChildThreadHandler.removeMessages(MSG_TASK_WAIT_TIMEOUT, baseTask);
+	}
+	/***
+	 * 发送task等待队列中超时的task
+	 * @param baseTask
+	 */
+	private void sendRunningDelayTimeOutMessage(JHBaseTask baseTask) {
+		if(baseTask.getTaskRunningTimeOut()>0){
+			Message msg=Message.obtain();
+			msg.what=MSG_TASK_RUNNING_TIMEOUT;
+			msg.obj=baseTask;
+			mChildThreadHandler.sendMessageDelayed(msg, baseTask.getTaskRunningTimeOut());
+		}
+	}
+	/**
+	 * 删除task等待队列中超时的task
+	 * @param baseTask
+	 */
+	private void clearRunningDelayTimeOutMessage(JHBaseTask baseTask) {
+		mChildThreadHandler.removeMessages(MSG_TASK_RUNNING_TIMEOUT, baseTask);
 	}
 
 	/**
@@ -154,7 +252,6 @@ public class JHTaskExecutor {
 		}
 		if(baseTask.isWaiting()){
 			if(mTaskQueue.removeWaitTask(baseTask)){
-				baseTask.setTaskStatus(TaskStatus.FINISHED);
 				baseTask.setException(new JHTaskRemoveException());
 				//TODO 通知task执行完成，调用task的onfailed 方法
 				clearWaitDelayTimeOutMessage(baseTask);
@@ -182,8 +279,10 @@ public class JHTaskExecutor {
 		}
 		if(baseTask.isWaiting()){
 			removeWaitTask(baseTask);
+			baseTask.cancel(false);
 		}else if(baseTask.isRunning()){
 			baseTask.cancel(false);
+			clearRunningDelayTimeOutMessage(baseTask);
 		}
 		
 	}
@@ -196,8 +295,10 @@ public class JHTaskExecutor {
 		for(JHBaseTask task:removeTasks){
 			if(task.isWaiting()){
 				removeWaitTask(task);
+				task.cancel(false);
 			}else if(task.isRunning()){
 				task.cancel(false);
+				clearRunningDelayTimeOutMessage(task);
 			}
 		}
 		
@@ -279,7 +380,7 @@ public class JHTaskExecutor {
 		}
 	}
 	
-
+	
 	/***
 	 * 添加任务执行完成的listener
 	 * @param linsener
@@ -296,6 +397,15 @@ public class JHTaskExecutor {
 		
 		//TODO
 	}
-	
-	
+	/**
+	 * 实际放入线程池的runnnable
+	 * @author 099
+	 * @since 2016-4-5
+	 */
+	private static abstract class WorkerRunnable implements Runnable{
+		protected JHBaseTask mTask;
+		WorkerRunnable(JHBaseTask task){
+			mTask=task;
+		}
+	}
 }

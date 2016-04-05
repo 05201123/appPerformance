@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.jh.app.taskcontrol.JHBaseTask.TaskStatus;
 import com.jh.app.taskcontrol.exception.TargetTaskExeception;
 /**
  * 金和task队列
@@ -33,7 +34,7 @@ public class JHTaskQueue {
 	  * 				   false 任务先进先出
 	  */
 	  boolean enqueueTask(JHBaseTask baseTask,boolean isSetBefore){
-		 
+		  baseTask.setTaskStatus(TaskStatus.PENDING);
 		  if(isSetBefore){
 			  baseTask.setSequence(mSequenceGenerator.getAndIncrement());
 		  }else{
@@ -70,6 +71,7 @@ public class JHTaskQueue {
 	  * @param baseTask
 	  */
 	  boolean removeWaitTask(JHBaseTask baseTask){
+		 baseTask.setTaskStatus(TaskStatus.FINISHED);
 		 removeTargetTask(baseTask);
 		 return mWaitingTasks.remove(baseTask);
 	 }
@@ -123,7 +125,7 @@ public class JHTaskQueue {
 			 if(task.isActive()){
 				 mWaitingTasks.addAll(mTempRunningTasks);
 				 mTempRunningTasks.clear();
-				 removeTargetTask(task);
+				 putTaskToRunningQueue(task);
 				return  task;
 			 }else{
 				 mTempRunningTasks.add(task);
@@ -137,8 +139,36 @@ public class JHTaskQueue {
 	  * @param task
 	  */
 	 void reAddTaskQueue(JHBaseTask task) {
+		 if(task==null){
+				throw new NullPointerException();
+			}
+		 task.setTaskStatus(TaskStatus.PENDING);
 		 mWaitingTasks.add(task);
 		
 	}
-
+	 /**
+	  * 将task加入到Running队列
+	  * @param task
+	  */
+	private void putTaskToRunningQueue(JHBaseTask task){
+		if(task==null){
+			throw new NullPointerException();
+		}
+		task.setTaskStatus(TaskStatus.RUNNING);
+		mCurrentRunningTasks.add(task);
+	}
+	/**
+	 * 将task从Running队列 去掉
+	 * @param mTask
+	 */
+	 void removeRunningTask(JHBaseTask task) {
+		if(task==null){
+			throw new NullPointerException();
+		}
+		task.setTaskStatus(TaskStatus.FINISHED);
+		mCurrentRunningTasks.remove(task);
+	}
+	 
+	 
+	 
 }
