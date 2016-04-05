@@ -6,15 +6,24 @@ import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import android.os.Handler;
+import android.os.Message;
+
 import com.jh.app.taskcontrol.JHBaseTask.TaskStatus;
 import com.jh.app.taskcontrol.exception.TargetTaskExeception;
+import com.jh.app.taskcontrol.handler.JHTaskHandler;
 /**
  * 金和task队列
  * @author 099
  * @since 2016-3-30
  */
 public class JHTaskQueue {
-	
+	/**任务的等待超时msg**/
+	private static final int MSG_TASK_WAIT_TIMEOUT=100;
+	/**任务的执行超时msg**/
+	private static final int MSG_TASK_RUNNING_TIMEOUT=101;
+	/**子线程Handler**/
+	private Handler mChildThreadHandler;
 	  /**顺序生成器*/
 	 private AtomicInteger mSequenceGenerator = new AtomicInteger();
 	 /**等待执行的task队列**/
@@ -26,6 +35,18 @@ public class JHTaskQueue {
 	 private final Set<JHBaseTask> mTempRunningTasks=new HashSet<JHBaseTask>();
 	 /**有特殊Target的task队列**/
 	 private final Map<String,HashSet<JHBaseTask>> mTargetTasks=new HashMap<String, HashSet<JHBaseTask>>();
+	 
+	 public JHTaskQueue(){
+		 mChildThreadHandler=new Handler(JHTaskHandler.getTaskLooper()){
+				public void handleMessage(Message msg) {
+					switch (msg.what) {
+						case MSG_TASK_WAIT_TIMEOUT:
+							//TODO task等待超时
+							break;
+					}
+				};
+			};
+	 }
 	 
 	 /**
 	  * 添加task到队列中
@@ -40,8 +61,9 @@ public class JHTaskQueue {
 		  }else{
 			  baseTask.setSequence(mSequenceGenerator.getAndDecrement());
 		  }
-		  saveTargetTask(baseTask);
 		 if( mWaitingTasks.add(baseTask)){
+			 sendWaitDelayTimeOutMessage(baseTask);
+			 saveTargetTask(baseTask);
 			 return true;
 		 }
 		 return false;
@@ -73,6 +95,7 @@ public class JHTaskQueue {
 	  boolean removeWaitTask(JHBaseTask baseTask){
 		 baseTask.setTaskStatus(TaskStatus.FINISHED);
 		 removeTargetTask(baseTask);
+		 clearWaitDelayTimeOutMessage(baseTask);
 		 return mWaitingTasks.remove(baseTask);
 	 }
 	  /**
@@ -126,6 +149,7 @@ public class JHTaskQueue {
 				 mWaitingTasks.addAll(mTempRunningTasks);
 				 mTempRunningTasks.clear();
 				 putTaskToRunningQueue(task);
+				 sendRunningDelayTimeOutMessage(task);
 				return  task;
 			 }else{
 				 mTempRunningTasks.add(task);
@@ -143,6 +167,8 @@ public class JHTaskQueue {
 				throw new NullPointerException();
 			}
 		 task.setTaskStatus(TaskStatus.PENDING);
+		 clearRunningDelayTimeOutMessage(task);
+		 sendWaitDelayTimeOutMessage(task);
 		 mWaitingTasks.add(task);
 		
 	}
@@ -167,8 +193,46 @@ public class JHTaskQueue {
 		}
 		task.setTaskStatus(TaskStatus.FINISHED);
 		mCurrentRunningTasks.remove(task);
+		clearRunningDelayTimeOutMessage(task);
 	}
 	 
-	 
+	 /***
+		 * 发送task等待队列中超时的task
+		 * @param baseTask
+		 */
+		private void sendWaitDelayTimeOutMessage(JHBaseTask baseTask) {
+			if(baseTask.getTaskRunningTimeOut()>0){
+				Message msg=Message.obtain();
+				msg.what=MSG_TASK_WAIT_TIMEOUT;
+				msg.obj=baseTask;
+				mChildThreadHandler.sendMessageDelayed(msg, baseTask.getTaskWaitTimeOut());
+			}
+		}
+		/**
+		 * 删除task等待队列中超时的task
+		 * @param baseTask
+		 */
+		private void clearWaitDelayTimeOutMessage(JHBaseTask baseTask) {
+			mChildThreadHandler.removeMessages(MSG_TASK_WAIT_TIMEOUT, baseTask);
+		}
+		/***
+		 * 发送task等待队列中超时的task
+		 * @param baseTask
+		 */
+		private void sendRunningDelayTimeOutMessage(JHBaseTask baseTask) {
+			if(baseTask.getTaskRunningTimeOut()>0){
+				Message msg=Message.obtain();
+				msg.what=MSG_TASK_RUNNING_TIMEOUT;
+				msg.obj=baseTask;
+				mChildThreadHandler.sendMessageDelayed(msg, baseTask.getTaskRunningTimeOut());
+			}
+		}
+		/**
+		 * 删除task等待队列中超时的task
+		 * @param baseTask
+		 */
+		private void clearRunningDelayTimeOutMessage(JHBaseTask baseTask) {
+			mChildThreadHandler.removeMessages(MSG_TASK_RUNNING_TIMEOUT, baseTask);
+		} 
 	 
 }
