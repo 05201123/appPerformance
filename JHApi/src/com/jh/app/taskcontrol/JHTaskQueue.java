@@ -10,6 +10,8 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.jh.app.taskcontrol.JHBaseTask.TaskStatus;
+import com.jh.app.taskcontrol.exception.JHTaskRunningTimeOutException;
+import com.jh.app.taskcontrol.exception.JHTaskWaitTimeOutException;
 import com.jh.app.taskcontrol.exception.TargetTaskExeception;
 import com.jh.app.taskcontrol.handler.JHTaskHandler;
 /**
@@ -22,6 +24,8 @@ public class JHTaskQueue {
 	private static final int MSG_TASK_WAIT_TIMEOUT=100;
 	/**任务的执行超时msg**/
 	private static final int MSG_TASK_RUNNING_TIMEOUT=101;
+	/**同一个traget task 同时running最大为5*/
+	private static final int TragetMaxRunningNum = 5;
 	/**子线程Handler**/
 	private Handler mChildThreadHandler;
 	  /**顺序生成器*/
@@ -39,9 +43,28 @@ public class JHTaskQueue {
 	 public JHTaskQueue(){
 		 mChildThreadHandler=new Handler(JHTaskHandler.getTaskLooper()){
 				public void handleMessage(Message msg) {
+					JHBaseTask task=(JHBaseTask) msg.obj;
+					if(task==null){
+						return;
+					}
 					switch (msg.what) {
 						case MSG_TASK_WAIT_TIMEOUT:
-							//TODO task等待超时
+							if(task.isWaiting()){
+								mWaitingTasks.remove(task);
+								removeTargetTask(task);
+								task.setTaskStatus(TaskStatus.FINISHED);
+								task.setException(new JHTaskWaitTimeOutException());
+								task.notifyFailed();
+							}
+							break;
+						case MSG_TASK_RUNNING_TIMEOUT:
+							if(task.isRunning()){
+								mCurrentRunningTasks.remove(task);
+								removeTargetTask(task);
+								task.setTaskStatus(TaskStatus.FINISHED);
+								task.setException(new JHTaskRunningTimeOutException());
+								task.notifyFailed();
+							}
 							break;
 					}
 				};
@@ -145,7 +168,7 @@ public class JHTaskQueue {
 	 JHBaseTask getFirstTask() {
 		 JHBaseTask task= mWaitingTasks.poll();
 		 if(task!=null){
-			 if(task.isActive()){
+			 if(task.isActive()||!isTragetOutOf(task)){
 				 mWaitingTasks.addAll(mTempRunningTasks);
 				 mTempRunningTasks.clear();
 				 putTaskToRunningQueue(task);
@@ -159,6 +182,29 @@ public class JHTaskQueue {
 		return null;
 	}
 	 /**
+	  * 是否超过同一时间运行限制
+	  * @param task
+	  * @return
+	  */
+	 private boolean isTragetOutOf(JHBaseTask task) {
+		if(task.getmTaskTraget()!=null){
+			Set<JHBaseTask> set=getTaskByTraget(task.getmTaskTraget());
+			if(set!=null){
+				int tempNum=0;
+				for(JHBaseTask mtask:set){
+					if(mtask.isRunning()){
+						tempNum++;
+					}
+				}
+				if(tempNum>=TragetMaxRunningNum){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
 	  * 重新加入的任务队列
 	  * @param task
 	  */
@@ -193,6 +239,7 @@ public class JHTaskQueue {
 		}
 		task.setTaskStatus(TaskStatus.FINISHED);
 		mCurrentRunningTasks.remove(task);
+		removeTargetTask(task);
 		clearRunningDelayTimeOutMessage(task);
 	}
 	 
@@ -233,6 +280,24 @@ public class JHTaskQueue {
 		 */
 		private void clearRunningDelayTimeOutMessage(JHBaseTask baseTask) {
 			mChildThreadHandler.removeMessages(MSG_TASK_RUNNING_TIMEOUT, baseTask);
+		}
+		/**
+		 * 队列是否为空
+		 * @return
+		 */
+		 boolean isEmpty() {
+			return (mCurrentRunningTasks.size()+mTempRunningTasks.size()+mWaitingTasks.size())==0;
+		}
+		 /**
+		  * traget标记的队列是否执行完
+		  * @return
+		  */
+		 boolean isTragetEmpty(String traget) {
+			Set<JHBaseTask> set= mTargetTasks.get(traget);
+			if(set==null||set.size()==0){
+				return true;
+			}
+			return false;
 		} 
 	 
 }

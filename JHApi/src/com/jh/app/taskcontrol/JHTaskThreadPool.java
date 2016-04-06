@@ -5,7 +5,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import android.os.Handler;
-import android.os.Looper;
 
 import com.jh.app.taskcontrol.callback.IThreadPoolStrategy;
 import com.jh.app.taskcontrol.handler.JHTaskHandler;

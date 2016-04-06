@@ -2,9 +2,11 @@ package com.jh.app.taskcontrol;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+
 import com.jh.app.taskcontrol.callback.ITaskLifeCycle;
-import com.jh.app.taskcontrol.exception.JHTaskException;
-import com.jh.app.taskcontrol.exception.JHTaskRemoveException;
 import com.jh.exception.JHException;
 
 /**
@@ -31,8 +33,18 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
     private Integer mSequence;
     /**是否激活*/
     private volatile boolean isActive=true;
-	/**task权重**/
-//	private int mTaskPriority=TaskPriority.PRIORITY_NORMAL;
+	/**主线程Handler**/
+    private static final InternalHandler sHandler=new InternalHandler(Looper.getMainLooper());
+    /**task 执行进度的消息值*/
+    private static final int MESSAGE_POST_PROGRESS = 103;
+    /**task 执行之前的消息值*/
+    private static final int MESSAGE_POST_PRE = 104;
+    /**task 执行是吧的消息值*/
+    private static final int MESSAGE_POST_FAILED = 105;
+    /**task 执行成功的消息值*/
+    private static final int MESSAGE_POST_SUCCESS = 106;
+	/**运行过程中发现的异常*/
+	private Exception mExc;
     
     /***
      * 获取task等待超时时间
@@ -63,7 +75,9 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
 	 */
 	 final boolean cancel(boolean mayInterruptIfRunning) {
         mCancelled.set(true);
-        //TODO 取消任务
+        if(cancelListener!=null){
+        	cancelListener.cancel(this);
+        }
         return false;
     }
 	/**
@@ -86,9 +100,8 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
 	 * @param values
 	 */
 	 protected final void publishProgress(Object bussiness,int newProgress) {
-	        if (!isCancelled()) {
-//	            sHandler.obtainMessage(MESSAGE_POST_PROGRESS,
-//	                    new AsyncTaskResult<Progress>(this, values)).sendToTarget();
+	        if (mExc==null) {
+	        	sHandler.obtainMessage(MESSAGE_POST_PROGRESS, newProgress, 0, new TaskResult(this, bussiness)).sendToTarget();
 	        }
 	    }
 	
@@ -208,14 +221,70 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
 		/**可延迟**/
 		static int PRIORITY_DELAY=1;
 	}
+	/***
+	 * 内部Handler
+	 * @author 099
+	 *
+	 */
+	private static class InternalHandler extends Handler {
+        public InternalHandler(Looper mainLooper) {
+			super(mainLooper);
+		}
+		@Override
+        public void handleMessage(Message msg) {
+			TaskResult result=(TaskResult) msg.obj;
+            switch (msg.what) {
+                case MESSAGE_POST_PROGRESS:
+                	if(result.mTask.getException()==null){
+                    	result.mTask.onProgressChanged(result.mData, msg.arg1);
+                	}
+                    break;
+                case MESSAGE_POST_PRE:
+                	if(result.mTask.getException()==null){
+                		result.mTask.onPreExecute();
+                	}
+                	break;
+                case MESSAGE_POST_SUCCESS:
+                	if(result.mTask.getException()==null){
+                		result.mTask.success();
+                	}else{
+                		result.mTask.fail(result.mTask.getException().getMessage());
+                	}
+                	break;
+                case MESSAGE_POST_FAILED:
+                	if(result.mTask.getException()!=null){
+                		result.mTask.fail(result.mTask.getException().getMessage());
+                	}
+                	break;
+            }
+        }
+    }
+	/**
+	 * Task结果
+	 * @author 099
+	 *
+	 */
+	private static class TaskResult {
+        final JHBaseTask mTask;
+        final Object mData;
+
+        TaskResult(JHBaseTask task, Object data) {
+            mTask = task;
+            mData = data;
+        }
+    }
+
 	/**
 	 * 设置金和taskException
 	 * @param jhTaskRemoveException
 	 */
-	public void setException(JHTaskException jhTaskRemoveException) {
-		// TODO Auto-generated method stub
-		
+	public void setException(Exception jhException) {
+		mExc=jhException;
 	}
+	public Exception getException(){
+		return mExc;
+	}
+	
 	/**
 	 * @return the isActive
 	 */
@@ -228,6 +297,42 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
 	 void setActive(boolean isActive) {
 		this.isActive = isActive;
 	}
-
+	 /**
+	  * 通知task执行失败
+	  */
+	 void notifyFailed() {
+		 if (mExc != null) {
+			sHandler.obtainMessage(MESSAGE_POST_FAILED,new TaskResult(this, null)).sendToTarget();
+		}
+	}
+	 /**
+	  * 通知task执行成功
+	  */
+	 void notifySuccess(){
+		 if (mExc == null) {
+			sHandler.obtainMessage(MESSAGE_POST_SUCCESS,new TaskResult(this, null)).sendToTarget();
+		}
+	 }
+	 /***
+	  * 通知task准备执行
+	  */
+	void notifyPre() {
+		if (mExc == null) {
+			sHandler.obtainMessage(MESSAGE_POST_PRE,new TaskResult(this, null)).sendToTarget();
+		}
+	}
+	/****
+	 * 任务cancel监听器
+	 */
+	private ITaskCancel cancelListener;
 	
+	ITaskCancel getCancelListener() {
+		return cancelListener;
+	}
+	void setCancelListener(ITaskCancel cancelListener) {
+		this.cancelListener = cancelListener;
+	}
+	public interface ITaskCancel{
+		 void cancel(JHBaseTask task);
+	}
 }

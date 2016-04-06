@@ -2,17 +2,12 @@ package com.jh.app.taskcontrol;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-
-import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemClock;
-
 import com.jh.app.taskcontrol.JHBaseTask.TaskPriority;
 import com.jh.app.taskcontrol.callback.ITaskFinishLinsener;
 import com.jh.app.taskcontrol.constants.TaskContants;
 import com.jh.app.taskcontrol.exception.JHTaskCancelException;
 import com.jh.app.taskcontrol.exception.JHTaskRemoveException;
-import com.jh.app.taskcontrol.exception.TargetTaskExeception;
 import com.jh.exception.JHException;
  /**
   * JH任务控制器
@@ -26,8 +21,7 @@ public class JHTaskExecutor {
 	private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
 	/**线程池tread数量**/
 	private int corePoolSize=CPU_COUNT * 2 + 1;	
-	/**主线程Handler**/
-	private Handler mMainHandler ;
+
 	/**任务队列*/
 	private JHTaskQueue mTaskQueue;
 	/**任务线程池*/
@@ -41,7 +35,6 @@ public class JHTaskExecutor {
 	
 	
 	private JHTaskExecutor(){
-		mMainHandler=new Handler(Looper.getMainLooper());
 		mTaskQueue=new JHTaskQueue();
 		mTaskThreadPool=new JHTaskThreadPool(corePoolSize, corePoolSize+5, null, null);
 	}
@@ -72,7 +65,6 @@ public class JHTaskExecutor {
 	 * @param baseTask
 	 */
 	public  void addTaskFirst(JHBaseTask baseTask,boolean isSetFirst){
-		//TODO 枷锁
 		if(baseTask!=null){
 			if(baseTask.isInvoked()){
 				throw new  RuntimeException("  multiple invoke exception");
@@ -119,23 +111,33 @@ public class JHTaskExecutor {
 	 */
 	private void prepare(JHBaseTask task) {
 		
-		
-		if(!task.isCancelled()){
-			task.onPreExecute();
+		if(task.getException()==null){
+			task.notifyPre();
 			mTaskThreadPool.executeRunnable(new WorkerRunnable(task) {
 				@Override
 				public void run() {
 					try {
-						doInBackground(mTask);
+						if(mTask.getException()!=null){
+							 mTask.notifyFailed();
+							 return;
+						}
+						mTask.doTask();//耗时操作，尽量少执行
+						
+						if(mTask.getException()!=null){
+							 mTask.notifyFailed();
+							 return;
+						}else{
+							mTask.notifySuccess();
+						}
 					}catch (final JHException e) {
 						e.printStackTrace();
-						//TODO
-//						taskFailed(currentTask, e);
+						mTask.setException(e);
+						mTask.notifyFailed();
 					}
 					 catch (final Exception e) {
-							e.printStackTrace();
-							//TODO
-//							taskFailed(currentTask, new JHException(e));
+						 e.printStackTrace();
+						 mTask.setException(e);
+						 mTask.notifyFailed();
 					}finally{
 						removeRunningTask(mTask);
 						executeTask();
@@ -146,7 +148,10 @@ public class JHTaskExecutor {
 			
 			
 		}else{
-			//TODO 执行cancel
+			task.notifyFailed();
+			removeRunningTask(task);
+			executeTask();
+			
 		}
 		
 		
@@ -157,44 +162,9 @@ public class JHTaskExecutor {
 	 */
 	private void removeRunningTask(JHBaseTask currentTask){
 		mTaskQueue.removeRunningTask(currentTask);
-		if(currentTask.getmTaskTraget()!=null){
-			//TODO
-		}
+		notifyTaskExeRunningListener(currentTask);
 		
 	}
-	
-	/***
-	 * 子线程执行的任务
-	 * @param currentTask
-	 * @throws JHException
-	 */
-	private void doInBackground(JHBaseTask currentTask)
-			throws JHException {
-		if(!currentTask.isCancelled()){
-			throw new JHTaskCancelException();
-		}
-		currentTask.doTask();
-		
-		if(!currentTask.isCancelled()){
-			throw new JHTaskCancelException();
-		}
-		//通知主线程执行成功
-		mMainHandler.post(new WorkerRunnable(currentTask) {
-			
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				if(!mTask.isCancelled()){
-					mTask.success();
-				}else{
-					//TODO
-//					taskFailed(currentTask, e);
-				}
-			}
-		});
-	
-	}
-	
 
 	/**
 	 * 从等待队列中删除task
@@ -207,8 +177,7 @@ public class JHTaskExecutor {
 		if(baseTask.isWaiting()){
 			if(mTaskQueue.removeWaitTask(baseTask)){
 				baseTask.setException(new JHTaskRemoveException());
-				//TODO 通知task执行完成，调用task的onfailed 方法
-				
+				baseTask.notifyFailed();
 			}
 		}
 	}
@@ -232,10 +201,13 @@ public class JHTaskExecutor {
 			throw new NullPointerException();
 		}
 		if(baseTask.isWaiting()){
-			removeWaitTask(baseTask);
+			mTaskQueue.removeWaitTask(baseTask);
 			baseTask.cancel(false);
+			baseTask.setException(new JHTaskCancelException());
+			baseTask.notifyFailed();
 		}else if(baseTask.isRunning()){
 			baseTask.cancel(false);
+			baseTask.setException(new JHTaskCancelException());
 		}
 		
 	}
@@ -246,12 +218,7 @@ public class JHTaskExecutor {
 	public void cancelTaskByTraget(String taskTraget){
 		HashSet<JHBaseTask> removeTasks=mTaskQueue.getTaskByTraget(taskTraget);
 		for(JHBaseTask task:removeTasks){
-			if(task.isWaiting()){
-				removeWaitTask(task);
-				task.cancel(false);
-			}else if(task.isRunning()){
-				task.cancel(false);
-			}
+			cancelTask(task);
 		}
 		
 	}
@@ -331,8 +298,38 @@ public class JHTaskExecutor {
 			}
 		}
 	}
-	
-	
+	/**
+	 * 通知task执行监听
+	 * @param currentTask
+	 */
+	private void notifyTaskExeRunningListener(JHBaseTask currentTask) {
+		//notify allTask
+		if(mTaskQueue.isEmpty()){
+			synchronized (mTargetFinishLinseners) {
+				HashSet<ITaskFinishLinsener> set = mTargetFinishLinseners
+						.get(TaskContants.ALL_TASK);
+				if(set!=null){
+					for(ITaskFinishLinsener listener:set){
+						listener.notifyGroupTagFinish(TaskContants.ALL_TASK);
+					}
+				}
+			}
+		}
+		// notify traget task
+		if(currentTask.getmTaskTraget()!=null&&mTaskQueue.isTragetEmpty(currentTask.getmTaskTraget())){
+			synchronized (mTargetFinishLinseners) {
+				HashSet<ITaskFinishLinsener> set = mTargetFinishLinseners
+						.get(currentTask.getmTaskTraget());
+				if(set!=null){
+					for(ITaskFinishLinsener listener:set){
+						listener.notifyGroupTagFinish(currentTask.getmTaskTraget());
+					}
+				}
+			}
+		}
+		
+		
+	}
 	/***
 	 * 添加任务执行完成的listener
 	 * @param linsener
