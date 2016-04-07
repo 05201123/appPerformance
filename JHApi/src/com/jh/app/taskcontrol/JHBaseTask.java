@@ -44,7 +44,7 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
     /**task 执行成功的消息值*/
     private static final int MESSAGE_POST_SUCCESS = 106;
 	/**运行过程中发现的异常*/
-	private Exception mExc;
+	private volatile Exception mExc;
     
     /***
      * 获取task等待超时时间
