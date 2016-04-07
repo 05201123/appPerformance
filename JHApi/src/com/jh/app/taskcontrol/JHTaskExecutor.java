@@ -203,11 +203,9 @@ public class JHTaskExecutor {
 		if(baseTask.isWaiting()){
 			mTaskQueue.removeWaitTask(baseTask);
 			baseTask.cancel(false);
-			baseTask.setException(new JHTaskCancelException());
 			baseTask.notifyFailed();
 		}else if(baseTask.isRunning()){
 			baseTask.cancel(false);
-			baseTask.setException(new JHTaskCancelException());
 		}
 		
 	}
