@@ -3,9 +3,10 @@ package com.jh.app.taskcontrol;
 import junit.framework.TestCase;
 import android.os.Handler;
 import android.os.Looper;
+
 import com.jh.app.taskcontrol.JHBaseTask.ITaskCancel;
-import com.jh.app.taskcontrol.JHBaseTask.TaskPriority;
 import com.jh.app.taskcontrol.JHBaseTask.TaskStatus;
+import com.jh.app.taskcontrol.constants.TaskContants.TaskPriority;
 import com.jh.app.taskcontrol.exception.JHTaskCancelException;
 import com.jh.exception.JHException;
 

@@ -2,11 +2,12 @@ package com.jh.app.taskcontrol;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+
 import android.os.SystemClock;
-import com.jh.app.taskcontrol.JHBaseTask.TaskPriority;
+
 import com.jh.app.taskcontrol.callback.ITaskFinishLinsener;
 import com.jh.app.taskcontrol.constants.TaskContants;
-import com.jh.app.taskcontrol.exception.JHTaskCancelException;
+import com.jh.app.taskcontrol.constants.TaskContants.TaskPriority;
 import com.jh.app.taskcontrol.exception.JHTaskRemoveException;
 import com.jh.exception.JHException;
  /**

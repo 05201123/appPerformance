@@ -1,11 +1,13 @@
 package com.jh.app.taskcontrol;
 
 import android.os.Looper;
-
-import com.jh.app.taskcontrol.JHBaseTask;
-import com.jh.app.taskcontrol.JHBaseTask.TaskPriority;
+import com.jh.app.taskcontrol.constants.TaskContants.TaskPriority;
 import com.jh.exception.JHException;
-
+/**
+ * task mock
+ * @author 099
+ *
+ */
 public class MockTestBaseTask extends JHBaseTask {
 
 	private int mPriority =TaskPriority.PRIORITY_NORMAL;
