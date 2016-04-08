@@ -3,7 +3,6 @@ package com.jh.app.taskcontrol;
 import junit.framework.TestCase;
 import android.os.Handler;
 import android.os.Looper;
-
 import com.jh.app.taskcontrol.JHBaseTask.ITaskCancel;
 import com.jh.app.taskcontrol.JHBaseTask.TaskPriority;
 import com.jh.app.taskcontrol.JHBaseTask.TaskStatus;
@@ -125,21 +124,21 @@ public class JHBaseTaskTest extends TestCase{
 	 */
 	public void test5TaskPreMessageExe(){
 		final MockTestBaseTask task=new MockTestBaseTask();
-		assertEquals(false, task.isOnPreExe);
+		assertEquals(false, task.isOnPreExe());
 		assertEquals(true, task.getException()==null);
 		task.notifyPre();
 		mHandler.post(new Runnable() {//通过logcat查看那异常观看是否执行，暂时无好办法。
 			@Override
 			public void run() {
-				assertEquals(true, task.isOnPreExe);
-				assertEquals(true, task.isOnPreExeInMainUI);
+				assertEquals(true, task.isOnPreExe());
+				assertEquals(true, task.isOnPreExeInMainUI());
 				
 			}
 		});
 		
 		
 		final MockTestBaseTask task2=new MockTestBaseTask();
-		assertEquals(false, task2.isOnPreExe);
+		assertEquals(false, task2.isOnPreExe());
 		assertEquals(true, task2.getException()==null);
 		new Thread(new Runnable() {
 			
@@ -149,8 +148,8 @@ public class JHBaseTaskTest extends TestCase{
 				mHandler.post(new Runnable() {//通过logcat查看那异常观看是否执行，暂时无好办法。
 					@Override
 					public void run() {
-						assertEquals(true, task2.isOnPreExe);
-						assertEquals(true, task2.isOnPreExeInMainUI);
+						assertEquals(true, task2.isOnPreExe());
+						assertEquals(true, task2.isOnPreExeInMainUI());
 						
 					}
 				});
@@ -163,7 +162,7 @@ public class JHBaseTaskTest extends TestCase{
 	 */
 	public void test6TaskFailedMessageExe(){
 		final MockTestBaseTask task=new MockTestBaseTask();
-		assertEquals(false, task.isOnFailedExe);
+		assertEquals(false, task.isOnFailedExe());
 		assertEquals(true, task.getException()==null);
 		task.setException(new JHException());
 		new Thread(new Runnable() {
@@ -174,7 +173,7 @@ public class JHBaseTaskTest extends TestCase{
 				mHandler.post(new Runnable() {//通过logcat查看那异常观看是否执行，暂时无好办法。
 					@Override
 					public void run() {
-						assertEquals(true, task.isOnFailedExe);
+						assertEquals(true, task.isOnFailedExe());
 						
 					}
 				});
@@ -187,7 +186,7 @@ public class JHBaseTaskTest extends TestCase{
 	 */
 	public void test7TaskSuccessMessageExe(){
 		final MockTestBaseTask task=new MockTestBaseTask();
-		assertEquals(false, task.isOnSuccessExe);
+		assertEquals(false, task.isOnSuccessExe());
 		assertEquals(true, task.getException()==null);
 		new Thread(new Runnable() {
 			
@@ -197,7 +196,7 @@ public class JHBaseTaskTest extends TestCase{
 				mHandler.post(new Runnable() {//通过logcat查看那异常观看是否执行，暂时无好办法。
 					@Override
 					public void run() {
-						assertEquals(true, task.isOnSuccessExe);
+						assertEquals(true, task.isOnSuccessExe());
 					}
 				});
 				
@@ -227,188 +226,34 @@ public class JHBaseTaskTest extends TestCase{
 		}).start();
 	}
 	
-	
-	
-	         
-	
-	//TODO  测试多线程下task的status
-	
-	
-	
-	
-	
-	private class MockTestBaseTask extends JHBaseTask{
-		
-		private int mPriority =TaskPriority.PRIORITY_NORMAL;
-		
-		private boolean isCancelLisExe=false;
-		
-		private boolean isNeedWait=false;
-		
-		private boolean isOnPreExe=false;
-		private boolean isOnPreExeInMainUI=false;
-		
-		private boolean isOnFailedExe=false;
-		private boolean isOnSuccessExe=false;
-		
-		private Object bussinessData;
-		private  int num;
-		
-		
-		private MockTestBaseTask(){
-			
-		}
-		
-		public void setmPriority(int priority){
-			mPriority=priority;
-		}
-		public int getPriority() {
-			return mPriority;
-		}
-		@Override
-		void notifyPre() {
-			super.notifyPre();
-		}
-		@Override
-		public void onPreExecute() {
-			super.onPreExecute();
-			setOnPreExe(true);
-			isOnPreExeInMainUI=Looper.getMainLooper()==Looper.myLooper();
-		}
-		
-		@Override
-		public void doTask() throws JHException {
-			// TODO Auto-generated method stub
-			
-		}
-		@Override
-		public void success() {
-			super.success();
-			setOnSuccessExe(true);
-		}
-		@Override
-		public void fail(String errorMessage) {
-			super.fail(errorMessage);
-			setOnFailedExe(true);
-		}
-		@Override
-		public void onProgressChanged(Object bussinessData, int newProgress) {
-			super.onProgressChanged(bussinessData, newProgress);
-			this.setBussinessData(bussinessData);
-			this.setNum(newProgress);
-			
-		}
-		
-		/**
-		 * @return the isCancelLisExe
-		 */
-		public boolean isCancelLisExe() {
-			return isCancelLisExe;
-		}
-		/**
-		 * @param isCancelLisExe the isCancelLisExe to set
-		 */
-		public void setCancelLisExe(boolean isCancelLisExe) {
-			this.isCancelLisExe = isCancelLisExe;
-		}
-		/**
-		 * @return the isNeedWait
-		 */
-		public boolean isNeedWait() {
-			return isNeedWait;
-		}
-		/**
-		 * @param isNeedWait the isNeedWait to set
-		 */
-		public void setNeedWait(boolean isNeedWait) {
-			this.isNeedWait = isNeedWait;
-		}
-
-		/**
-		 * @return the isOnPreExe
-		 */
-		public boolean isOnPreExe() {
-			return isOnPreExe;
-		}
-
-		/**
-		 * @param isOnPreExe the isOnPreExe to set
-		 */
-		public void setOnPreExe(boolean isOnPreExe) {
-			this.isOnPreExe = isOnPreExe;
-		}
-
-		/**
-		 * @return the isOnFailedExe
-		 */
-		public boolean isOnFailedExe() {
-			return isOnFailedExe;
-		}
-
-		/**
-		 * @param isOnFailedExe the isOnFailedExe to set
-		 */
-		public void setOnFailedExe(boolean isOnFailedExe) {
-			this.isOnFailedExe = isOnFailedExe;
-		}
-
-		/**
-		 * @return the isOnSuccessExe
-		 */
-		public boolean isOnSuccessExe() {
-			return isOnSuccessExe;
-		}
-
-		/**
-		 * @param isOnSuccessExe the isOnSuccessExe to set
-		 */
-		public void setOnSuccessExe(boolean isOnSuccessExe) {
-			this.isOnSuccessExe = isOnSuccessExe;
-		}
-
-		/**
-		 * @return the isOnPreExeInMainUI
-		 */
-		public boolean isOnPreExeInMainUI() {
-			return isOnPreExeInMainUI;
-		}
-
-		/**
-		 * @param isOnPreExeInMainUI the isOnPreExeInMainUI to set
-		 */
-		public void setOnPreExeInMainUI(boolean isOnPreExeInMainUI) {
-			this.isOnPreExeInMainUI = isOnPreExeInMainUI;
-		}
-
-		/**
-		 * @return the bussinessData
-		 */
-		public Object getBussinessData() {
-			return bussinessData;
-		}
-
-		/**
-		 * @param bussinessData the bussinessData to set
-		 */
-		public void setBussinessData(Object bussinessData) {
-			this.bussinessData = bussinessData;
-		}
-
-		/**
-		 * @return the num
-		 */
-		public int getNum() {
-			return num;
-		}
-
-		/**
-		 * @param num the num to set
-		 */
-		public void setNum(int num) {
-			this.num = num;
+	/**
+	 * 多线程下的Task Status值(感觉不好) 没啥意义
+	 * TODO
+	 */
+	public void test9TaskStatusMulThread(){
+		final MockTestBaseTask task=new MockTestBaseTask();
+		assertFalse(task.isInvoked());
+		assertFalse(task.isWaiting());
+		assertFalse(task.isRunning());
+		assertFalse(task.isFinished());
+		Thread thread=new Thread(new Runnable() {
+			@Override
+			public void run() {
+				task.setTaskStatus(TaskStatus.PENDING);
+				
+			}
+		});
+		try {
+			thread.start();
+			thread.join();
+			assertTrue(task.isInvoked());
+			assertTrue(task.isWaiting());
+			assertFalse(task.isRunning());
+			assertFalse(task.isFinished());
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 		
 	}
-	
 	
 }

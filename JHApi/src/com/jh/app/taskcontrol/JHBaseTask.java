@@ -21,7 +21,7 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
 	/**执行超时时间未设置，任务是无限大**/
 	public static final long RUNNING_TIMEOUT_NONE=-1;
 	/**task的状态值*/
-	private volatile int mStatus=TaskStatus.NONE;
+	private  int mStatus=TaskStatus.NONE;
 	/**task是否已经取消*/
 	private final AtomicBoolean mCancelled = new AtomicBoolean();
 	/**等待超时时间**/
@@ -288,13 +288,13 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
 	 */
 	public static  class TaskPriority{
 		/**立即执行**/
-		static int PRIORITY_IMMEDIATE=4;
+		public static int PRIORITY_IMMEDIATE=4;
 		/**重要**/
-		static int PRIORITY_FOREGROUND=3;
+		public static int PRIORITY_FOREGROUND=3;
 		/**普通**/
-		static int PRIORITY_NORMAL=2;
+		public static int PRIORITY_NORMAL=2;
 		/**可延迟**/
-		static int PRIORITY_DELAY=1;
+		public static int PRIORITY_DELAY=1;
 	}
 	/***
 	 * 内部Handler
