@@ -32,7 +32,8 @@ public class JHTaskExecutor {
 	/**满栈一分钟前台任务可以运行**/
 	private static final int TASKPOOLS_FULL_TIMEOUT=1000*60;
 	 /**有特殊Target的task队列**/
-	 private final Map<String,HashSet<ITaskFinishLinsener>> mTargetFinishLinseners=new HashMap<String, HashSet<ITaskFinishLinsener>>();
+	private final Map<String,HashSet<ITaskFinishLinsener>> mTargetFinishLinseners=new HashMap<String, HashSet<ITaskFinishLinsener>>();
+	
 	
 	
 	private JHTaskExecutor(){
@@ -87,7 +88,8 @@ public class JHTaskExecutor {
 		}
 		if(mTaskThreadPool.isCanExecRunnable()){
 			lastThredPoolFullTime=0;
-			prepare(task);
+			
+			prepare(task,false);
 			return;
 		}else{
 			if(lastThredPoolFullTime!=0){
@@ -95,10 +97,10 @@ public class JHTaskExecutor {
 			}
 			if(mTaskThreadPool.isCanForceExecRunnable()){
 				if(task.getPriority()==TaskPriority.PRIORITY_IMMEDIATE){
-					prepare(task);
+					prepare(task,true);
 					return ;
 				}else if(task.getPriority()==TaskPriority.PRIORITY_IMMEDIATE&&SystemClock.elapsedRealtime()-lastThredPoolFullTime>=TASKPOOLS_FULL_TIMEOUT){
-					prepare(task);
+					prepare(task,true);
 					return;
 				}
 			}
@@ -110,11 +112,11 @@ public class JHTaskExecutor {
 	 * 执行task
 	 * @param task
 	 */
-	private void prepare(JHBaseTask task) {
+	private void prepare(JHBaseTask task,boolean isForce) {
 		
 		if(task.getException()==null){
 			task.notifyPre();
-			mTaskThreadPool.executeRunnable(new WorkerRunnable(task) {
+			mTaskThreadPool.executeRunnable(new WorkerRunnable(task,isForce) {
 				@Override
 				public void run() {
 					try {
@@ -141,6 +143,7 @@ public class JHTaskExecutor {
 						 mTask.notifyFailed();
 					}finally{
 						removeRunningTask(mTask);
+						mTaskThreadPool.exeFinished(mIsTempThreadPool);
 						executeTask();
 						
 					}
@@ -384,8 +387,10 @@ public class JHTaskExecutor {
 	 */
 	private static abstract class WorkerRunnable implements Runnable{
 		protected JHBaseTask mTask;
-		WorkerRunnable(JHBaseTask task){
+		protected  boolean mIsTempThreadPool;
+		WorkerRunnable(JHBaseTask task,boolean isTmep){
 			mTask=task;
+			mIsTempThreadPool=isTmep;
 		}
 	}
 }
