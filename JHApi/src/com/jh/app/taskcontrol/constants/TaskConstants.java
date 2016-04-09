@@ -4,7 +4,7 @@ package com.jh.app.taskcontrol.constants;
  * @author 099
  * @since 2016-3-30
  */
-public interface TaskContants {
+public interface TaskConstants {
 	/**全部任务执行完**/
 	String ALL_TASK="all_task";
 	/**

@@ -7,7 +7,7 @@ import android.os.Looper;
 import android.os.Message;
 
 import com.jh.app.taskcontrol.callback.ITaskLifeCycle;
-import com.jh.app.taskcontrol.constants.TaskContants.TaskPriority;
+import com.jh.app.taskcontrol.constants.TaskConstants.TaskPriority;
 import com.jh.app.taskcontrol.exception.JHTaskCancelException;
 import com.jh.exception.JHException;
 

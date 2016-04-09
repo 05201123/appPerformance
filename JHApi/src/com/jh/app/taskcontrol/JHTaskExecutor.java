@@ -6,8 +6,8 @@ import java.util.Map;
 import android.os.SystemClock;
 
 import com.jh.app.taskcontrol.callback.ITaskFinishLinsener;
-import com.jh.app.taskcontrol.constants.TaskContants;
-import com.jh.app.taskcontrol.constants.TaskContants.TaskPriority;
+import com.jh.app.taskcontrol.constants.TaskConstants;
+import com.jh.app.taskcontrol.constants.TaskConstants.TaskPriority;
 import com.jh.app.taskcontrol.exception.JHTaskRemoveException;
 import com.jh.app.taskcontrol.runnable.WorkerRunnable;
 import com.jh.exception.JHException;
@@ -310,10 +310,10 @@ public class JHTaskExecutor {
 		if(mTaskQueue.isEmpty()){
 			synchronized (mTargetFinishLinseners) {
 				HashSet<ITaskFinishLinsener> set = mTargetFinishLinseners
-						.get(TaskContants.ALL_TASK);
+						.get(TaskConstants.ALL_TASK);
 				if(set!=null){
 					for(ITaskFinishLinsener listener:set){
-						listener.notifyGroupTagFinish(TaskContants.ALL_TASK);
+						listener.notifyGroupTagFinish(TaskConstants.ALL_TASK);
 					}
 				}
 			}
@@ -338,7 +338,7 @@ public class JHTaskExecutor {
 	 * @param linsener
 	 */
 	public void addTaskFinishLinsener(ITaskFinishLinsener linsener){
-		addTragetTaskFinishLinsener(TaskContants.ALL_TASK,linsener);
+		addTragetTaskFinishLinsener(TaskConstants.ALL_TASK,linsener);
 	}
 	/***
 	 * 添加任务执行完成的listener
@@ -347,7 +347,7 @@ public class JHTaskExecutor {
 	public void addTragetTaskFinishLinsener(String traget,ITaskFinishLinsener linsener){
 		
 		 if(traget==null){
-			 traget=TaskContants.ALL_TASK;
+			 traget=TaskConstants.ALL_TASK;
 		 }
 		synchronized (mTargetFinishLinseners) {
 			HashSet<ITaskFinishLinsener> set = mTargetFinishLinseners
@@ -368,7 +368,7 @@ public class JHTaskExecutor {
 	 */
 	public void removeTaskFinishLinsener(String traget,ITaskFinishLinsener linsener){
 		if (traget == null) {
-			traget = TaskContants.ALL_TASK;
+			traget = TaskConstants.ALL_TASK;
 		}
 		synchronized (mTargetFinishLinseners) {
 			HashSet<ITaskFinishLinsener> set = mTargetFinishLinseners
