@@ -28,8 +28,10 @@ public class JHTaskQueue {
 	private static final int TragetMaxRunningNum = 5;
 	/**子线程Handler**/
 	private Handler mChildThreadHandler;
-	  /**顺序生成器*/
+	  /**顺序生成器 自增*/
 	 private AtomicInteger mSequenceGenerator = new AtomicInteger();
+	 /**顺序生成器 自减*/
+	 private AtomicInteger mSequenceGeneratorFirst = new AtomicInteger();
 	 /**等待执行的task队列**/
 	 private final PriorityBlockingQueue<JHBaseTask> mWaitingTasks =
 		        new PriorityBlockingQueue<JHBaseTask>();
@@ -40,7 +42,7 @@ public class JHTaskQueue {
 	 /**有特殊Target的task队列**/
 	 private final Map<String,HashSet<JHBaseTask>> mTargetTasks=new HashMap<String, HashSet<JHBaseTask>>();
 	 
-	 public JHTaskQueue(){
+	 public JHTaskQueue(){           
 		 mChildThreadHandler=new Handler(JHTaskHandler.getTaskLooper()){
 				public void handleMessage(Message msg) {
 					JHBaseTask task=(JHBaseTask) msg.obj;
@@ -79,10 +81,10 @@ public class JHTaskQueue {
 	  */
 	  boolean enqueueTask(JHBaseTask baseTask,boolean isSetBefore){
 		  baseTask.setTaskStatus(TaskStatus.PENDING);
-		  if(isSetBefore){
-			  baseTask.setSequence(mSequenceGenerator.getAndIncrement());
+		  if(!isSetBefore){
+			  baseTask.setSequence(mSequenceGenerator.incrementAndGet());
 		  }else{
-			  baseTask.setSequence(mSequenceGenerator.getAndDecrement());
+			  baseTask.setSequence(mSequenceGeneratorFirst.decrementAndGet());
 		  }
 		 if( mWaitingTasks.add(baseTask)){
 			 sendWaitDelayTimeOutMessage(baseTask);
@@ -299,5 +301,10 @@ public class JHTaskQueue {
 			}
 			return false;
 		} 
+		 int getWaitTaskSize(){
+			 return mTempRunningTasks.size()+mWaitingTasks.size();
+		 }
+		 
+		 
 	 
 }
