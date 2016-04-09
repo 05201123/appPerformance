@@ -9,6 +9,7 @@ import com.jh.app.taskcontrol.callback.ITaskFinishLinsener;
 import com.jh.app.taskcontrol.constants.TaskContants;
 import com.jh.app.taskcontrol.constants.TaskContants.TaskPriority;
 import com.jh.app.taskcontrol.exception.JHTaskRemoveException;
+import com.jh.app.taskcontrol.runnable.WorkerRunnable;
 import com.jh.exception.JHException;
  /**
   * JH任务控制器
@@ -81,7 +82,7 @@ public class JHTaskExecutor {
 	/**
 	 * 执行task
 	 */
-	private void executeTask() {
+	private synchronized void executeTask() {
 		JHBaseTask task=mTaskQueue.getFirstTask();
 		if(task==null){
 			return;
@@ -102,7 +103,7 @@ public class JHTaskExecutor {
 				}else if(task.getPriority()==TaskPriority.PRIORITY_IMMEDIATE&&SystemClock.elapsedRealtime()-lastThredPoolFullTime>=TASKPOOLS_FULL_TIMEOUT){
 					prepare(task,true);
 					return;
-				}
+				} 
 			}
 		}
 		
@@ -143,7 +144,7 @@ public class JHTaskExecutor {
 						 mTask.notifyFailed();
 					}finally{
 						removeRunningTask(mTask);
-						mTaskThreadPool.exeFinished(mIsTempThreadPool);
+						mTaskThreadPool.exeFinished(ismIsTempThreadPool());
 						executeTask();
 						
 					}
@@ -380,17 +381,5 @@ public class JHTaskExecutor {
 		 
 		 
 	}
-	/**
-	 * 实际放入线程池的runnnable
-	 * @author 099
-	 * @since 2016-4-5
-	 */
-	private static abstract class WorkerRunnable implements Runnable{
-		protected JHBaseTask mTask;
-		protected  boolean mIsTempThreadPool;
-		WorkerRunnable(JHBaseTask task,boolean isTmep){
-			mTask=task;
-			mIsTempThreadPool=isTmep;
-		}
-	}
+	
 }

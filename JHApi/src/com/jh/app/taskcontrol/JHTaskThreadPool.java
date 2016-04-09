@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.jh.app.taskcontrol.callback.IThreadPoolStrategy;
 import com.jh.app.taskcontrol.handler.JHTaskHandler;
+import com.jh.app.taskcontrol.runnable.WorkerRunnable;
 /**
  * 任务线程池
  * @author 099
@@ -33,7 +34,7 @@ public class JHTaskThreadPool {
 	 * 执行runnalbe
 	 * @param runnable
 	 */
-	public synchronized void executeRunnable(Runnable runnable){
+	public  void executeRunnable(WorkerRunnable runnable){
 		if(runnable==null){
 			 throw new NullPointerException();
 		}
@@ -44,7 +45,7 @@ public class JHTaskThreadPool {
 	 * @return 	true 有空闲
 	 * 			false 满栈
 	 */
-	public synchronized boolean isCanExecRunnable(){
+	public  boolean isCanExecRunnable(){
 		
 		return iThreadPoolStrategy.isFree();
 	
@@ -54,14 +55,15 @@ public class JHTaskThreadPool {
 	 * @return 	true 有空闲
 	 * 			false 满栈
 	 */
-	public synchronized boolean isCanForceExecRunnable(){
+	public  boolean isCanForceExecRunnable(){
 		
 		return iThreadPoolStrategy.isCanFroceExec();
 	}
-	public synchronized void exeFinished(boolean mIsTempThreadPool) {
+	public  void exeFinished(boolean mIsTempThreadPool) {
 		
 		iThreadPoolStrategy.exeFinished(mIsTempThreadPool);
 	}
+	
 	/***
 	 * 金和默认线程池
 	 * @author 099
@@ -95,6 +97,7 @@ public class JHTaskThreadPool {
 				if(tempExecutorService!=null&&tempExecutorService.isTerminated()){
 					tempExecutorService.shutdown();
 					tempExecutorService=null;
+					//TODO print debug
 				}
 				mLock.unlock();
 			}
@@ -117,10 +120,10 @@ public class JHTaskThreadPool {
                     new LinkedBlockingQueue<Runnable>());
 		}
 		@Override
-		public void execute(Runnable runnable) {
-			if(isFree()){
+		public void execute(WorkerRunnable runnable) {
+			if(!runnable.ismIsTempThreadPool()){
 				curExeCoreCount++;
-				Log.e("bbbbbbbbb", "curExeCoreCount ="+curExeCoreCount);
+				Log.e("bbbbbbbbb", "curExeCoreCount ="+curExeCoreCount);//TODO print debug
 				executorService.execute(runnable);
 			}else{
 				final ReentrantLock mLock=mainLock;
@@ -128,7 +131,7 @@ public class JHTaskThreadPool {
 				if(tempExecutorService==null){
 					tempExecutorService=newFixedThreadPool(mTempTreadPoolCount);
 				}
-				curExeTempCount++;
+				curExeTempCount++;//TODO print debug
 				tempExecutorService.execute(runnable);
 				mHandler.removeCallbacks(mOverLoadRunnable);
 				mHandler.postDelayed(mOverLoadRunnable, OVERLOAD_FREETIMEOUT);
@@ -157,10 +160,10 @@ public class JHTaskThreadPool {
 		public void exeFinished(boolean mIsTempThreadPool) {
 			if(mIsTempThreadPool){
 				curExeTempCount--;
-				Log.e("cccccccccc", "curExeCoreCount ="+curExeCoreCount);
+				Log.e("cccccccccc", "curExeTempCount ="+curExeTempCount);//TODO print debug
 			}else{
 				curExeCoreCount--;
-				Log.e("aaaaaaaaaa", "curExeCoreCount ="+curExeCoreCount);
+				Log.e("aaaaaaaaaa", "curExeCoreCount ="+curExeCoreCount);//TODO print debug
 			}
 			
 			
