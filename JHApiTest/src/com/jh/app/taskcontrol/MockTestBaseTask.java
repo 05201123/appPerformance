@@ -1,6 +1,8 @@
 package com.jh.app.taskcontrol;
 
 import android.os.Looper;
+import android.os.SystemClock;
+
 import com.jh.app.taskcontrol.constants.TaskConstants.TaskPriority;
 import com.jh.exception.JHException;
 /**
@@ -25,6 +27,10 @@ public class MockTestBaseTask extends JHBaseTask {
 	private Object bussinessData;
 	private  int num;
 	
+	private String TempTraget;
+	
+	
+	private long doTaskTime;
 	
 	public MockTestBaseTask(){
 		
@@ -49,7 +55,7 @@ public class MockTestBaseTask extends JHBaseTask {
 	
 	@Override
 	public void doTask() throws JHException {
-		// TODO Auto-generated method stub
+		SystemClock.sleep(getDoTaskTime());
 		
 	}
 	@Override
@@ -178,5 +184,32 @@ public class MockTestBaseTask extends JHBaseTask {
 	public void setNum(int num) {
 		this.num = num;
 	}
+
+	@Override
+	protected String getmTaskTraget() {
+		return TempTraget;
+	}
+	
+	/**
+	 * @param tempTraget the tempTraget to set
+	 */
+	public void setTempTraget(String tempTraget) {
+		TempTraget = tempTraget;
+	}
+
+	/**
+	 * @return the doTaskTime
+	 */
+	public long getDoTaskTime() {
+		return doTaskTime;
+	}
+
+	/**
+	 * @param doTaskTime the doTaskTime to set
+	 */
+	public void setDoTaskTime(long doTaskTime) {
+		this.doTaskTime = doTaskTime;
+	}
+	
 
 }

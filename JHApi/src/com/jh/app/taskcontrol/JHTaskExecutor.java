@@ -20,9 +20,9 @@ public class JHTaskExecutor {
 	/**单例**/
 	private static JHTaskExecutor excutor=new JHTaskExecutor();
 	/**CPU数量*/
-	private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+//	private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
 	/**线程池tread数量**/
-	private int corePoolSize=CPU_COUNT * 2 + 1;	
+	private int corePoolSize=8;	
 
 	/**任务队列*/
 	private JHTaskQueue mTaskQueue;
@@ -34,8 +34,6 @@ public class JHTaskExecutor {
 	private static final int TASKPOOLS_FULL_TIMEOUT=1000*60;
 	 /**有特殊Target的task队列**/
 	private final Map<String,HashSet<ITaskFinishLinsener>> mTargetFinishLinseners=new HashMap<String, HashSet<ITaskFinishLinsener>>();
-	
-	
 	
 	private JHTaskExecutor(){
 		mTaskQueue=new JHTaskQueue();
@@ -192,7 +190,7 @@ public class JHTaskExecutor {
 	 * @param taskTraget
 	 */
 	public void removeWaitTaskByTraget(String taskTraget){
-		HashSet<JHBaseTask> removeTasks=mTaskQueue.getTaskByTraget(taskTraget);
+		 HashSet<JHBaseTask> removeTasks=new HashSet<JHBaseTask>(mTaskQueue.getTaskByTraget(taskTraget));
 		for(JHBaseTask task:removeTasks){
 			removeWaitTask(task);
 		}
@@ -219,7 +217,7 @@ public class JHTaskExecutor {
 	 * @param baseTask
 	 */
 	public void cancelTaskByTraget(String taskTraget){
-		HashSet<JHBaseTask> removeTasks=mTaskQueue.getTaskByTraget(taskTraget);
+		HashSet<JHBaseTask> removeTasks=new HashSet<JHBaseTask>(mTaskQueue.getTaskByTraget(taskTraget));
 		for(JHBaseTask task:removeTasks){
 			cancelTask(task);
 		}
@@ -308,7 +306,6 @@ public class JHTaskExecutor {
 	private void notifyTaskExeRunningListener(JHBaseTask currentTask) {
 		//notify allTask
 		if(mTaskQueue.isEmpty()){
-			synchronized (mTargetFinishLinseners) {
 				HashSet<ITaskFinishLinsener> set = mTargetFinishLinseners
 						.get(TaskConstants.ALL_TASK);
 				if(set!=null){
@@ -316,11 +313,9 @@ public class JHTaskExecutor {
 						listener.notifyGroupTagFinish(TaskConstants.ALL_TASK);
 					}
 				}
-			}
 		}
 		// notify traget task
 		if(currentTask.getmTaskTraget()!=null&&mTaskQueue.isTragetEmpty(currentTask.getmTaskTraget())){
-			synchronized (mTargetFinishLinseners) {
 				HashSet<ITaskFinishLinsener> set = mTargetFinishLinseners
 						.get(currentTask.getmTaskTraget());
 				if(set!=null){
@@ -328,7 +323,6 @@ public class JHTaskExecutor {
 						listener.notifyGroupTagFinish(currentTask.getmTaskTraget());
 					}
 				}
-			}
 		}
 		
 		

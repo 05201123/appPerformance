@@ -1,10 +1,12 @@
 package com.jh.app.taskcontrol;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 import android.os.Handler;
 import android.os.Message;
@@ -12,7 +14,6 @@ import android.os.Message;
 import com.jh.app.taskcontrol.JHBaseTask.TaskStatus;
 import com.jh.app.taskcontrol.exception.JHTaskRunningTimeOutException;
 import com.jh.app.taskcontrol.exception.JHTaskWaitTimeOutException;
-import com.jh.app.taskcontrol.exception.TargetTaskExeception;
 import com.jh.app.taskcontrol.handler.JHTaskHandler;
 /**
  * 金和task队列
@@ -36,11 +37,13 @@ public class JHTaskQueue {
 	 private final PriorityBlockingQueue<JHBaseTask> mWaitingTasks =
 		        new PriorityBlockingQueue<JHBaseTask>();
 	 /**当前正在执行的tasks*/
-	 private final Set<JHBaseTask> mCurrentRunningTasks = new HashSet<JHBaseTask>();
+	 private final Set<JHBaseTask> mCurrentRunningTasks = Collections.synchronizedSet(new HashSet<JHBaseTask>());
 	 /**临时缓存队列**/
 	 private final Set<JHBaseTask> mTempRunningTasks=new HashSet<JHBaseTask>();
 	 /**有特殊Target的task队列**/
 	 private final Map<String,HashSet<JHBaseTask>> mTargetTasks=new HashMap<String, HashSet<JHBaseTask>>();
+	 /**锁*/
+	 private final ReentrantLock mainLock = new ReentrantLock();
 	 
 	 public JHTaskQueue(){           
 		 mChildThreadHandler=new Handler(JHTaskHandler.getTaskLooper()){
@@ -51,21 +54,33 @@ public class JHTaskQueue {
 					}
 					switch (msg.what) {
 						case MSG_TASK_WAIT_TIMEOUT:
+							boolean isRemoveSuccess=false;
+							final ReentrantLock mLock=mainLock;
+							mLock.lock();
 							if(task.isWaiting()){
-								mWaitingTasks.remove(task);
-								removeTargetTask(task);
+								isRemoveSuccess=mWaitingTasks.remove(task);
 								task.setTaskStatus(TaskStatus.FINISHED);
 								task.setException(new JHTaskWaitTimeOutException());
+							}
+							mLock.unlock();
+							if(isRemoveSuccess){
+								removeTargetTask(task);
 								task.notifyFailed();
 							}
+							
 							break;
 						case MSG_TASK_RUNNING_TIMEOUT:
+							boolean isRemoveSuccess2=false;
+							final ReentrantLock mLock2=mainLock;
+							mLock2.lock();
 							if(task.isRunning()){
-								mCurrentRunningTasks.remove(task);
-								removeTargetTask(task);
+								isRemoveSuccess2=mCurrentRunningTasks.remove(task);
 								task.setTaskStatus(TaskStatus.FINISHED);
 								task.setException(new JHTaskRunningTimeOutException());
-								task.notifyFailed();
+							}
+							mLock2.unlock();
+							if(isRemoveSuccess2){
+								removeTargetTask(task);
 							}
 							break;
 					}
@@ -118,10 +133,20 @@ public class JHTaskQueue {
 	  * @param baseTask
 	  */
 	  boolean removeWaitTask(JHBaseTask baseTask){
-		 baseTask.setTaskStatus(TaskStatus.FINISHED);
-		 removeTargetTask(baseTask);
-		 clearWaitDelayTimeOutMessage(baseTask);
-		 return mWaitingTasks.remove(baseTask);
+		  boolean isRemoveSuccess=false;
+		  final ReentrantLock mLock=mainLock;
+		  mLock.lock();
+		  if(baseTask.isWaiting()){
+			  isRemoveSuccess= mWaitingTasks.remove(baseTask);
+			  baseTask.setTaskStatus(TaskStatus.FINISHED);
+		  }
+		  mLock.unlock();
+		  if(isRemoveSuccess){
+			  removeTargetTask(baseTask);
+			  clearWaitDelayTimeOutMessage(baseTask);
+		  }
+		  
+		  return isRemoveSuccess;
 	 }
 	  /**
 	   * 将有target标记的task缓存起来
@@ -135,8 +160,6 @@ public class JHTaskQueue {
 				  HashSet<JHBaseTask> set=mTargetTasks.get(traget);
 				  if(set!=null){
 					  set.remove(baseTask);
-				  }else{
-					  throw new TargetTaskExeception();
 				  }
 			  }
 		  }
@@ -161,27 +184,35 @@ public class JHTaskQueue {
 	  * @return
 	  */
 	 boolean contains(String taskTraget) {
-		return mTargetTasks.get(taskTraget)!=null;
+		return mTargetTasks.get(taskTraget)!=null&&mTargetTasks.get(taskTraget).size()>0;
 	}
 	 /**
 	  * 获取等待队列中的最前面的task
 	  * @return
 	  */
 	 JHBaseTask getFirstTask() {
-		 JHBaseTask task= mWaitingTasks.poll();
-		 if(task!=null){
-			 if(task.isActive()||!isTragetOutOf(task)){
-				 mWaitingTasks.addAll(mTempRunningTasks);
-				 mTempRunningTasks.clear();
-				 putTaskToRunningQueue(task);
-				 sendRunningDelayTimeOutMessage(task);
-				return  task;
+		 JHBaseTask firstTask=null;
+		 mTempRunningTasks.clear();
+		 final ReentrantLock mLock=mainLock;
+		  mLock.lock();
+		 while(firstTask==null){
+			 JHBaseTask task= mWaitingTasks.poll();
+			 if(task==null){
+				 break;
+			 }
+			 if(task.isActive()&&!isTragetOutOf(task)){
+				 firstTask=task;
 			 }else{
 				 mTempRunningTasks.add(task);
-				 return getFirstTask();
 			 }
 		 }
-		return null;
+		 mWaitingTasks.addAll(mTempRunningTasks);
+		 if(firstTask!=null){
+			 putTaskToRunningQueue(firstTask);
+			 sendRunningDelayTimeOutMessage(firstTask);
+		 }
+		 mLock.unlock();
+		 return firstTask;
 	}
 	 /**
 	  * 是否超过同一时间运行限制
@@ -211,13 +242,21 @@ public class JHTaskQueue {
 	  * @param task
 	  */
 	 void reAddTaskQueue(JHBaseTask task) {
-		 if(task==null){
-				throw new NullPointerException();
-			}
-		 task.setTaskStatus(TaskStatus.PENDING);
-		 clearRunningDelayTimeOutMessage(task);
-		 sendWaitDelayTimeOutMessage(task);
-		 mWaitingTasks.add(task);
+		 boolean isRemoveSuccess=false;
+		 final ReentrantLock mLock=mainLock;
+	     mLock.lock();
+	     if(task.isRunning()){
+	    	 isRemoveSuccess=mCurrentRunningTasks.remove(task);
+	    	 task.setTaskStatus(TaskStatus.PENDING);
+	    	 mWaitingTasks.add(task);
+	     }
+	     mLock.unlock();
+	     if(isRemoveSuccess){
+	    	 clearRunningDelayTimeOutMessage(task);
+			 sendWaitDelayTimeOutMessage(task); 
+	     }
+		 
+		 
 		
 	}
 	 /**
@@ -225,9 +264,6 @@ public class JHTaskQueue {
 	  * @param task
 	  */
 	private void putTaskToRunningQueue(JHBaseTask task){
-		if(task==null){
-			throw new NullPointerException();
-		}
 		task.setTaskStatus(TaskStatus.RUNNING);
 		mCurrentRunningTasks.add(task);
 	}
@@ -236,13 +272,18 @@ public class JHTaskQueue {
 	 * @param mTask
 	 */
 	 void removeRunningTask(JHBaseTask task) {
-		if(task==null){
-			throw new NullPointerException();
+		boolean isRemoveSuccess=false;
+		final ReentrantLock mLock=mainLock;
+		mLock.lock();
+		if(task.isRunning()){
+			isRemoveSuccess=mCurrentRunningTasks.remove(task);
+			task.setTaskStatus(TaskStatus.FINISHED);
 		}
-		task.setTaskStatus(TaskStatus.FINISHED);
-		mCurrentRunningTasks.remove(task);
-		removeTargetTask(task);
-		clearRunningDelayTimeOutMessage(task);
+		mLock.unlock();
+		if(isRemoveSuccess){
+			removeTargetTask(task);
+			clearRunningDelayTimeOutMessage(task);
+		}
 	}
 	 
 	 /***
@@ -295,7 +336,7 @@ public class JHTaskQueue {
 		  * @return
 		  */
 		 boolean isTragetEmpty(String traget) {
-			Set<JHBaseTask> set= mTargetTasks.get(traget);
+			Set<JHBaseTask> set= getTaskByTraget(traget);
 			if(set==null||set.size()==0){
 				return true;
 			}
