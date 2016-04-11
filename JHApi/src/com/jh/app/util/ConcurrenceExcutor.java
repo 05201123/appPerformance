@@ -16,6 +16,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.jh.app.taskcontrol.JHTaskExecutor;
+import com.jh.app.taskcontrol.task.WrapperBaseTask;
 import com.jh.app.util.BaseTask;
 import com.jh.exception.JHException;
 /**
@@ -23,6 +25,7 @@ import com.jh.exception.JHException;
  * @author jhzhangnan1
  *
  */
+@Deprecated
 public class ConcurrenceExcutor {
 
 	protected Handler mainHandler ;
@@ -33,6 +36,8 @@ public class ConcurrenceExcutor {
 //	protected BaseTask currentTask;
 	private int maxThreads = 10;
 	private ExecutorService executorService; 
+	
+	private JHTaskExecutor executor=JHTaskExecutor.getInstance();
 	
 	private ConcurrenceExcutor(){
 		this(10);
@@ -55,12 +60,12 @@ public class ConcurrenceExcutor {
 	}*/
 	public ConcurrenceExcutor(int maxThreadCount)
 	{
-		this.maxThreads = maxThreadCount;
-		mainHandler = new Handler(Looper.getMainLooper());
-		waitTasks =  new LinkedBlockingQueue<BaseTask>();
-		tmptasks = new LinkedBlockingQueue<BaseTask>();
-		processTasks = new LinkedBlockingQueue<BaseTask>();
-		executorService = Executors.newFixedThreadPool(maxThreads); 
+//		this.maxThreads = maxThreadCount;
+//		mainHandler = new Handler(Looper.getMainLooper());
+//		waitTasks =  new LinkedBlockingQueue<BaseTask>();
+//		tmptasks = new LinkedBlockingQueue<BaseTask>();
+//		processTasks = new LinkedBlockingQueue<BaseTask>();
+//		executorService = Executors.newFixedThreadPool(maxThreads); 
 		
 	}
 	public int getTaskSize(){
@@ -83,38 +88,48 @@ public class ConcurrenceExcutor {
 	public void cancelTask(BaseTask task){
 		if(task!=null)
 		{
-			waitTasks.remove(task);
-			processTasks.remove(task);
-			finishExecute();
-			task.cancelTask();
+			executor.cancelTask(task.getWrapperTask());
+//			waitTasks.remove(task);
+//			processTasks.remove(task);
+//			finishExecute();
+//			task.cancelTask();
 		}
 	}
 	public void addTaskFirst(BaseTask task)
 	{
-		waitTasks.offer(task);
-		start();
+		WrapperBaseTask newTask=new WrapperBaseTask(task);
+		task.setWarpperTask(newTask);
+		executor.addTaskFirst(newTask);
+		/*waitTasks.offer(task);
+		start();*/
 	}
 	public void addTask(BaseTask task)
-	{
-		waitTasks.add(task);
-		start();
+	{	
+		WrapperBaseTask newTask=new WrapperBaseTask(task);
+		task.setWarpperTask(newTask);
+		executor.addTask(newTask);
+//		waitTasks.add(task);
+//		start();
 	}
 	
 	public void removeTask(BaseTask task){
-		if (waitTasks!=null && waitTasks.contains(task)) {
-			waitTasks.remove(task);
-		}
+//		if (waitTasks!=null && waitTasks.contains(task)) {
+//			waitTasks.remove(task);
+//		}
+		executor.removeWaitTask(task.getWrapperTask());
 	}
 	
 	
 	public void appendTask(BaseTask task)
 	{
-		waitTasks.add(task);
-		start();
+		WrapperBaseTask newTask=new WrapperBaseTask(task);
+		task.setWarpperTask(newTask);
+		executor.addTask(newTask);
 	}
 	public void start()
 	{
-		iterateTask();
+//		iterateTask();
+		executor.executeTask();
 	}
 	/**
 	 * 是否存在任务
@@ -122,23 +137,24 @@ public class ConcurrenceExcutor {
 	 * @return
 	 */
 	public boolean hasTask(BaseTask task) {
-		synchronized (waitTasks) {
-			if (waitTasks != null) {
-				// return allTasks.contains(task);
-				if (waitTasks.contains(task))
-					return true;
-				else if (processTasks != null && processTasks.contains(task)) {
-					return true;
-				}
-				return false;
-
-			} else {
-				if (processTasks != null && processTasks.contains(task)) {
-					return true;
-				}
-				return false;
-			}
-		}
+		return executor.hasTask(task.getWrapperTask());
+//		synchronized (waitTasks) {
+//			if (waitTasks != null) {
+//				// return allTasks.contains(task);
+//				if (waitTasks.contains(task))
+//					return true;
+//				else if (processTasks != null && processTasks.contains(task)) {
+//					return true;
+//				}
+//				return false;
+//
+//			} else {
+//				if (processTasks != null && processTasks.contains(task)) {
+//					return true;
+//				}
+//				return false;
+//			}
+//		}
 		//return allTasks.contains(task)||processTasks.contains(task);
 	}
 	/**

@@ -1,5 +1,6 @@
 package com.jh.app.util;
 
+import com.jh.app.taskcontrol.JHBaseTask;
 import com.jh.exception.JHException;
 
 import android.R.integer;
@@ -12,7 +13,9 @@ import android.content.Context;
  * @version  1.0
  * @author  yourname
  * @since 2012-2-3
+ * isDeprecated ,use {@link JHBaseTask}
  */
+@Deprecated
 public abstract class BaseTask {
 	//任务是否已退出。
 	//private boolean canceled = false;
@@ -53,6 +56,7 @@ public abstract class BaseTask {
 	 //private static final int CANCEL = 2;
 	//任务完成
 	private static final int FINISH = 3;
+	//TODO 不支持
 	public void resetTask(){
 		status = WAIT;
 	}
@@ -141,7 +145,7 @@ public abstract class BaseTask {
 	};
 	public Context getContext(){return null;};
 	private ITaskCancel cancelListener;
-	ITaskCancel getCancelListener() {
+	public ITaskCancel getCancelListener() {
 		return cancelListener;
 	}
 	void setCancelListener(ITaskCancel cancelListener) {
@@ -149,5 +153,12 @@ public abstract class BaseTask {
 	}
 	public interface ITaskCancel{
 		 void cancel(BaseTask task);
+	}
+	private JHBaseTask newTask;
+	public JHBaseTask getWrapperTask() {
+		return newTask;
+	}
+	public void setWarpperTask(JHBaseTask task){
+		newTask=task;
 	}
 }

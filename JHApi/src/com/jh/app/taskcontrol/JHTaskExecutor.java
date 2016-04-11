@@ -80,7 +80,7 @@ public class JHTaskExecutor {
 	/**
 	 * 执行task
 	 */
-	private synchronized void executeTask() {
+	public synchronized void executeTask() {
 		JHBaseTask task=mTaskQueue.getFirstTask();
 		if(task==null){
 			return;
@@ -138,7 +138,7 @@ public class JHTaskExecutor {
 					}
 					 catch (final Exception e) {
 						 e.printStackTrace();
-						 mTask.setException(e);
+						 mTask.setException(new JHException(e));
 						 mTask.notifyFailed();
 					}finally{
 						removeRunningTask(mTask);

@@ -46,7 +46,7 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
     /**task 执行成功的消息值*/
     private static final int MESSAGE_POST_SUCCESS = 106;
 	/**运行过程中发现的异常*/
-	private volatile Exception mExc;
+	private volatile JHException mExc;
 	/****
 	 * 任务cancel监听器
 	 */
@@ -79,14 +79,20 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
 	 * @param mayInterruptIfRunning 是否终止线程
 	 * @return 
 	 */
-	 final boolean cancel(boolean mayInterruptIfRunning) {
+	 protected boolean cancel(boolean mayInterruptIfRunning) {
         mCancelled.set(true);
         setException(new JHTaskCancelException());
-        if(cancelListener!=null){
-        	cancelListener.cancel(this);
-        }
+        notifyTaskCancel();
         return false;
     }
+	 /**
+	  * 通知taskCancelListener
+	  */
+	protected  void notifyTaskCancel() {
+		if(cancelListener!=null){
+        	cancelListener.cancel(this);
+        }
+	}
 	/**
 	 * 判断是否需要等待
 	 * @return true  将task压入线程池中
@@ -202,14 +208,14 @@ public abstract class JHBaseTask implements ITaskLifeCycle, Comparable<JHBaseTas
 	 * 设置金和taskException
 	 * @param jhTaskRemoveException
 	 */
-	public void setException(Exception jhException) {
+	public void setException(JHException jhException) {
 		mExc=jhException;
 	}
 	/**
 	 * 获取task运行时异常
 	 * @return
 	 */
-	public Exception getException(){
+	public JHException getException(){
 		return mExc;
 	}
 	
