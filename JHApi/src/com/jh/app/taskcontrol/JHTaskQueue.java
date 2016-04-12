@@ -101,12 +101,9 @@ public class JHTaskQueue {
 		  }else{
 			  baseTask.setSequence(mSequenceGeneratorFirst.decrementAndGet());
 		  }
-		 if( mWaitingTasks.add(baseTask)){
-			 sendWaitDelayTimeOutMessage(baseTask);
-			 saveTargetTask(baseTask);
-			 return true;
-		 }
-		 return false;
+		  sendWaitDelayTimeOutMessage(baseTask);
+		  saveTargetTask(baseTask);
+		  return  mWaitingTasks.add(baseTask);
 	 }
 	  /**
 	   * 将有target标记的task缓存起来
