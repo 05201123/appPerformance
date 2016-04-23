@@ -7,6 +7,8 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+import com.jh.androidTraining.BuildingAppswithContentSharing.SharingActionProviderActivity;
+import com.jh.androidTraining.BuildingAppswithContentSharing.SharingSimpleDataActivity;
 import com.jh.androidTraining.activity.ParentActivityMeansBeforeActivity;
 /**
  * 主activity
@@ -23,8 +25,10 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				startActivity(new Intent(MainActivity.this, ParentActivityMeansBeforeActivity.class));
+//				startActivity(new Intent(MainActivity.this, ParentActivityMeansBeforeActivity.class));
 //				startActivity(new Intent(MainActivity.this, RawAndAssetsDifferActivity.class));
+//				startActivity(new Intent(MainActivity.this, SharingSimpleDataActivity.class));
+				startActivity(new Intent(MainActivity.this, SharingActionProviderActivity.class));
 			}
 		});
 	}

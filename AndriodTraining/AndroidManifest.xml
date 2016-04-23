@@ -8,6 +8,7 @@
         android:minSdkVersion="14"
         android:targetSdkVersion="19" />
 
+
     <application
         android:name="com.jh.androidTraining.application.AndroidTrainingApplication"
         android:allowBackup="true"
@@ -43,6 +44,39 @@
            		android:name="android.support.PARENT_ACTIVITY"
             	android:value="com.jh.androidTraining.MainActivity" />
         </activity>
+        <!-- 2 BuildingAppswithContentSharing start -->
+        <activity 
+            android:theme="@android:style/Theme.Holo.Light"
+            android:name="com.jh.androidTraining.BuildingAppswithContentSharing.SharingSimpleDataActivity"
+            android:screenOrientation="portrait"
+            ></activity>
+        <activity 
+            android:theme="@android:style/Theme.Holo.Light"
+            android:name="com.jh.androidTraining.BuildingAppswithContentSharing.ReceivingSimpleDataActivity"
+            android:screenOrientation="portrait"
+            >
+            <intent-filter >
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="text/plain"/>
+            </intent-filter>
+            <intent-filter >
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="image/jpeg"/>
+            </intent-filter>
+            <intent-filter >
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="image/*"/>
+            </intent-filter>
+            
+        </activity>
+         <activity 
+            android:theme="@android:style/Theme.Holo.Light"
+            android:name="com.jh.androidTraining.BuildingAppswithContentSharing.SharingActionProviderActivity"
+            android:screenOrientation="portrait"
+            ></activity>
     </application>
 
 </manifest>
