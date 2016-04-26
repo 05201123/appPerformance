@@ -55,11 +55,11 @@ In extreme cases, the system might simply kill your app process without calling 
 }
 
 question
-1. how delay onDestroy() perform£ø
-2. why °∞(you should instead perform heavy-load shutdown operations during onStop())°±£ø
+1. how delay onDestroy() performÔºü
+2. why ‚Äú(you should instead perform heavy-load shutdown operations during onStop())‚ÄùÔºü
 3. onstop is in mainthread, larger,more cpu operations,why?
-4. turn  screen orientation£¨edittext data is stored£ø
-5. what is onSaveInstanceState() involed opportunity £ø
+4. turn  screen orientationÔºåedittext data is storedÔºü
+5. what is onSaveInstanceState() involed opportunity Ôºü
 
 interest
 

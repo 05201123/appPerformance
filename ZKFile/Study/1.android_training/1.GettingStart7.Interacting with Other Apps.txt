@@ -5,14 +5,14 @@ knowledge
 1.An Intent can be explicit in order to start a specific component (a specific Activity instance) or implicit in order to start any component that can handle the intended action (such as "capture a photo").
 
 2.Here are a couple other intents and their action and Uri data pairs:
-	£®1£©	Uri number = Uri.parse("tel:5551234");
+	Ôºà1Ôºâ	Uri number = Uri.parse("tel:5551234");
 		Intent callIntent = new Intent(Intent.ACTION_DIAL, number);
-	£®2£©	// Map point based on address
+	Ôºà2Ôºâ	// Map point based on address
 		Uri location = Uri.parse("geo:0,0?q=1600+Amphitheatre+Parkway,+Mountain+View,+California");
 		// Or map point based on latitude/longitude
 		// Uri location = Uri.parse("geo:37.422219,-122.08364?z=14"); // z param is zoom level
 		Intent mapIntent = new Intent(Intent.ACTION_VIEW, location);
-	£®3£©	Uri webpage = Uri.parse("http://www.android.com");
+	Ôºà3Ôºâ	Uri webpage = Uri.parse("http://www.android.com");
 		Intent webIntent = new Intent(Intent.ACTION_VIEW, webpage);
   Here are some more intents that add extra data to specify the desired action:
 
@@ -55,7 +55,7 @@ Note: You should perform this check when your activity first starts in case you 
 5.Show an App Chooser
 	Notice that when you start an activity by passing your Intent to startActivity() and there is more than one app that responds to the intent, the user can select which app to use by default . 
 	This is nice when performing an action for which the user generally wants to use the same app every time, such as when opening a web page (users likely use just one web browser) or taking a photo (users likely prefer one camera).
-	However, if the action to be performed could be handled by multiple apps and the user might prefer a different app each time°™such as a "share" action, for which users might have several apps through which they might share an item°™you should explicitly show a chooser dialog as shown in figure 2. 
+	However, if the action to be performed could be handled by multiple apps and the user might prefer a different app each time‚Äîsuch as a "share" action, for which users might have several apps through which they might share an item‚Äîyou should explicitly show a chooser dialog as shown in figure 2. 
 	The chooser dialog forces the user to select which app to use for the action every time (the user cannot select a default app for the action).
 		Intent intent = new Intent(Intent.ACTION_SEND);
 		...
@@ -123,7 +123,7 @@ Receive the Result
 	If you do not declare it, no implicit intents will resolve to your activity.
 
 13.You must always specify a result code with the result. Generally, it's either RESULT_OK or RESULT_CANCELED. You can then provide additional data with an Intent, as necessary.
-	Note: The result is set to RESULT_CANCELED by default. £ø£ø£ø
+	Note: The result is set to RESULT_CANCELED by default. ÔºüÔºüÔºü
 	So, if the user presses the Back button before completing the action and before you set the result, the original activity receives the "canceled" result.
 
 14.There's no need to check whether your activity was started with startActivity() or startActivityForResult(). 
@@ -132,7 +132,7 @@ Receive the Result
 
 question
 
-1.Intent.ACTION_VIEW°¢Intent.ACTION_DIAL...system how deals?
+1.Intent.ACTION_VIEW„ÄÅIntent.ACTION_DIAL...system how deals?
 2.Caution: If you invoke an intent and there is no app available on the device that can handle the intent, your app will crash. is really?
 3. what happens when user select which app to use by default and when Intent.createChooser()?
 4. Apps included with the Android platform offer their own APIs ??

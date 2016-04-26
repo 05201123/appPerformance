@@ -24,7 +24,7 @@ This is commonly used to share an image but can be used to share any type of bin
 Intent shareIntent = new Intent();
 shareIntent.setAction(Intent.ACTION_SEND);
 Uri uriToImage = Uri.parse("file:///sdcard/icon.jpg");
-shareIntent.putExtra(Intent.EXTRA_STREAM, uriToImage);//uriToImage = Uri.parse("file:///android_asset/icon.jpg");²»ºÃÊ¹£¿£¿£¿
+shareIntent.putExtra(Intent.EXTRA_STREAM, uriToImage);//uriToImage = Uri.parse("file:///android_asset/icon.jpg");ä¸å¥½ä½¿ï¼Ÿï¼Ÿï¼Ÿ
 shareIntent.setType("image/jpeg");
 startActivity(Intent.createChooser(shareIntent, getResources().getText(R.string.send_to)));
 
@@ -85,9 +85,9 @@ The recommended ways to do this are:
 
 question
 
-1. knowledge3ÖĞ£¬FileProviderÓëMediaStoreµÄÊ¹ÓÃ
-2. uriToImage = Uri.parse("file:///android_asset/icon.jpg");²»ºÃÊ¹£¿£¿£¿
-	        Uri.parse("android.resource://" + getPackageName() + "/"+ R.drawable.ic_launcher);²»ºÃÊ¹£¿£¿£¿
+1. knowledge3ä¸­ï¼ŒFileProviderä¸MediaStoreçš„ä½¿ç”¨
+2. uriToImage = Uri.parse("file:///android_asset/icon.jpg");ä¸å¥½ä½¿ï¼Ÿï¼Ÿï¼Ÿ
+	        Uri.parse("android.resource://" + getPackageName() + "/"+ R.drawable.ic_launcher);ä¸å¥½ä½¿ï¼Ÿï¼Ÿï¼Ÿ
 
 
 

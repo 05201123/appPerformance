@@ -7,7 +7,7 @@ If you plan to swap your fragments in and out during user interaction, you must 
 
 2.If your activity allows the fragments to be removed and replaced, you should add the initial fragment(s) to the activity during the activity's onCreate() method.
 
-3.An important rule when dealing with fragments¡ªespecially those that you add at runtime¡ªis that the fragment must have a container View in the layout in which the fragment's layout will reside.
+3.An important rule when dealing with fragmentsâ€”especially those that you add at runtimeâ€”is that the fragment must have a container View in the layout in which the fragment's layout will reside.
 
 4. When you remove or replace a fragment and add the transaction to the back stack, the fragment that is removed is stopped (not destroyed). 
 	If the user navigates back to restore the fragment, it restarts. 
@@ -24,7 +24,7 @@ If you plan to swap your fragments in and out during user interaction, you must 
 
 question
 
-1. konwledge 1 is really£¿
+1. konwledge 1 is reallyï¼Ÿ
 
 2. konwledge 2 is really?
 

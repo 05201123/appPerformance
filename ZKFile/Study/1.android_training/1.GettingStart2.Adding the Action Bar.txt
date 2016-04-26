@@ -18,9 +18,9 @@ Note: If you've created a custom theme, be sure it uses one of the Theme.Holo th
 		...
 	</manifest>
 ry Setup document and set up the v7 appcompat library (once you've downloaded the library package, follow the instructions for Adding lTo get started, read the Support Libraibraries with resources).
-	£¨1£©Update your activity so that it extends ActionBarActivity. For example:
+	ï¼ˆ1ï¼‰Update your activity so that it extends ActionBarActivity. For example:
 		public class MainActivity extends ActionBarActivity { ... }
-	£¨2£©In your manifest file, update either the <application> element or individual <activity> elements to use one of the Theme.AppCompat themes. For example:
+	ï¼ˆ2ï¼‰In your manifest file, update either the <application> element or individual <activity> elements to use one of the Theme.AppCompat themes. For example:
 		<activity android:theme="@style/Theme.AppCompat.Light" ... >
 Note: If you've created a custom theme, be sure it uses one of the Theme.AppCompat themes as its parent. For details, see Styling the Action Bar.
 
@@ -148,7 +148,7 @@ public boolean onOptionsItemSelected(MenuItem item) {
 }
 
 9.If you are using the Support Library APIs for the action bar, then you must use (or override) the Theme.AppCompat family of styles (rather than the Theme.Holo family, available in API level 11 and higher).
-In doing so, each style property that you declare must be declared twice: once using the platform's style properties (the android: properties) and once using the style properties included in the Support Library (the appcompat.R.attr properties¡ªthe context for these properties is actually your app). 
+In doing so, each style property that you declare must be declared twice: once using the platform's style properties (the android: properties) and once using the style properties included in the Support Library (the appcompat.R.attr propertiesâ€”the context for these properties is actually your app). 
 See the examples below for details.
 
 Theme.Holo for a "dark" theme.

@@ -41,7 +41,7 @@ knowledge
 
 7.Save a File on External Storage
 	Remember that getExternalFilesDir() creates a directory inside a directory that is deleted when the user uninstalls your app. 
-	If the files you're saving should remain available after the user uninstalls your app¡ªsuch as when your app is a camera and the user will want to keep the photos¡ªyou should instead use getExternalStoragePublicDirectory().
+	If the files you're saving should remain available after the user uninstalls your appâ€”such as when your app is a camera and the user will want to keep the photosâ€”you should instead use getExternalStoragePublicDirectory().
 	Regardless of whether you use ***getExternalStoragePublicDirectory() for files that are shared or ***getExternalFilesDir() for files that are private to your app, it's important that you use directory names provided by API constants like DIRECTORY_PICTURES. 
 	These directory names ensure that the files are treated properly by the system. 
 	For instance, files saved in DIRECTORY_RINGTONES are categorized by the system media scanner as ringtones instead of music.
@@ -68,7 +68,7 @@ knowledge
 	All you need to do is call getWritableDatabase() or getReadableDatabase().
 	Note: Because they can be long-running, be sure that you call getWritableDatabase() or getReadableDatabase() in a background thread, such as with AsyncTask or IntentService.
 
-11. You may also want to implement onDowngrade (SQLiteDatabase db, int oldVersion, int newVersion) , but it's not required. Êı¾İ¿âĞÂ°æ±¾Ğ¡ÓÚÀÏ°æ±¾
+11. You may also want to implement onDowngrade (SQLiteDatabase db, int oldVersion, int newVersion) , but it's not required. æ•°æ®åº“æ–°ç‰ˆæœ¬å°äºè€ç‰ˆæœ¬
 	However, this method is not abstract, so it is not mandatory for a customer to implement it.
 	If not overridden, default implementation will reject downgrade and throws SQLiteException 
 
@@ -79,7 +79,7 @@ question
 
 2.The first argument for insert() is simply the table name. 
 	The second argument provides the name of a column in which the framework can insert NULL in the event that the ContentValues is empty (if you instead set this to "null", then the framework will not insert a row when there are no values).
-	is really£¿
+	is reallyï¼Ÿ
 
 3.sqlite:before insert?can perform update()?   
 
