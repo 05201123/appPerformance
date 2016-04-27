@@ -203,13 +203,14 @@ public class JHTaskExecutor {
 		if(baseTask==null){
 			throw new NullPointerException();
 		}
-		if(baseTask.isWaiting()){
-			mTaskQueue.removeWaitTask(baseTask);
-			baseTask.cancel(false);
-			baseTask.notifyFailed();
-		}else if(baseTask.isRunning()){
-			baseTask.cancel(false);
-		}
+		baseTask.cancel(false);
+//		if(baseTask.isWaiting()){
+//			mTaskQueue.removeWaitTask(baseTask);
+//			baseTask.cancel(false);
+//			baseTask.notifyFailed();
+//		}else if(baseTask.isRunning()){
+//			baseTask.cancel(false);
+//		}
 		
 	}
 	/**
@@ -301,7 +302,7 @@ public class JHTaskExecutor {
 	}
 	/**
 	 * 通知task执行监听
-	 * @param currentTask
+	 * @param currentTask 
 	 */
 	private void notifyTaskExeRunningListener(JHBaseTask currentTask) {
 		//notify allTask
