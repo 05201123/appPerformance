@@ -61,8 +61,8 @@ public class PerformanceUtils {
         return sCoreNum;
     }
 
-    public static long getFreeMemory() {
-        ActivityManager am = (ActivityManager) BlockCanaryCore.getContext().getContext().getSystemService(Context.ACTIVITY_SERVICE);
+    public static long getFreeMemory(Context context) {
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
         am.getMemoryInfo(mi);
         return mi.availMem / 1024;

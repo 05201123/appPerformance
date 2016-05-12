@@ -69,6 +69,10 @@
             android:name="com.jh.performance.threadoptimize.activity.ThreadPriorityActivity"
             android:label="@string/thread_and_priority"
              ></activity>
+          <activity 
+            android:name="com.jh.performance.threadoptimize.activity.ThreadMemoryActivity"
+            android:label="@string/thread_and_memory"
+             ></activity>
           <!-- threadperformance optimize end-->
           
           <!-- blockcanary activity -->
