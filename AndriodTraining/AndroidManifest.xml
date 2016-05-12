@@ -76,7 +76,8 @@
             android:theme="@android:style/Theme.Holo.Light"
             android:name="com.jh.androidTraining.BuildingAppswithContentSharing.SharingActionProviderActivity"
             android:screenOrientation="portrait"
-            ></activity>
+            ></activity>    
+         <!-- 2 BuildingAppswithContentSharing end -->
     </application>
 
 </manifest>

@@ -1,0 +1,23 @@
+Sharing Files
+
+knowledge
+
+1.In all cases, the only secure way to offer a file from your app to another app is to send the receiving app the file's content URI and grant temporary access permissions to that URI. 
+	Content URIs with temporary URI access permissions are secure because they apply only to the app that receives the URI, and they expire automatically. 
+	The Android FileProvider component provides the method getUriForFile() for generating a file's content URI.
+	The FileProvider class is part of the v4 Support Library. 
+
+2.
+
+question
+
+
+
+
+
+interest
+1.Content Provider Basics	file:///D:/sdk/docs/guide/topics/providers/content-provider-basics.html#ContentURIs
+2.<provider>			file:///D:/sdk/docs/guide/topics/manifest/provider-element.html#auth
+
+
+

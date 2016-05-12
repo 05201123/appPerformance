@@ -25,6 +25,6 @@ public class PerformanceApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        BlockCanary.install(this, new BlockCanaryContext()).start();
+//        BlockCanary.install(this, new BlockCanaryContext()).start();
     }
 }

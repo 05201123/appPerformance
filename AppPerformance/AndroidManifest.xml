@@ -64,6 +64,13 @@
             android:label="@string/demo_activity"
              ></activity>
           
+          <!-- threadperformance optimize start-->
+          <activity 
+            android:name="com.jh.performance.threadoptimize.activity.ThreadPriorityActivity"
+            android:label="@string/thread_and_priority"
+             ></activity>
+          <!-- threadperformance optimize end-->
+          
           <!-- blockcanary activity -->
           <activity
             android:name="com.github.moduth.blockcanary.ui.DisplayBlockActivity"
