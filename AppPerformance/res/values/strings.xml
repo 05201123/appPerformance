@@ -13,6 +13,7 @@
     <string name="memory_caution_customview">慎用自定义view页面</string>
     <string name="thread_and_priority">线程与权限</string>
     <string name="thread_and_memory">线程与内存</string>
+    <string name="thread_and_num">线程与数量</string>
     <string name="demo_activity">Demo</string>
     
     <string name="handler_summary">Handler在android中一个很重要的类，Message,Handler,Looper,MessageQueue应该要通透。</string>
