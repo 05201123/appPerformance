@@ -41,7 +41,7 @@ public class ThreadCanary {
 	public static ThreadCanary getInstance(){
 		return instance;
 	}
-	public void init(Context context,CollectThreadInfoParams params){
+	public ThreadCanary init(Context context,CollectThreadInfoParams params){
 		mContext=context;
 		if(params!=null){
 			if(!TextUtils.isEmpty(params.getSavePath())){
@@ -52,6 +52,7 @@ public class ThreadCanary {
 			}
 			isRepeat=params.isRepeat();
 		}
+		return instance;
 	}
 	
 	/**
