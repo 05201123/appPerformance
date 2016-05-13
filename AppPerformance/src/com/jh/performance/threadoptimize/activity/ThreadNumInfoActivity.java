@@ -6,6 +6,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.jh.performance.utils.PerformanceUtils;
+import com.jh.peroptimize.utils.thread.ThreadCanary;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -89,6 +90,7 @@ public class ThreadNumInfoActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		ThreadCanary.getInstance().stopGetThreadInfo();
 	}
 	
 }

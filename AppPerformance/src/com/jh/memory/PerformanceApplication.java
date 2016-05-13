@@ -14,8 +14,10 @@
 package com.jh.memory;
 
 import android.app.Application;
+
 import com.github.moduth.blockcanary.BlockCanary;
 import com.github.moduth.blockcanary.BlockCanaryContext;
+import com.jh.peroptimize.utils.thread.ThreadCanary;
  /**
   * 性能Application
   * @author 099
@@ -26,5 +28,6 @@ public class PerformanceApplication extends Application {
     public void onCreate() {
         super.onCreate();
 //        BlockCanary.install(this, new BlockCanaryContext()).start();
+        ThreadCanary.getInstance().init(this, null).startGetThreadInfo();
     }
 }
