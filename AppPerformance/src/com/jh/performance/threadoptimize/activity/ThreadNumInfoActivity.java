@@ -36,33 +36,7 @@ public class ThreadNumInfoActivity extends Activity {
 		executorService.execute(new MyRunnable(41));
 		executorService.execute(new MyRunnable2(42));
 		
-		Log.e("performance", "thread active num = "+Thread.activeCount());
 		
-		 Map<Thread, StackTraceElement[]> threadMap=Thread.getAllStackTraces();
-		 Set<Thread> threadSet=threadMap.keySet();
-		 for(Thread thread:threadSet){
-			 Log.e("performance", "treadinfo name= "+thread.getName()+" id= "+thread.getId()+" isAlive="+thread.isAlive());
-			 StackTraceElement[] Elements=threadMap.get(thread);
-			 if(Elements!=null&&Elements.length>0){
-				 for(int i=0;i<Elements.length;i++){
-					 StackTraceElement element=Elements[i];
-					 if(i==5){
-						 Log.e("performance", "classname= "+element.getClassName()+" methodname= "+element.getMethodName()+" All="+element.toString());
-						 break;
-					 }
-					 if(i==Elements.length-1){
-						 Log.e("performance", "classname= "+element.getClassName()+" methodname= "+element.getMethodName()+" All="+element.toString());
-						 break;
-					 }
-					 if(element.toString().contains("com.jh")){
-						 Log.e("performance", "classname= "+element.getClassName()+" methodname= "+element.getMethodName()+" All="+element.toString());
-						 break; 
-					 }
-					 
-				 }
-			 }
-
-		 }
 		 
 	
 		
@@ -84,9 +58,9 @@ public class ThreadNumInfoActivity extends Activity {
 			fib(35);
 			long endtime=System.currentTimeMillis();
 			long endThreadTime=SystemClock.currentThreadTimeMillis();
-//			Log.e("performance",myName+"starttime= "+starttime+", endtime ="+endtime+", exectime ="+(endtime-starttime)
-//					+"; startThreadTime ="+startThreadTime+", endThreadTime ="+endThreadTime+",execThreadtime ="
-//					+(endThreadTime-startThreadTime));
+			Log.e("performance",myName+"starttime= "+starttime+", endtime ="+endtime+", exectime ="+(endtime-starttime)
+					+"; startThreadTime ="+startThreadTime+", endThreadTime ="+endThreadTime+",execThreadtime ="
+					+(endThreadTime-startThreadTime));
 			
 		}
 		
@@ -105,13 +79,16 @@ public class ThreadNumInfoActivity extends Activity {
 				fib(35);
 				long endtime=System.currentTimeMillis();
 				long endThreadTime=SystemClock.currentThreadTimeMillis();
-//				Log.e("performance",myName+"starttime= "+starttime+", endtime ="+endtime+", exectime ="+(endtime-starttime)
-//						+"; startThreadTime ="+startThreadTime+", endThreadTime ="+endThreadTime+",execThreadtime ="
-//						+(endThreadTime-startThreadTime));
+				Log.e("performance",myName+"starttime= "+starttime+", endtime ="+endtime+", exectime ="+(endtime-starttime)
+						+"; startThreadTime ="+startThreadTime+", endThreadTime ="+endThreadTime+",execThreadtime ="
+						+(endThreadTime-startThreadTime));
 				
 			}
 			
 		}
-	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+	}
 	
 }
