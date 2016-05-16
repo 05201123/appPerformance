@@ -103,6 +103,10 @@ public class ThreadCanary {
 			 if(Elements!=null&&Elements.length>0){
 				 for(int i=0;i<Elements.length;i++){
 					 StackTraceElement element=Elements[i];
+//					 sb.append("  treadinfo = "+element.toString()).append(SEPARATOR);
+					 if(i==0&&element.toString().contains("java.lang.Object.wait")){
+						 sb.append("  treadinfo = "+element.toString()).append(SEPARATOR); 
+					 }
 					 if(i==5){
 						 sb.append("  treadinfo = "+element.toString()).append(SEPARATOR);
 						 break;
