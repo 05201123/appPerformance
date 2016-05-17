@@ -103,16 +103,17 @@ public class ThreadCanary {
 			 if(Elements!=null&&Elements.length>0){
 				 for(int i=0;i<Elements.length;i++){
 					 StackTraceElement element=Elements[i];
-//					 sb.append("  treadinfo = "+element.toString()).append(SEPARATOR);
+					 int temp=0;
 					 if(i==0&&element.toString().contains("java.lang.Object.wait")){
 						 sb.append("  treadinfo = "+element.toString()).append(SEPARATOR); 
 //						 break;
 					 }else if(element.toString().contains("com.jh")){
 						 sb.append("  treadinfo = "+element.toString()).append(SEPARATOR);
+						 temp++;
+						 if(temp>2){
+							 break;
+						 }
 
-					 }else if(i==Elements.length-1){
-						 sb.append("  treadinfo = "+element.toString()).append(SEPARATOR);
-						 break;
 					 }
 					 
 				 }
