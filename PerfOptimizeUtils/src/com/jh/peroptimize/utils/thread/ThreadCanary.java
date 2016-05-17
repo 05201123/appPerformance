@@ -98,7 +98,7 @@ public class ThreadCanary {
 		 Map<Thread, StackTraceElement[]> threadMap=Thread.getAllStackTraces();
 		 Set<Thread> threadSet=threadMap.keySet();
 		 for(Thread thread:threadSet){
-			 sb.append("treadinfo name= "+thread.getName()+" id= "+thread.getId()+" isAlive="+thread.isAlive()).append(SEPARATOR);
+			 sb.append(SEPARATOR).append("treadinfo name= "+thread.getName()+" id= "+thread.getId()+" isAlive="+thread.isAlive()).append(SEPARATOR);
 			 StackTraceElement[] Elements=threadMap.get(thread);
 			 if(Elements!=null&&Elements.length>0){
 				 for(int i=0;i<Elements.length;i++){
@@ -106,18 +106,13 @@ public class ThreadCanary {
 //					 sb.append("  treadinfo = "+element.toString()).append(SEPARATOR);
 					 if(i==0&&element.toString().contains("java.lang.Object.wait")){
 						 sb.append("  treadinfo = "+element.toString()).append(SEPARATOR); 
-					 }
-					 if(i==5){
+//						 break;
+					 }else if(element.toString().contains("com.jh")){
+						 sb.append("  treadinfo = "+element.toString()).append(SEPARATOR);
+
+					 }else if(i==Elements.length-1){
 						 sb.append("  treadinfo = "+element.toString()).append(SEPARATOR);
 						 break;
-					 }
-					 if(i==Elements.length-1){
-						 sb.append("  treadinfo = "+element.toString()).append(SEPARATOR);
-						 break;
-					 }
-					 if(element.toString().contains("com.jh")){
-						 sb.append("  treadinfo = "+element.toString()).append(SEPARATOR);
-						 break; 
 					 }
 					 
 				 }
