@@ -17,6 +17,7 @@ knowledge
 	就有可论证的确定性，但是实际上具有不可确定性。
 	危险、偶发，只有自信，多疑，亲自动手，才能写出优质的多线程代码。
 	了解并发，可以使你意识到明显正确的程序可能会展现出不正确的行为。
+	可能，可能，了解可能，排除可能，界限，界限，找到界限，防范界限。
 
 	并发必然会带来复杂，但用户体验，程序设计，资源负载均衡改进相比，就微不足道了。
 4.并发问题令人困扰的一个主要原因：使用并发时需要解决问题有多个，而实现并发的方式也有多种，并且在这两者之间没有明显的映射关系，（而且通常都是模糊的界限）
@@ -48,6 +49,46 @@ knowledge
 
 9.线程组，ThreadGroup，最好把线程组当成是一次不成功的尝试，你只要忽略它就好。
 
+10.递增程序自身也需要多个步骤，并且在递增过程中任务可能被线程机制挂起，也就是说，java中递增运算不是原子性的。
+
+11.锁：
+	基本上所有的并发模式在解决线程问题冲突的时候，都采用“序列化访问共享资源”的方案。这意味着在给定的时刻只允许一个任务访问共享资源。通常这是通过加锁
+语句来实现的。因为锁语句产生一种互斥效果，这种机制成为互斥量(mutex).
+	synchronized
+	
+	所有的对象都自动含有单一的锁（也称为监视器）？synchronized method 作用用于方法时，锁就是就这个。这个自动的锁是synchronized（this）吗? 相同
+	针对每个类也有一个锁，所以synchronized static 方法可以在类的范围内防止对static数据的并发访问。这个锁是synchronized（xxx.class）吗?相同
+	二者不是一个锁，相互无影响
+	
+	在并发中，将域设置成private是十分重要的，否则synchronized关键字将不能防止其他任务去直接访问域，造成冲突。
+	
+	一个任务可以多次获得对象锁。如果一个方法在同一个对象上调用了第二个方法，后者又调用了同一个对象的另一个方法，就会发生这种情况。JVM负责跟踪对象加锁的次数。
+	如果一个对象被解锁（即完全释放锁），其计数为0.在任务第一次给对象加锁的时候，计数为1.每当这个相同的任务在这个对象上获得锁时，计数都会递增。显然，只有
+	首先获得锁的任务才能允许继续获取多个锁。每当任务离开一个synchronized方法时，计数递减。当计数为0时，释放锁，就可以给别的任务用了。
+	
+	
+	每个访问临界公共资源的方法都必须被同步，否则它们不会正确的工作。关于“临界公共资源”如何理解？
+	
+	try｛｝finnally｛｝ lock，unlock。
+	Lock的优势：1.灵活，加锁，释放锁控制更强。	
+					ReentrantLock lock=new ReentrantLock();
+					lock.isLocked() 是否锁了
+					lock.tryLock(timeout, unit) 多长时间尝试申请锁，阻塞最多timeout的时间。
+					lock.tryLock();尝试申请锁
+			允许尝试去获取锁，如果锁住了，可以先去执行其他事情，而不是像synchronized那样，一直等待。	
+			2.实现专有同步结构很有用，“锁耦合”，比如LinkedBlockingQueue；
+			3.加锁和释放锁必须是一一对应的，如果多了一个lock，就锁住了，没有释放，如果多了一个unlock，就报异常。
+			4.锁和线程相关的，主线程的锁就得主线程释放，子线程的锁必须子线程释放。同一个线程中，有这个锁了，仍然可以加这个锁，但子线程lock时，就需要等待。
+	释放未加锁的lock，lock.unlock();
+	一个线程加锁，另一个线程解锁，也同样报异常。
+	java.lang.IllegalMonitorStateException
+ 	at java.util.concurrent.locks.ReentrantLock$Sync.tryRelease(ReentrantLock.java:124)
+ 	at java.util.concurrent.locks.AbstractQueuedSynchronizer.release(AbstractQueuedSynchronizer.java:1236)
+ 	at java.util.concurrent.locks.ReentrantLock.unlock(ReentrantLock.java:432)
+	
+					
+	
+
 question
 1.单核cpu下，并发多线程会提高执行速度吗？
 	仍然会提高速度，当执行等待型任务时，如io处理（存取需要等待磁盘响应），若执行高密度的cpu运算是，多线程在执行速度上并不明显。
@@ -77,6 +118,8 @@ question
 	指的是在构造方法里，启动线程，如果线程去用这个类的资源的时候，由于这个对象还在new的过程中，所以，线程就会访问不稳定状态的对象。这是一个i额风险。
 
 11.承诺升级理论：继续错误的代价由别人来承担，而承认错误的代价由自己来承担。
+
+12.synchronized的用法，方法上？类上？
 
 
 
