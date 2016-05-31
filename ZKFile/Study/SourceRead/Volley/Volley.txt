@@ -1,0 +1,50 @@
+Volley
+
+knowledge
+
+1.通过构造方法实现设计上的封装。
+	public class VolleyError{
+		public VolleyError(){
+		
+		}
+		public VolleyError(String  errmsg){
+		
+		}
+		...
+		...//设计一个大而全的构造方法类。
+	}
+	
+	public class TimeoutError extends VolleyError{
+		public TimeoutError(){
+		
+		}
+		...
+		...//根据实际需要定义构造方法，封装构造行为。
+	}
+
+2.异常设计时，可以将一些异常的专属操作，封装在这些异常里。比如
+	public class AuthFailureError extends VolleyError {
+    /** An intent that can be used to resolve this exception. (Brings up the password dialog.) */
+    private Intent mResolutionIntent;
+
+    public AuthFailureError() { }
+
+    public AuthFailureError(Intent intent) {
+        mResolutionIntent = intent;
+    }
+    }
+    我们写的时候，可能把异常的操作写在异常外面。但明显不如这样封装好。
+
+3.StackTraceElement[] trace = new Throwable().fillInStackTrace().getStackTrace();
+	获取跟踪堆的元素
+	
+	
+
+question
+	1.StackTraceElement[] trace = new Throwable().fillInStackTrace().getStackTrace();
+	与
+	StackTraceElement[] trace =Thread.currentThread().getStackTrace();的不同
+	答：基本相同，只是第一个方法比第二个放多多了VMStack.getThreadStackTraceThread.getStackTrace。
+	效率相差无己，第二种略快。
+	
+	
