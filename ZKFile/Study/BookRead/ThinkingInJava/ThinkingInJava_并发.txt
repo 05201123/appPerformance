@@ -102,6 +102,7 @@ knowledge
 					   2.Atomic类的设计是用来构建java.util.concurrent的类，因此只有在特殊情况下才在自己的代码中使用它们。
 					   通常依赖锁要更安全一些（synchonized或lock）。
 
+15.注意：synchonized关键字不属于方法特征签名的组成部分，所以可以覆盖方法的时候加上去。重写（Overriding）
 					
 	
 
