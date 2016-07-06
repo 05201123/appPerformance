@@ -38,6 +38,125 @@ knowledge
 3.StackTraceElement[] trace = new Throwable().fillInStackTrace().getStackTrace();
 	获取跟踪堆的元素
 	
+4.User Agent:中文名为用户代理，是Http协议中的一部分，属于头域的组成部分，User Agent也简称UA。
+它是一个特殊字符串头，是一种向访问网站提供你所使用的浏览器类型及版本、操作系统及版本、浏览器内核、等信息的标识。
+通过这个标识，用户所访问的网站可以显示不同的排版从而为用户提供更好的体验或者进行信息统计；
+例如用手机访问谷歌和电脑访问是不一样的，这些是谷歌根据访问者的UA来判断的。UA可以进行伪装。
+浏览器的UA字串的标准格式：浏览器标识 (操作系统标识; 加密等级标识; 浏览器语言) 渲染引擎标识版本信息。
+	String userAgent = "volley/0";
+        try {
+            String packageName = context.getPackageName();
+            PackageInfo info = context.getPackageManager().getPackageInfo(packageName, 0);
+            userAgent = packageName + "/" + info.versionCode;
+        } catch (NameNotFoundException e) {
+        }
+5.Http请求使用，版本大于等于9的HttpUrlConnection更好一些，小于9用HttpClient
+		if (Build.VERSION.SDK_INT >= 9) {
+                stack = new HurlStack();
+            } else {
+                // Prior to Gingerbread, HttpUrlConnection was unreliable.
+                // See: http://android-developers.blogspot.com/2011/09/androids-http-clients.html
+                stack = new HttpClientStack(AndroidHttpClient.newInstance(userAgent));
+         }
+
+6.Volley 都有一个接口，然后对应一个默认实现，如果用户不自定义，就用默认的实现。
+	比如RetryPolicy与DefaultRetryPolicy。ResponseDelivery，ExecutorDelivery等。
+
+7.默认重试机制：DefaultRetryPolicy，网络调用接口，如果超时失败，401，403，可以积累重试，并且重试时，可以按比例增加超时时间，以提高调用成功的可能性。
+	public void retry(VolleyError error) throws VolleyError {
+        mCurrentRetryCount++;
+        mCurrentTimeoutMs += (mCurrentTimeoutMs * mBackoffMultiplier);
+        if (!hasAttemptRemaining()) {
+            throw error;
+        }
+    }
+
+8.关于调用超时，使用timeout，分为网络接口超时，和任务request超时两种，网络接口获取获取数据超时，设置到http请求中的超时，时间到报超时异常。
+	而request超时，不会强行停止request，而是log下来而已，用来以后调优。
+
+9.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);使用这个，降低和主线程抢夺cpu的机会。
+
+10.PriorityBlockingQueue,权限阻塞队列，先按优先级，优先级相同，按先进先出的原则。
+
+11.图片处理：
+
+byte[] data = response.data;
+        BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
+        Bitmap bitmap = null;
+        if (mMaxWidth == 0 && mMaxHeight == 0) {
+            decodeOptions.inPreferredConfig = mDecodeConfig;
+            bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
+        } else {
+            // If we have to resize this image, first get the natural bounds.
+            decodeOptions.inJustDecodeBounds = true;
+            BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
+            int actualWidth = decodeOptions.outWidth;
+            int actualHeight = decodeOptions.outHeight;
+
+            // Then compute the dimensions we would ideally like to decode to.
+            int desiredWidth = getResizedDimension(mMaxWidth, mMaxHeight,
+                    actualWidth, actualHeight);
+            int desiredHeight = getResizedDimension(mMaxHeight, mMaxWidth,
+                    actualHeight, actualWidth);
+
+            // Decode to the nearest power of two scaling factor.
+            decodeOptions.inJustDecodeBounds = false;
+            // TODO(ficus): Do we need this or is it okay since API 8 doesn't support it?
+            // decodeOptions.inPreferQualityOverSpeed = PREFER_QUALITY_OVER_SPEED;
+            decodeOptions.inSampleSize =
+                findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
+            Bitmap tempBitmap =
+                BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
+
+            // If necessary, scale down to the maximal acceptable size.
+            if (tempBitmap != null && (tempBitmap.getWidth() > desiredWidth ||
+                    tempBitmap.getHeight() > desiredHeight)) {
+                bitmap = Bitmap.createScaledBitmap(tempBitmap,
+                        desiredWidth, desiredHeight, true);
+                tempBitmap.recycle();
+            } else {
+                bitmap = tempBitmap;
+            }
+        }
+	
+ // Visible for testing.
+    static int findBestSampleSize(
+            int actualWidth, int actualHeight, int desiredWidth, int desiredHeight) {
+        double wr = (double) actualWidth / desiredWidth;
+        double hr = (double) actualHeight / desiredHeight;
+        double ratio = Math.min(wr, hr);
+        float n = 1.0f;
+        while ((n * 2) <= ratio) {
+            n *= 2;
+        }
+
+        return (int) n;
+    }
+    
+private static int getResizedDimension(int maxPrimary, int maxSecondary, int actualPrimary,
+            int actualSecondary) {
+        // If no dominant value at all, just return the actual.
+        if (maxPrimary == 0 && maxSecondary == 0) {
+            return actualPrimary;
+        }
+
+        // If primary is unspecified, scale primary to match secondary's scaling ratio.
+        if (maxPrimary == 0) {
+            double ratio = (double) maxSecondary / (double) actualSecondary;
+            return (int) (actualPrimary * ratio);
+        }
+
+        if (maxSecondary == 0) {
+            return maxPrimary;
+        }
+
+        double ratio = (double) actualSecondary / (double) actualPrimary;
+        int resized = maxPrimary;
+        if (resized * ratio > maxSecondary) {
+            resized = (int) (maxSecondary / ratio);
+        }
+        return resized;
+    }
 	
 
 question
@@ -46,5 +165,17 @@ question
 	StackTraceElement[] trace =Thread.currentThread().getStackTrace();的不同
 	答：基本相同，只是第一个方法比第二个放多多了VMStack.getThreadStackTraceThread.getStackTrace。
 	效率相差无己，第二种略快。
+	2.public static boolean DEBUG = Log.isLoggable(TAG, Log.VERBOSE);
+	在pc上，adb shell setprop log.tag.Volley VERBOSE 设置该TAG的输出级别为VERBOSE。
+	 则Log.isLoggable("Volley", Log.VERBOSE) level为VERBOSE以上的都返回true，每设置一次，只能用于一部手机没有重启的情况，如果换一部或者重启要重新设置一下；
+	 这样的好处是，自己 开发的手机设置一次，都能打印VERBOSE，编译给别的手机就不能打印VERBOSE信息，这样就不用每次正式发布时要把isDbug设置为false
 	
-	
+
+
+
+interest
+1.网络调用失败重试机制。（3.超时机制）
+2.缓存任务执行存取机制。
+3.图片处理
+4.二进制数据处理
+
