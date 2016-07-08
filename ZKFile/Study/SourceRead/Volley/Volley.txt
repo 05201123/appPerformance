@@ -78,7 +78,7 @@ knowledge
 
 10.PriorityBlockingQueue,权限阻塞队列，先按优先级，优先级相同，按先进先出的原则。
 
-11.图片处理：
+11.图片优化处理：
 
 byte[] data = response.data;
         BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
@@ -169,6 +169,7 @@ question
 	在pc上，adb shell setprop log.tag.Volley VERBOSE 设置该TAG的输出级别为VERBOSE。
 	 则Log.isLoggable("Volley", Log.VERBOSE) level为VERBOSE以上的都返回true，每设置一次，只能用于一部手机没有重启的情况，如果换一部或者重启要重新设置一下；
 	 这样的好处是，自己 开发的手机设置一次，都能打印VERBOSE，编译给别的手机就不能打印VERBOSE信息，这样就不用每次正式发布时要把isDbug设置为false
+	3.Semaphore,tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS)
 	
 
 
@@ -178,4 +179,5 @@ interest
 2.缓存任务执行存取机制。
 3.图片处理
 4.二进制数据处理
+5.缓存机制
 

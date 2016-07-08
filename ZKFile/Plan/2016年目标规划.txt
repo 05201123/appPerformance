@@ -40,7 +40,7 @@
 	12.bitmap
 	13.dex
 	14.as
-	15.
+	15.blockCanary
 	
 五、健康
 	1.睡眠
