@@ -158,6 +158,41 @@ private static int getResizedDimension(int maxPrimary, int maxSecondary, int act
         return resized;
     }
 	
+12.流转二进制数组
+	 private static int DEFAULT_POOL_SIZE = 4096;
+	
+	 protected final ByteArrayPool mPool=new ByteArrayPool(DEFAULT_POOL_SIZE);
+	/** Reads the contents of HttpEntity into a byte[]. */
+    private byte[] entityToBytes(HttpEntity entity) throws IOException, ServerError {
+        PoolingByteArrayOutputStream bytes =
+                new PoolingByteArrayOutputStream(mPool, (int) entity.getContentLength());
+        byte[] buffer = null;
+        try {
+            InputStream in = entity.getContent();
+            if (in == null) {
+                throw new ServerError();
+            }
+            buffer = mPool.getBuf(1024);
+            int count;
+            while ((count = in.read(buffer)) != -1) {
+                bytes.write(buffer, 0, count);
+            }
+            return bytes.toByteArray();
+        } finally {
+            try {
+                // Close the InputStream and release the resources by "consuming the content".
+                entity.consumeContent();
+            } catch (IOException e) {
+                // This can happen if there was an exception above that left the entity in
+                // an invalid state.
+                VolleyLog.v("Error occured when calling consumingContent");
+            }
+            mPool.returnBuf(buffer);
+            bytes.close();
+        }
+    }
+    
+    
 
 question
 	1.StackTraceElement[] trace = new Throwable().fillInStackTrace().getStackTrace();
@@ -175,9 +210,8 @@ question
 
 
 interest
-1.网络调用失败重试机制。（3.超时机制）
-2.缓存任务执行存取机制。
-3.图片处理
-4.二进制数据处理
-5.缓存机制
+1.网络调用失败重试机制。（3.超时机制） ok
+2.任务队列执行存取机制。ok
+3.图片处理 （遗留，等待图片处理知识研究）
+4.二进制数据处理（等待输入输出流学习）
 
