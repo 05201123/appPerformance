@@ -75,6 +75,7 @@ knowledge
 					lock.isLocked() 是否锁了
 					lock.tryLock(timeout, unit) 多长时间尝试申请锁，阻塞最多timeout的时间。
 					lock.tryLock();尝试申请锁
+					lock.lockInterruptibly();如果有锁，则等待，发生Thread.interrupt()，则释放当前线程获取的锁，这是synchoized达不到的效果。
 			允许尝试去获取锁，如果锁住了，可以先去执行其他事情，而不是像synchronized那样，一直等待。	
 			2.实现专有同步结构很有用，“锁耦合”，比如LinkedBlockingQueue；
 			3.加锁和释放锁必须是一一对应的，如果多了一个lock，就锁住了，没有释放，如果多了一个unlock，就报异常。
@@ -124,10 +125,19 @@ knowledge
 		方法返回，但是任务的线程还可以中断，这也是死亡的一种方式。
 
 19.线程进入阻塞状态的方式：
-		（a）sleep（）方法，线程进入休眠状态。任务在制定时间内不会运行。
+		（a）sleep（）方法，线程进入休眠状态。任务在制定时间内不会运行。 
+			interrupt(),可以中断
 		（b）wait（）方式，使线程挂起，直到线程得到notify（）或者notifyAll()消息，线程才会进入就绪状态。
 		（c）任务在等待某个输入或输出完成。
+			不能中断，想要中断，可以关闭io资源用来释放锁，此时isInterrupted=true，不会爆出InterruptedException。
 		（d）任务试图在某个对象上调用其同步控制方法，但对象锁不可用，因为另一个任务正在用这个锁。
+			不能中断。发生异常，可以释放锁。
+			lock.lockInterruptibly();
+
+20.interrupt(),当执行thread.interrupt()的时候，中断发生的唯一时刻，是在任务要进入阻塞操作中，或者已经在阻塞操作内部时（IO不可中断，或阻塞的synchoized（）方法0），
+		interrupt（），会使isInterrupt（）=true，当发声InterruptedExcepiton或者thread。interrupted()时，isInterrupt（）=false。
+
+
 		
 
 question
@@ -161,6 +171,16 @@ question
 11.承诺升级理论：继续错误的代价由别人来承担，而承认错误的代价由自己来承担。
 
 12.何时用synchronized，何时用lock？？
+
+13.Thread类包含interrupt（）方法，因此你可以终止被阻塞的任务，这个方法将设置线程的中断状态。如果一个线程已经被阻塞，或者试图执行一个阻塞操作，那么设置这个线程的中断状态
+将抛出InterruptedExcepiton。当抛出该异常或者该任务调用Thread.interrupted（）时，中断状态将被复位。正如你将看到的，Thread.interrupted（）提供了离开run（）循环而不抛出异常
+的第二种方式。          阻塞的任务??才能interrupt吗？？？无限循环的任务呢？？ 第二种方式只的是什么？
+
+
+
+14.如果想推出某个任务，interrupt（）方法无法中断时，该如何退出？
+	thread.interrupted（）来减少程序执行的步骤，提高新能。
+
 
 
 
