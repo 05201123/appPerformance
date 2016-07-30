@@ -128,6 +128,8 @@ knowledge
 		（a）sleep（）方法，线程进入休眠状态。任务在制定时间内不会运行。 
 			interrupt(),可以中断
 		（b）wait（）方式，使线程挂起，直到线程得到notify（）或者notifyAll()消息，线程才会进入就绪状态。
+			interrupt(),可以中断
+			lock condition ，await（），也可以被中断。
 		（c）任务在等待某个输入或输出完成。
 			不能中断，想要中断，可以关闭io资源用来释放锁，此时isInterrupted=true，不会爆出InterruptedException。
 		（d）任务试图在某个对象上调用其同步控制方法，但对象锁不可用，因为另一个任务正在用这个锁。
@@ -137,6 +139,52 @@ knowledge
 20.interrupt(),当执行thread.interrupt()的时候，中断发生的唯一时刻，是在任务要进入阻塞操作中，或者已经在阻塞操作内部时（IO不可中断，或阻塞的synchoized（）方法0），
 		interrupt（），会使isInterrupt（）=true，当发声InterruptedExcepiton或者thread。interrupted()时，isInterrupt（）=false。
 
+21.wait(),通常，这种条件将由另一个任务来改变。wait()会在等待外部世界产生变化的时候将任务挂起，并且只有在notify（）或notifyAll（）发生时，即表示发生了某些感兴趣
+	的事物，这个任务才会被唤醒并去检查所产生的变化。
+	（a）提供了一种在任务之间对活动的同步的方式。
+	（b）wait，notify（），notifyAll（）是和synchoized锁相伴相生的。如果未放置在锁内，则直接会报异常，java.lang.IllegalMonitorStateException。
+	     调用sleep（），yield（）的时候，锁并没有释放。
+	     notify（），在众多等待同一个锁的任务只有一个会被唤醒。使用的条件
+	     （1）所有任务必须等待相同的条件。
+	     （2）当条件反生变化时，必须只有一个任务能够从中受益。
+	     （3）这些限制对所有可能存在的子类总是起作用的。
+	     如果这些规则中有任何一条不满足，那么你就必须使用notifyAll（）。
+	（c）wait，notifyall,对应一个锁，notifyAll（）不会释放其他锁的外套（）。
+
+22.wait（）的形式
+
+	Synchonized(object){
+		object.notifyAll();
+	}
+	Synchonized(object){
+		while(someCondition){
+			object.wait();
+		}
+	}
+
+	为啥用while？？
+	a）你可能有多个任务处于相同的原因在等待同一个锁，而第一个唤醒任务可能会改变这种状况（即使你没有这么做，
+	有人也会通过继承你的类去这么做）。如果属于这种情况，那么这个任务应该被再次挂起，直至其感兴趣的条件发生变化。
+	b）在这个任务从其wait（）中被唤醒的时刻，有可能会有其他的任务已经做出了改变，从而使得这个任务在此时不能执行，
+	或者执行其操作已经显得无关紧要。此时，应该通过再次调用wait（）来将其重新挂起。
+	c）也有可能某些任务出于不同的原因在等待你的对象上的锁（在这种情况下必须使用notifyAll（））。在这种情况下，你需要检查是否
+	已经由正确的原因唤醒，如果不是，就再次调用wait。
+	本质是就是要检查所感兴趣的特定条件，并在条件不满足的情况下返回wait（）中。
+
+23.lock condition ，await（），signal() signalAll()，也能实现wait的效果，只不过用在解决更复杂的多线程问题。
+	同样，await（）signal() signalAll()之前必须获取到锁，否则报java.lang.IllegalMonitorStateException。
+	await（），释放的适当前锁，signal（）signalAll（）通知的也是当前锁下的wait（）任务。
+
+24.BlockingQueue,阻塞队列，先进先出。
+		queue.put("aaaa"); throw InterruptedException；
+		queue.take();throw InterruptedException；
+		queue.peek();取第一个，若empty则返回null
+		queue.poll();取出第一个，remove队列，若empty，则返回null
+		queue.add("aaa");
+   
+   通过输入输出，在线程之间进行通信很有用。
+   PipedWriter
+   PipedReader 可中断，但初始化未完全使用，可能会在一些平台上存在问题，还是BlockQueue更健壮一些。
 
 		
 
