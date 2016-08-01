@@ -186,6 +186,109 @@ knowledge
    PipedWriter
    PipedReader 可中断，但初始化未完全使用，可能会在一些平台上存在问题，还是BlockQueue更健壮一些。
 
+ 25.死锁
+	哲学家就餐的问题。
+	/**
+	* 筷子
+	* @author 099
+	*
+	*/
+	public class ChopStick {
+	private boolean taken=false;
+	public synchronized void take() throws InterruptedException{
+		while(taken){
+			wait();
+		}
+		taken=true;
+	}
+	public synchronized void drop() throws InterruptedException{
+		taken=false;
+		notifyAll();
+	}
+	}
+
+	public class Philosopher implements Runnable{
+	private ChopStick left;
+	private ChopStick right;
+	private int id;
+	private int ponderfactor; 
+	
+	private Random random=new Random(47);
+	
+	public Philosopher(ChopStick left,ChopStick right, int id,int ponderfactor){
+		this.left=left;
+		this.right=right;
+		this.id=id;
+		this.ponderfactor=ponderfactor;
+	}
+	public void pause() throws InterruptedException{
+		if(ponderfactor==0){
+			return;
+		}
+		TimeUnit.MILLISECONDS.sleep(random.nextInt(ponderfactor*250));
+	}
+	
+	@Override
+	public void run() {
+		try{
+			while (!Thread.interrupted()) {
+				System.out.println(this+" "+"thinking");
+				pause();
+				//hungry
+				System.out.println(this+" "+"grabbing right");
+				right.take();
+				System.out.println(this+" "+"grabbing left");
+				left.take();
+				System.out.println(this+" "+"eating");
+				pause();
+				right.drop();
+				System.out.println(this+" "+"drop right");
+				left.drop();
+				System.out.println(this+" "+"drop left");
+			}
+		}catch(InterruptedException e){
+			System.out.println(this+" "+"InterruptedException");
+		}
+		
+		
+		
+	}
+	@Override
+	public String toString() {
+		return "Philosopher"+id;
+	}
+
+	}
+
+	public static void main(String[] args) throws Exception{
+		int ponder=0;
+		int size=5;
+		ExecutorService exec=Executors.newCachedThreadPool();
+		ChopStick[] chopSticks=new ChopStick[5];
+		for(int i=0;i<size;i++){
+			chopSticks[i]=new ChopStick();
+		}
+		for(int i=0;i<size;i++){
+			exec.execute(new Philosopher(chopSticks[i], chopSticks[(i+1)%size], i, ponder));
+		}
+		System.in.read();
+		exec.shutdownNow();
+	}
+
+	产生的条件
+		（1）互斥条件，任务使用的资源中至少有一个是不能共享的。这里一根筷子一次只能被一个哲学家使用。
+		（2）至少有一个任务必须持有一个资源且正在等待获取一个当前被别的任务持有的资源。也就是说要发生死锁，哲学家必须拿着一根筷子，并且等待另一根。
+		（3）资源不能被任务抢占，任务必须把资源释放当做普通事件。哲学家很有礼貌不会从其他哲学家手中抢夺筷子。
+		（4）必须有循环等待，这时，一个任务等待其他任务所持有的资源，后者又在等待另一个任务所持有的资源。这样一直下去，直到有一个任务在等待第一个
+		任务所持有的资源，使得大家锁住。因为每个哲学家都试图先得到右边的筷子，然后得到左边的筷子，所以产生了循环等待。
+	避免死锁，就是破坏4个条件中的一个，这个例子中，如果有一个哲学家先左后右，那么这个哲学家将永远不会阻止他右边的哲学家拿到筷子。这就防止了循环等待。
+	当然还有其他避免死锁的方式。
+
+26.CountDownLatch，被用来同步一个或多个任务，强制它们等待由其他任务执行的一组操作完成。
+	典型用法：将一个程序分为n个互相独立的可解决任务，并创建值为0的CountDownLatch。当每个任务完成时，都会在这个锁存器上调用countDown（）。
+	等待问题被解决的任务在这个锁存器上调用await（），将他们自己拦住，直至锁存器计数结束。
+	
+
 		
 
 question
