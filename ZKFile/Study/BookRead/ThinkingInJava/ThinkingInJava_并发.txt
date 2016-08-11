@@ -305,7 +305,22 @@ knowledge
 
 29.PriorityBlockingQueue，有优先级的队列，可阻塞的读取操作。compare to 方法，决定优先级，越小越先执行。
 
+30.Semaphore,正常的锁在任何时刻都只允许一个任务访问一项资源，而计数信号量允许n个任务同时访问这个资源。你可以将信号量看作是在向分发使用资源的“许可证”，尽管实际上没有使用任何许可证对象。
+	简单的说 new Semaphore（size，true），size是信号的数量。true代表先进先出，先等待先解锁。
+	当任务调用semaphore.acquire()时，计数+1，如果超过size的数量值，semaphore.acquire()则会等待。
+	available.release()释放锁，计数-1，如果有在等待的任务，semaphore.acquire()将停止休眠。
+
+31.Exchanger,是在两个任务之间交换对象的栅栏。它们各自拥有一个对象，当离开时，交换彼此的对象。
+	经典应用场景：一个任务在创建对象，这些对象生产的代价很高昂，而另一个任务在消费的对象。通过这种方式，可以有更多的对象在被创建的同时被消费。
+	Exchanger<List<String>> exchanger=new Exchanger<List<String>>();
+	List<T> holder holder=exchanger.exchange(holder);
 	
+	简单的说：就是有一块区域，是用来交易对象的。A任务进去交易exchanger.exchange（），当发现是交易区域有人（即其他任务exchanger.exchange（）了），则二者交易彼此持有的对象，然后离开交易场所。
+	当交易场所没有人时，则A任务等待，其他任务来进入交易场所（exchanger.exchange（）），然后二者交易。
+	当然可以有多个对象相互的交易，只要满足有两个进入交易场所，就进行交易。
+
+32.
+
 
 		
 
@@ -351,6 +366,11 @@ question
 	thread.interrupted（）来减少程序执行的步骤，提高新能。
 
 
+
+
+
+Demo仿真
+	1.银行需求： 服务时间2-10分钟，
 
 
 
