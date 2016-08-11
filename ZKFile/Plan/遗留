@@ -3,3 +3,6 @@ Volley
 	以解决，ThinkingInJava_并发 knowledge 30
 2.图片处理 （遗留，等待图片处理知识研究）
 3.二进制数据处理（等待输入输出流学习）
+BlockCanary
+4.关于获取应用内存的方式，以及各种方式的差异？？
+5.Cpu执行率的分析

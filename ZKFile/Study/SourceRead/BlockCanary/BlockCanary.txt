@@ -2,12 +2,115 @@ BlockCanary
 
 knowledge
 
+1.主线程执行message打印日志Looper.getMainLooper().setMessageLogging(Printer printer)
+		Looper源码：
+		for (;;) {
+            Message msg = queue.next(); // might block
+            if (msg == null) {
+                // No message indicates that the message queue is quitting.
+                return;
+            }
+            // This must be in a local variable, in case a UI event sets the logger
+            Printer logging = me.mLogging;
+            if (logging != null) {
+                logging.println(">>>>> Dispatching to " + msg.target + " " +
+                        msg.callback + ": " + msg.what);
+            }
+            msg.target.dispatchMessage(msg);
+            if (logging != null) {
+                logging.println("<<<<< Finished to " + msg.target + " " + msg.callback);
+        }
+
+2.FilenameFilter 根据文件名过滤文件 FileFilter过滤文件
+	File f=new File(dirPatch);
+	if(f.exists() && f.isDirectory()){
+		File[] files=f.listFiles(new FilenameFilter(){
+			public boolean accept(File dir,String filename){
+				return false;
+			}
+
+		});
+		f.listFiles(new FileFilter() {
+				
+				@Override
+				public boolean accept(File pathname) {
+					// TODO Auto-generated method stub
+			
+					return false;
+				}
+			});
+
+
+	}
+
+3.Thread.getStackTrace():线程执行轨迹
+
+4.获取cpu数量。
+	Runtime.getRuntime().availableProcessors();
+	与
+	public static int getNumCores() {
+        class CpuFilter implements FileFilter {
+            @Override
+            public boolean accept(File pathname) {
+                return Pattern.matches("cpu[0-9]", pathname.getName());
+            }
+        }
+
+        if (sCoreNum == 0) {
+            try {
+                // Get directory containing CPU info
+                File dir = new File("/sys/devices/system/cpu/");
+                // Filter to only list the devices we care about
+                File[] files = dir.listFiles(new CpuFilter());
+                // Return the number of cores (virtual CPU devices)
+                sCoreNum = files.length;
+            } catch (Exception e) {
+                Log.e(TAG, "getNumCores exception", e);
+                sCoreNum = 1;
+            }
+        }
+        return sCoreNum;
+    }
+
+	第一种方法获取可以用的cpu核数，解释说4.2以上的系统，一般可以返回最大核数，除非有针对于
+	发热和电量有特殊的限制。（当然应为不好）。
+	部分手机这个方法爆发异常，最好try catch住。
+	第二种方式，一般也没有问题，更加准确，但可能有些手机的文件位置已变，所以可能不好使。
+
 
 
 question
-	
+1.System.currentTimeMillis();与SystemClock.currentThreadTimeMillis();的区别
+	线程wait（），线程sleep等情况下的值是如何的？
+	线程wait（），sleep（）不在SystemClock.currentThreadTimeMillis()的执行时间内。
+	单纯数学逻辑运算，二者时间相差不大，
+	多线程调度的时间，）不在SystemClock.currentThreadTimeMillis()的执行时间内。
+2.关于获取应用内存的方式，以及各种方式的差异？？
+
 
 
 interest
 
+1.CpuSampler利用率的理解。
+ BufferedReader cpuReader = null;
+        BufferedReader pidReader = null;
+        try {
+            cpuReader = new BufferedReader(new InputStreamReader(
+                    new FileInputStream("/proc/stat")), 1000);
+            String cpuRate = cpuReader.readLine();
+            if (cpuRate == null) {
+                cpuRate = "";
+            }
+
+            if (mPid == 0) {
+                mPid = android.os.Process.myPid();
+            }
+            pidReader = new BufferedReader(new InputStreamReader(
+                    new FileInputStream("/proc/" + mPid + "/stat")), 1000);
+            String pidCpuRate = pidReader.readLine();
+            if (pidCpuRate == null) {
+                pidCpuRate = "";
+            }
+
+   parseCpuRate(cpuRate, pidCpuRate);
 
