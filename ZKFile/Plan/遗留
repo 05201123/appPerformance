@@ -1,4 +1,5 @@
 Volley
 1.Semaphore,tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS)
+	以解决，ThinkingInJava_并发 knowledge 30
 2.图片处理 （遗留，等待图片处理知识研究）
 3.二进制数据处理（等待输入输出流学习）
