@@ -1,0 +1,5 @@
+﻿Android源码设计模式实战与解析
+knowledge
+
+1.单一职责原则 -----SingleResponsibilityPrinciple----SRP
+	
