@@ -2,4 +2,59 @@
 knowledge
 
 1.单一职责原则 -----SingleResponsibilityPrinciple----SRP
+	一个类只有一个引起它变化的原因，一个类应该是一组相关性很高的函数、数据的封装。
+	更多是靠经验，去断定一个类的职责。
+
+面向对象是什么，很多时候都不甚了解。首先我们有一个需求，然后将需求演化为任务。接着我们肢解每一个小任务，
+逐一的完成。感觉上就像将一个过程分成好几段，然后完成，怎么觉得都像是面向过程的？
+那什么是面向对象呢？面向过程，面向对象又有什么分别？
+
+其实我也无法很简单的阐述，偶尔在工作中会有福至心灵，感觉到面向对象的真谛，但又积累不住，或经不起自己的几个反问。
+或许，我是说或许啊，面向对象，就是以对象的角度来肢解任务，肢解世界的。
+简单的说，它们要先将任务了解清楚，然后抽象出恰当的对象。他们解决问题的方式是用通过对象之间的信息传递。
+一个对象，经过自己的行为处理一番，将信息传给下一个对象，直到问题解决。
+
+一个大任务，分解成很多小任务，而这些小任务彼此交织牵连，这就很容易将程序做的复杂而难以复用。
+对象则不同，它有很大的复用性，对象的行为可以扩充，简单直接。
+
+面向对象，追求的是抽象封装，复用，简单直接，层次分明。所以适当的封装类极为关键。
+一个类，只封装一系列相关性高的行为，属性，每个行为都只做一件事，这样，才能更好的被人理解，更清晰。
+如果一个类职责越多，改动的可能就越大，不仅类可能会越来越复杂，难以维护，也越容易出错。
+
+2.开放关闭原则-----OpenClosePrinciple-------OCP
+  
+ 对扩展开发，对修改关闭。理想状态下，当我们按照需求写完代码后，这个模块，这个类，这个方法，都基本确定了。
+ 除非错误，否则不要修改原有的代码。比如在模块级别，想要扩充功能，但原有模版的功能还有用，最好是不修改原有
+ 代码而实现功能扩充。
+
+ 当然，需求的变化不是那么那么理想的，可能现在的需求要抹杀以前的功能，
+	我们的抽象也不是那么理想的，我的抽象出的对象，需要扩充，
+	我们的代码也是死死的，不容易扩展，不够灵活，总之无法完全遵守OCP原则，但可以尽量的去按照OCP原则去
+	追求理想。（当然，如何选择，需要权衡，OCP有些时候是需要不管不顾的，毕竟原则太多，场景太多，我们做的是
+	在合适的场景写出灵活的代码）。
+
+OCP还是要抽象了，只有抽象的好，才能容易扩展，才能运用多态，将实现分离出去。只有分离出去，才有选择使用的可能。
+只有能选择使用，才能做到扩充功能时，将新的功能实现设置进去，而不用去修改原有的逻辑。
+	比如工厂，比如策略。
+
+
+
+
+
+
+
+question
+
+1.Imageview setBitmap() 可以在子线程吗？好使吗？
 	
+08-16 19:30:33.253 24024-24064/fragment.jh.com.fragment E/AndroidRuntime: FATAL EXCEPTION: Thread-2030
+android.view.ViewRootImpl$CalledFromWrongThreadException: Only the original thread that created a view hierarchy can touch its views.
+at android.view.ViewRootImpl.checkThread(ViewRootImpl.java:5399)
+at android.view.ViewRootImpl.requestLayout(ViewRootImpl.java:986)
+at android.view.View.requestLayout(View.java:15607)
+at android.widget.RelativeLayout.requestLayout(RelativeLayout.java:318)
+at android.view.View.requestLayout(View.java:15607)
+at android.widget.ImageView.setImageDrawable(ImageView.java:421)
+at android.widget.ImageView.setImageBitmap(ImageView.java:436)
+at fragment.jh.com.fragment.MainActivity$1$1.run(MainActivity.java:24)
+at java.lang.Thread.run(Thread.java:838)
