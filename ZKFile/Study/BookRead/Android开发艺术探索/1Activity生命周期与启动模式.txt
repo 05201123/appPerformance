@@ -1,0 +1,115 @@
+Activity的生命周期
+knowledge
+1.onStart()和onStop()，是从Activity是否可见这一角度的回调。
+       onResume()和onPause是从Activity是否位于前台这个角度的回调。 
+2.onRestoreInstanceState的调用时机在onStart()之后，有保存的数据则调用，无则不调。
+3.Activity会调用onSaveInstanceState去保存数据，然后Activity去委托window去保存数据，接着window再委托它上面的顶级容器去保存数据。。。
+   直到所有的view保存数据。
+4.对于有保存数据的(onSaveInstanceState)Activity,可以在onCreate()和onRestoreInstanceState中取到。官方建议采用后面一种去恢复数据。
+   因为在有些启动模式下，Activity重启动不会走onCreate()...(验证一下)，改动启动模式要注意一下代码。
+5.Activity 启动模式 Androidmanifest中可配置，默认是standard，标准模式。
+ standard标准模式   
+		    每次启动都产生一个实例Activity，放入activity任务栈中。不会复用，最容易理解。Activity生命周期正常。
+		   谁启动了标准模式的activity，则新的activity就会进入启动它的所在的任务债中。
+		   ****当我们用ApplicationContext去启动standard模式的Activity的时候会报错：
+		   android.util.AndroidRuntimeException:Calling startActvity from outside of an Activity context requires the 
+		   FLAG_ACTIVITY_NEW_TASK flag.Is this really what you want?
+		   
+		   standard模式的Activity默认会进入启动它的Activity所属的任务栈中。但是由于非Activity类型的Context（如ApplicationContext）
+		   并没有所谓的任务栈，所以这就出问题了。
+ singleTop栈顶复用模式
+		   如果新的Activity已经位于任务栈的栈顶，那么此Activity不会被重新创建，同时它的onNewIntent方法会被回调，通过此方法的参数我们
+		   可以取出当前请求的信息。***这个Actvity的onCreate（）、onStart（）不会被系统调用，因为它并没有发生变化。
+		   如果新的Activity已经存在但不是位于栈顶，那么新Actvity仍然会重新创建。（？？？任务栈中是否有两个Activity？？是否有cleartop的效果）
+ singleTask栈内复用模式：
+	           这是一种单实例模式，在这种模式下，只要Activity在一个栈中存在，那么多次启动此Activity都不会重新创建实例，会回调onNewIntent。
+		   比如Activity A，系统首先会寻找是否存在A想要的任务栈（任务栈的名字，TaskAffinity），如果不存在，就重新创建一个任务栈，然后创建A的实例后把A放到栈中。
+		   如果存在A所需的任务栈，这时要看A是否在栈中有实例存在。如果有，那么系统会把A调到栈顶（并有cleartop的效果，清除实例之上的所有activity）并调用它的onNewIntent方法，
+		   如果实例不存在，就创建A的实例并把A压入栈中。
+ singleInstance单实例模式：
+		   这是一种加强的singleTak模式，它除了具有singleTask模式的所有特性外，还加强了一点，那就是具有此种模式的Activity只能单独地位于一个任务栈中，
+		   换句话说，比如Activity A是singleInstance模式，当A启动后，系统会为它创建一个新的任务栈，然后A独自在这个新的任务栈中，由于栈内复用的特性，
+		   后续的请求均不会创建新的Activty，除非这个独特的任务栈被系统销毁。（？？？任务栈的名字是什么？）
+
+6.activity 任务栈是后进先出的模式。任务栈分为前台任务栈和后台任务栈，后台任务栈中的Activity位于暂停状态，用户可以调用切换将后台任务栈再次调到前台。
+		  任务栈名字，TaskAffinity，这个参数标识了一个Activity所需要的任务栈的名字。默认情况下，所有Activity所需的任务栈的名字为应用的包名。
+		  当然，我们可以为每个Activity都单独指定TaskAffinity属性。这个属性必须不能与包名相同（？？相同会崩溃吗？？），否则就等于没有设定。
+	          TaskAffinity属性主要和SingleTask启动模式或者allowTaskReparenting属性配对使用，在其他情况下没有意义。
+		  
+		当TaskAffinity和SingleTask启动模式配对使用的时候，它是具有该模式的Activity的目前任务栈的名字，待启动的Activity会运行在名字和TaskAffinity
+		相同的任务栈中。
+
+
+7.TaskAffinity和allowTaskReparenting（默认是true？还是false？）结合的时候，会产生特殊的效果。
+	当一个应用A启动了应用B的某个Activity后，如果这个Activity的allowTaskReparenting属性为true的话，那么当应用B被启动后，此Activity会直接从应用A的任务
+	栈转移到应用B的任务栈中。
+	比如现在有2个应用A和B,A启动了B的一个Activity C，然后按Home键回到桌面，然后单击B的桌面图标，这个时候并不是启动了B的主Activity，而是重新显示了已经
+	被应用A启动的Activity C 或者说，C 从A的任务栈转移到了B的任务栈中。可以这么理解，由于A启动了C这个时候C只能运行在A的任务栈中，但是C属于B的应用，
+	在正常情况下，它的TaskAffinity的值坑定不可能和A的任务栈相同（因为包不同）。所以，当B被启动后，B会创建自己的任务栈，这个时候系统发现C原本锁想要的
+	任务栈已经被创建了，所以就把C从A的任务栈中转移过来了。
+
+8.Activity的Flags
+	FLAG_ACTIVITY_NEW_TASK:作用与“SingleTask”相同？？真的是一模一样吗？
+	FLAG_ACTIVITY_SINGLE_TOP:作用与“singleTop”启动模式相同？？同问
+	FLAG_ACTIVITY_CLEAR_TOP:具有此标记的Activity，当它启动式，在同一个任务栈所有位于它上面的Activity都要出栈。这个模式一般需要和FLAG_ACTIVITY_NEW_TASK
+	配合使用，在这种情况下，被启动的Activity的实例如果已经存在，那么系统就会调用它的onNewIntent。如果被启动的Activity采用standard模式启动，那么它连同
+	它之上的Activity都要出栈，系统会创建新的Activity实例并放入栈顶。
+
+9.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS:具有这个标记的Activity不会出现在历史Activity的列表中，当某些情况下我们不希望用户通过历史列表回到我们的Activity的时候，
+这个标记比较有用。它等同于在XML中设定Activity的属性android :excludeFromRecents="true".
+
+
+
+
+
+
+
+
+	
+
+   
+
+    
+
+question
+1.应用被系统回收，Activity会走onDestory吗？（内存需要，手机设置不保留非活动的页面）
+2.透明主题对Activity的生命周期的影响（包括自己的透明还有跳转的透明）
+3.onPause中不能太耗时，因为这会影响新activity的显示，onPause必须先执行完，新Activity的onResume才会执行。？？？
+ 进入下一个acitivty之后的，两个activity生命周期的变化。
+4.onSaveInstanceState的调用时机？系统只在Activity异常终止的时候才会调用onSaveInstanceState和onRestoreInstanceState来存储和恢复数据，其他情况
+不触发这个过程。Activity异常终止就是Acitvity有机会重现的意思，比如横竖屏切换。
+正常退出应用不会调用这个方法，只有异常情形下才会调用。
+finish（）算异常吗？back键呢？内存回收（会调）？
+
+5.系统配置发生变化后，比如横竖屏切换，View也会自行保存一些数据，比如textview会保存text等。
+何种view保存什么，以及恢复之后，如何更新UI的？
+
+6.onConfigurationChanged()调用的时机？
+当在menifest.xml配置android:configchanges="orientation"横竖屏切换调用了onConfigurationChanged()；
+只有在设置Activity不重启的情况下，才调用吗？还是一直调用？？还是和onSaveInstanceSate()onRestoreInstanceState()只能调用一个。
+
+7.无任务栈的Context，启动哪种模式的activity会报错，哪种不会报错。
+
+8.broadcastReceiver ，Service的Context，有任务栈的概念吗？启动standard模式会崩溃吗？
+
+9.singleTop模式下，是检索所有栈中有这个activity吗？还是只检索当前的前台栈？
+
+10.singleTask，singleInstance模式下，cleartop是针对所在栈还是针对所有栈？
+
+11.Flag clearTop是针对所有栈还是针对所在栈？
+
+12.AndroidManifest.xml与用Flag设置Activty的启动模式，优先级上第二种方式高于第一种，当两种同时存在时，以第二种方式为准。？？？
+   是不是有时会取并集？？
+ 
+13.点击桌面图标，主Activity启动模式是什么？
+
+
+
+
+
+
+
+
+interest
+1.
+
