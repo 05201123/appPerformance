@@ -1,0 +1,32 @@
+Activity
+在android中是最重要的一个组件。人们与系统交互，就是通过Activity的。
+
+一、了解
+	（1）Activity是什么？解决的是什么问题？
+	（2）Activity的经典的生命周期
+	（3）Activity的启动流程（简单流程）
+	（4）Activity常用Api运用
+	（5）常见的问题
+二、运用
+	（1）Activity的启动模式
+	（2）Activity的数据保存与恢复
+	（3）Activity的主题
+	（4）Activity特别的Api运用
+	（5）一些常见的问题
+三、精通
+	（1）Activity的任务栈理论
+	（2）ActivityThread理论
+	（3）Activity启动流程原理
+	（4）Activity启动优化
+
+
+
+
+
+1.For example, if you're building a streaming video player,
+you might pause the video and terminate the network connection when the user switches to another app. 
+When the user returns, you can reconnect to the network and allow the user to resume the video from the same spot.
+
+2.点击桌面图标的启动流程与长按home键返回该应用是一样的?
+
+3.长按home键划掉应用，处理到底是什么？
