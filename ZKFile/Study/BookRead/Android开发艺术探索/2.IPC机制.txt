@@ -1,0 +1,133 @@
+第二章 IPC机制
+
+1.knowledge
+	(1)线程是CPU调度的最小单位，而进程是一个执行单位。一个进程可以有多个线程。
+       （2）使用多进程的原因？
+		（a）一个应用因为某个原因自身需要采用多进程的方式来实现。
+			i）有些模块由于特殊原因需要在单独的进程中运行。比如webview内存泄漏问题。
+			ii）加大一个应用可以使用的内存，所以需要多进程来获取多分内存空间。（？？？Android对单个应用所使用的最大内存做了限制，早起版本是16MB，
+			这个限制是针对应用还是针对进程的，如果是针对应用的，那么一个应用两个进程，是否会分配到更多的内存？）
+
+		（b）当前应用需要向其他应用获取数据,比如换肤的应用
+       （3）Android中多进程的机制有哪些？
+		（a）Binder：Messager 、AIDL service
+		（b）socket
+		（c）Intent BroadcastReceiver Activity。。。 四大组件
+       （4）开启多进程的方式
+		（a）AndroidManifest中四大组件添加process属性 process name="";
+		（b）可以用jni调用底层fork一个新的进程（不知道如何实现，暂时也不感兴趣）。
+       （5）多进程开启之后的引发的问题
+		（a）Application多次调用
+		（b）静态成员变量不能共享，内存无法共享
+		（c）sharedpreference可靠性下降
+		（d）同步锁跨进程不起作用，（锁住的不是同一个对象）
+   (6)跨进程数据通信的方式
+   		（a）Intent
+   		（b）Binder：Messager
+   		（c）Binder：AIDL
+   		（d）socket
+   		（e）共享文件和sharedPreference
+   		...
+   (7)序列化：将java 对象 通过一种方式转换为二进制序列并储存起来的过程。 而反序列化则是反转过来，将字节序列恢复为java对象的过程。
+   			而我们在传输中用到的xml、json等，则是存储下来的格式。（我现在的理解，xml、json这种格式，就是一种为了方便编译，解析的协议）
+   		android中序列化方式有Serializable和Parcelable接口两种。
+   		序列化的作用：（a）传输数据（Intent或者Binder）
+   				    （b）对象数据持久化到文件中
+   				   （c）网络传输对象数据
+   		***通过序列化后，反序列化回来的对象和原来的对象就是两个内存地址引用了。就是说两个其实是两个对象了。
+   		
+   (8)Serializable java提供的一种序列化接口，它是一个空接口，为对象提供标准的序列化和反序列化操作。	
+   		若是让一个类支持序列化，则需要引用Serializable接口，然后声明serialVersionUID，赋值，确定一个序列的标识。(实际上，甚至这个serialVersionUID也不是必需的，
+   		我们不声明这个serialVersonUID同样可以实现序列化，但是将会对反序列化的过程造成影响？？？)
+   		序列化：
+   		ObjectOutputStream ops = new ObjectOutputStream(new FileOutputStream(classPath));
+			ops.writeObject(book);
+			ops.close();
+   		
+   		反序列化：
+   		ObjectInputStream ois=new ObjectInputStream(new FileInputStream(classpath));
+			Object object=ois.readObject();
+			ois.close();
+		serialVersonUID是用来辅助序列化和反序列化的，原则上序列化后的数据中的serialVersonUID只有和当前类的serialVersonUID相同，才能够正常被反序列化。
+		serialVersonUID的详细工作机制是这样的：序列化的时候系统会把当前的serialVersonUID写入到序列化文件中，当反序列的时候，会去检测与当前类的serialVersonUID
+		是否一致。如果相同，可以反序列化，否则就说明当前类和序列化的类发生了某些变化，比如成员变量的数量，类型可能发生变化，这时候会报错：java.io.InvaildClassException
+		提示serialVersonUID不同。
+		
+		解释上面的疑问： 
+		##serialVersonUID如果不声明，在Intent putExtra(String name, Serializable value)，或者上面的序列化的方法，
+		如果类在反序列化时，没有变化，都没有任何问题。但如果类发生了变化，比如变量增减等，都会提示serialVersonUID不同的InvaildClassException。
+		因为如果不声明，那么会根据类的结果生成的hash作为serialVersonUID，当在反序列化时，类的结构发生变化，就会造成新类的serialVersonUID与以前的发生变化，导致异常。
+		这时，我们如果把报错中显示的serialVersonUID赋值给到当前的类中，再次反序列化，就会取得成功。
+		注意：
+		1.静态成员变量属于类，而不是对象，不会参与序列化过程。
+		2.transient关键字标记的成员变量不参与序列化过程。
+		3.serialVersonUID相同，修改了类名或成员变量的类型，反序列也会失败。java.lang.IllegalArgumentException: invalid value for field
+		
+	(9)Parcelable android提供的一种序列化接口。只要实现这个接口，一个类的对象就可以实现序列化，并通过Intent和Binder传递了。
+		序列化 
+		class Book implements Parcelable{
+			@Override
+			public int describeContents() {
+				// ***返回当前对象的内容描述，一般是0，只有当对象中存在文件描述符时，才设置成1.
+				return 0;
+			}
+			@Override
+			public void writeToParcel(Parcel dest, int flags) {//将当前对象写入到序列化结构中1.不要立即释放对象 0.表示释放，一般为0.
+				dest.writeInt(bookId);
+				dest.writeString(bookName);
+				dest.writeParcelable(bookPi, 0);//传入一个parcelalbe 对象。 
+				//***可以传递所有序列化的对象，Serialzialbe也可以传入，各种序列化的list。android 中的 Intent，Bitmap...
+			}
+		}
+		当实现了Parcelable，就可以序列化了，即通过Intent传递了。如果在接收方，没有写反序列化的代码，则直接回崩溃
+		Process: com.jh.ipctest, PID: 2001
+ 		android.os.BadParcelableException: Parcelable protocol requires a Parcelable.Creator object 
+ 		called  CREATOR on class com.jh.ipctest.parcelable.Book
+		at android.os.Parcel.readParcelableCreator(Parcel.java:2156)
+		
+		所以接收方要写好反序列化的代码，即Creator
+		public static final Parcelable.Creator<Book> CREATOR=new Parcelable.Creator<Book>() {
+		
+			@Override
+			public Book[] newArray(int size) {
+				return new Book[size];
+			}
+		
+			@Override
+			public Book createFromParcel(Parcel source) {
+				return new Book(source);
+			}
+		};
+		public Book(Parcel source) {
+			bookId=source.readInt();
+			bookName=source.readString();
+			bookPi=source.readParcelable(Thread.currentThread().getContextClassLoader());//***parcelable传当前线程的类加载器。
+		}
+		
+		***注意： 写入的顺序和读取的顺序是要一致的。bookId，bookName，bookPi。
+		
+	（10）*****两个应用之间的序列化，反序列化，必须是包名，类名都相同才行，这样序列化数据对象就可以实现，跨应用传递了。
+	（11）Parcelable 和Serializable 都可以同过Intent数据传递，这两种序列化方式如何取舍？
+		Serializable是java中的序列化接口，使用简单，开销很大，序列化和反序列需要大量的io操作。
+		Parcelable是android中的序列化方式，因此适用于android平台，就是相对于Serilizable来有些书写上的麻烦。但android平台上序列化效率高，首先Parcelable。
+		Parcelable主要用于内存中，intent，binder。而储存到设备中或通过网络传输数据传递，也是可以的（？？？？），但过程比较复杂，因此在这两种情况下建议用Serializable。
+		但存储我们经常用xml,json格式。（足以以忽略Serializable了，我觉得，当然还是看需求。xml，json不会考虑serialUID，和类的路径，类名，只关心结构，数据）
+
+2.question
+	（1）Android对单个应用所使用的最大内存做了限制，早起版本是16MB，这个限制是针对应用还是针对进程的，如果是针对应用的，那么一个应用两个进程，是否会分配到更多的内存？
+	（2）ShareUID 的用法，好处，解决什么问题？连个应用可以跑在同一个进程吗？
+	（3）一个应用报名为com.jh.test,process name=":remote",与process name="com.jh.test.remote";的区别？
+		即应用进程，私有进程和正常的进程之间的区别？
+	（4）多进程开启之后的引发的问题，会影响数据库存取？？
+	（5）多进程下的Activity任务栈
+3.interst
+
+	（1）IPC Inter-Process Communication   进程间通信
+	（2）ANR Application Not Responding    应用无响应
+	（3）序列化，详细研究：
+		http://www.cnblogs.com/JarvisHuang/p/5550109.html
+		http://www.jianshu.com/p/fcc59fb523b6
+		http://www.cnblogs.com/yezhennan/p/5527506.html
+		
+	
+	
