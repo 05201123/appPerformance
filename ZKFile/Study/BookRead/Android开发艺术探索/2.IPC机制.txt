@@ -112,7 +112,59 @@
 		Parcelable是android中的序列化方式，因此适用于android平台，就是相对于Serilizable来有些书写上的麻烦。但android平台上序列化效率高，首先Parcelable。
 		Parcelable主要用于内存中，intent，binder。而储存到设备中或通过网络传输数据传递，也是可以的（？？？？），但过程比较复杂，因此在这两种情况下建议用Serializable。
 		但存储我们经常用xml,json格式。（足以以忽略Serializable了，我觉得，当然还是看需求。xml，json不会考虑serialUID，和类的路径，类名，只关心结构，数据）
-
+	(12)Binder 一种跨进程的通讯方式。
+		Android开发中，Binder主要运用在Service中，包括AIDL与Messager。其中，简单的Service不涉及进程中通讯，比较简单，而Messager的底层也是用的AIDL。
+		所以，学习使用Binder，就是会用AIDL这种机制。
+		Demo  com.jh.ipctest.binder.Book
+		
+		package com.jh.ipctest.binder;
+		import android.os.Parcel;
+		import android.os.Parcelable;
+		/**实现Parcelable Binder是通过parcel方式传递的*/
+		public class Book implements Parcelable{
+			private String bookId;
+			private String bookName;
+			...
+		}
+		Book.aidl//TODO
+		package com.jh.ipctest.binder;
+		parcelable Book;
+		
+		IBookManager.aidl   //跨进程通讯接口文件，会在gen中生成一个IBookManager.java。系统为了方便，自动生成文件。
+		package com.jh.ipctest.binder;
+		import com.jh.ipctest.binder.Book;
+		interface IBookManager{
+			List<Book> getBookList();
+			void addBook(in Book book);
+		}
+		文件解析请看IBookManager.java
+	(13)Binder 的工作机制。
+	
+		Client-----发出远程请求，此时挂起当前线程（如果耗时，不能再UI线程发起请求）-----通过Binder-------将请求写入data，通过Transact---
+		Service----onTransact-----Binder线程池----将写入结果reply--------通过BInder-----返回数据唤醒Client----Client。
+	（14）Binder linkToDeath() 和unlinkDeath()
+		Binder 是运行在服务端的进程，如果进程挂了，Binder连接死亡，客户端请求就会失败。为了解决这个问题，Binder提供了linkToDeath()和unlinkDeath()。
+		类似于回调。
+		//TODO TODO TODO
+	(15)Android 中的IPC机制
+		（a）Boudle Intent 机制数据传递，支持Parcelable，Serilizable...
+			用法很简单，略...***android中，条件允许尽量用Parcelable，进行内存中数据传递。	
+		(b)使用文件共享
+			Android系统基于Linux，使得并发读/写文件可以没有限制的进行。甚至两个线程同时对一个文件读写也是允许的。
+			但文件共享，是可以进行进程间信息传递的。文件格式没有啥要求，json，xml，数据化二进制数据。
+			局限性：对数据同步要求不高的进程间通讯中，并妥善处理并发读写的问题。
+			
+			SharedPreference，Android 提供，轻量级数据存储，键值对。文件路径/data/data/package name/shared_prefs。
+			但是由于系统对它的读/写有一定的缓存策略，即在内存中会有一份sharedpreference文件的缓存，因此在多进程模式下，系统的读写就变得不可靠。（即使不并发）
+			因此在多进程通讯中，不建议使用sharedpreference。
+		（c）Messager
+			
+			
+		
+		
+		
+		
+	
 2.question
 	（1）Android对单个应用所使用的最大内存做了限制，早起版本是16MB，这个限制是针对应用还是针对进程的，如果是针对应用的，那么一个应用两个进程，是否会分配到更多的内存？
 	（2）ShareUID 的用法，好处，解决什么问题？连个应用可以跑在同一个进程吗？
@@ -120,6 +172,7 @@
 		即应用进程，私有进程和正常的进程之间的区别？
 	（4）多进程开启之后的引发的问题，会影响数据库存取？？
 	（5）多进程下的Activity任务栈
+	（6） Binder asInterface方法的不同处理，如果服务端 自己进程有客户端，其他进程也有客户端，会如何呢？？？？
 3.interst
 
 	（1）IPC Inter-Process Communication   进程间通信
