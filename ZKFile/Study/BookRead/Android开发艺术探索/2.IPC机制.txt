@@ -142,6 +142,7 @@
 	
 		Client-----发出远程请求，此时挂起当前线程（如果耗时，不能再UI线程发起请求）-----通过Binder-------将请求写入data，通过Transact---
 		Service----onTransact-----Binder线程池----将写入结果reply--------通过BInder-----返回数据唤醒Client----Client。
+	
 	（14）Binder linkToDeath() 和unlinkDeath()
 		Binder 是运行在服务端的进程，如果进程挂了，Binder连接死亡，客户端请求就会失败。为了解决这个问题，Binder提供了linkToDeath()和unlinkDeath()。
 		类似于回调。
@@ -157,7 +158,189 @@
 			SharedPreference，Android 提供，轻量级数据存储，键值对。文件路径/data/data/package name/shared_prefs。
 			但是由于系统对它的读/写有一定的缓存策略，即在内存中会有一份sharedpreference文件的缓存，因此在多进程模式下，系统的读写就变得不可靠。（即使不并发）
 			因此在多进程通讯中，不建议使用sharedpreference。
-		（c）Messager
+		（c）Messenger
+		按Google开发文档的说法，在跨进程通信时，推荐使用MessengerService而不是AIDL
+			在不同进程中，传递Message对象，轻量级的IPC方案，底层实现是AIDL。
+			优点：
+				1.服务端不用考虑线程问题，消息是一个一个执行的，（Looper MessageQueue Handler）
+				2.使用方法简单，AIDL做了封装。
+			缺点：
+				1.简单的交互
+				2.数据传递受限，Parcelable等可序列化的数据，通过msg bundle，msg.obj 不能使用，否则报异常
+				3.服务器端串行执行客户端消息，无法并行，优点也是缺点。（1个服务端对应多个客户端）
+				 E/AndroidRuntime(8644): FATAL EXCEPTION: main
+ 				 E/AndroidRuntime(8644): Process: com.jh.ipctest, PID: 8644
+ 				 E/AndroidRuntime(8644): java.lang.RuntimeException: Can't marshal non-Parcelable objects across processes.
+ 				 E/AndroidRuntime(8644): 	at android.os.Message.writeToParcel(Message.java:507)
+ 				 E/AndroidRuntime(8644): 	at android.os.IMessenger$Stub$Proxy.send(IMessenger.java:84)
+ 				 E/AndroidRuntime(8644): 	at android.os.Messenger.send(Messenger.java:50)
+ 		Demo
+ 		
+ 		客户端代码：
+ 		public class BinderActivity extends Activity {
+	
+		private TextView textview;
+	
+		private Messenger mMessenger;
+		
+		//接收服务端消息的Messenger，赋值在每一个message上传给服务器。
+		private Messenger replyMessenger=new Messenger(new Handler(){
+		public void handleMessage(Message msg) {
+			//TODO Replyto Message
+			};
+		
+		});
+		/**
+		*客户端 service 连接类，当服务连接会通过 onServiceConnected返回binder，当服务端
+		*挂掉会onServiceDisconnected
+		*/
+		private ServiceConnection mConnection=new ServiceConnection() {
+		
+			@Override
+			public void onServiceDisconnected(ComponentName name) {
+				//TODO 服务端进程挂掉，会回调这个方法。可以执行重新连接的方法
+			}
+		
+			@Override
+			public void onServiceConnected(ComponentName name, IBinder service) {
+				//服务端绑定之后的回调，返回binder。
+				// ComponentName name 用于区分不同的服务端，即一个客户端，可以通过binder连接多个服务端。
+				mMessenger=new Messenger(service);
+				Message msg=Message.obtain();
+				msg.what=1001;
+				Bundle data=new Bundle();
+				data.putString("book", "aaaaaaa");
+//				data.putParcelable("book", book); //###问题（7）parcelable会崩溃，为什么？
+				msg.setData(data);
+				msg.replyTo=replyMessenger;//赋值服务器端的reply
+				try {
+					mMessenger.send(msg); //发送消息到服务器端
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+			}
+		};
+
+		private Book book;
+	
+		@Override
+		protected void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			setContentView(R.layout.activity_binder);
+			textview = (TextView) findViewById(R.id.textView1);
+			textview.setOnClickListener(new OnClickListener() {
+			
+				@Override
+				public void onClick(View v) {
+					Message msg=Message.obtain();
+					Bundle data=new Bundle();
+					data.putString("book", "bbbbbb");
+					msg.setData(data);
+					msg.what=1002;
+					msg.replyTo=replyMessenger;
+					try {
+						mMessenger.send(msg);
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					}
+				
+				
+				
+				}
+			});
+			setViews();
+			Intent intent=new Intent(this,MessengerService.class);
+			bindService(intent, mConnection, Context.BIND_AUTO_CREATE);//绑定服务
+		}
+
+		private void setViews() {
+			Intent intent=getIntent();
+			book = intent.getParcelableExtra("book");
+			textview.setText(book.getBookId()+" : "+book.getBookName());
+		}
+		@Override
+		protected void onDestroy() {
+			unbindService(mConnection);
+			super.onDestroy();
+		}
+	
+	}
+	服务器端代码：
+	/**
+ 	* Messenger服务端
+ 	*/
+	public class MessengerService extends Service {
+		private  static class MessengerHandler extends Handler{
+			@Override
+			public void handleMessage(Message msg) {
+				switch (msg.what) {
+				case 1001:
+					Bundle data=msg.getData();
+//					com.jh.ipctest.binder.Book book=data.getParcelable("book");
+					break;
+				case 1002:
+//					com.jh.ipctest.binder.Book book=data.getParcelable("book");
+					Bundle data2=msg.getData();
+					Messenger replyTo=msg.replyTo;
+					Message replyToMsg=Message.obtain();
+					replyToMsg.what=1003;
+					Bundle data3=new Bundle();
+					data3.putString("reply", "cccccc");
+					replyToMsg.setData(data3);//   接收到消息，可反馈给客户端一个reply。
+					try {
+						replyTo.send(replyToMsg);
+					} catch (RemoteException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					break;
+				default:
+					break;
+				}
+				super.handleMessage(msg);
+			}
+		}
+		@Override
+		public IBinder onBind(Intent intent) {
+			MessengerHandler handler=new MessengerHandler();
+			Messenger messenger=new Messenger(handler);
+			return messenger.getBinder();//为客户端返回binder，用于交互。
+		}
+		}
+ 		
+ 		Messenger 工作机制：
+ 		Client -----创建Messenger（通过服务器端回调的IBinder）----发送消息-----
+ 		Service（Handler 接收消息）------通过Msg.replyTo,取得客户端来的Messenger----发送消息----通知客户端消息收到。
+ 		
+ 	         （d）AIDL
+ 	    Messenger是轻量型的AIDL，只能执行串行的请求，一条消息 一条消息的处理。
+ 	    AIDL的更灵活，可以处理复杂的CS之间的交互，可以并行，这是其优势。
+ 	          支持的数据类型
+ 	          （1）基础数据类型
+ 	          （2）String和CharSequence
+ 	          （3）List：只支持ArrayList，里面每一个元素支持AIDL
+ 	          （4）Map：只支持HashMap，里面每一个元素支持AIDL
+ 	          （5）Parcelable：所有实现Parcelable接口的对象。（Serializable不行吗？***）
+ 	          	注意******：如果AIDL文件中使用到了自定义的Parcelable对象，那么必须新建一个和它同名的AIDL文件，并在其中声明为Parcelable。
+ 	          	例如：	Book.aidl//TODO
+						package com.jh.ipctest.binder;
+						parcelable Book;
+				注意******：AIDL文件与Parcelable对象即使在同一个包中，一旦AIDL引用到了Parcelable对象，那么也要显示的import的Parcelable对象。
+ 	          （6）AIDL，所有AIDL接口本身也可以在AIDL文件中使用。
+ 	          
+ 	     AIDL注意：AIDL中，除了基本数据类型，其他的方法参数 in，out，inout，来修饰，比如
+ 	     void addBook(in Book book); in 表示输入 out 表示输出，inout 表示输入输出型参数。用out，inout会造成底层一定的开销。
+ 	     		AIDL开发，所有文件最好放在一个包中，因为序列化和反序列化需要包的路径完全相同，要不然会报错。所以，为了防止客户端，服务器端迁移，最好是放在同一
+ 	     		个包中。比如一开始是一个app的双进程，现在改成两个app的进程间交互。
+ 	     
+ 	            
+ 	          
+ 	    
+ 		
+ 		
+ 					 
+ 			
+				
 			
 			
 		
@@ -173,6 +356,14 @@
 	（4）多进程开启之后的引发的问题，会影响数据库存取？？
 	（5）多进程下的Activity任务栈
 	（6） Binder asInterface方法的不同处理，如果服务端 自己进程有客户端，其他进程也有客户端，会如何呢？？？？
+	（7） Messenger传递Parcelable 数据回失败，提示反序列化时，提示找不到类。
+ 		Class not found when unmarshalling: com.jh.ipctest.binder.Book
+ 		java.lang.ClassNotFoundException: com.jh.ipctest.binder.Book
+ 		at java.lang.Class.classForName(Native Method)
+ 		at java.lang.Class.forName(Class.java:251)
+ 		at java.lang.Class.forName(Class.java:216)
+ 		at android.os.Parcel.readParcelableCreator(Parcel.java:2133)
+		
 3.interst
 
 	（1）IPC Inter-Process Communication   进程间通信

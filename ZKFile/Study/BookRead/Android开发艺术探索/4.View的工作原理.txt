@@ -1,0 +1,31 @@
+第二章 View 的工作机制
+
+1.knowledge
+	(1)View的三个流程
+		a.measure  测量流程
+		b.layout   布局流程
+		c.draw	   绘制流程	
+       （2）
+ 	          
+ 	    
+ 		
+ 		
+ 					 
+ 			
+				
+			
+			
+		
+		
+		
+		
+	
+2.question
+	（1）
+		
+3.interst
+
+	（1）
+		
+	
+	
