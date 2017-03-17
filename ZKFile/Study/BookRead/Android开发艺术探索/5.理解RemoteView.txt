@@ -1,0 +1,30 @@
+第五章 理解RemoteView
+
+1.knowledge
+	(1)RemoteView 一种View的结构，实现跨进程控制view
+		主要用在通知栏Notiifycation和桌面小部件Widget。
+		
+       （2）
+ 	          
+ 	    
+ 		
+ 		
+ 					 
+ 			
+				
+			
+			
+		
+		
+		
+		
+	
+2.question
+	（1）
+		
+3.interst
+
+	（1）
+		
+	
+	
