@@ -1,0 +1,169 @@
+第12章 Bitmap加载与Cache
+
+1.knowledge
+	(1)Bitmap与OOM异常
+	OOM，java.lang.OutofMemoryError:bitmap size exceeds VM budget.
+	OOM一般都伴随着内存泄漏，Bitmap引起OOM的原因是图片过多，都被强引用，无法释放，造成OOM，或者一张图片过大，直接OOM。
+	为了避免OOM的异常，同样需要应用快速流畅，我们对图片进行管理：
+	a、图片压缩处理：减少内存浪费。
+	   Volley的源码：
+	   byte[] data = response.data;
+        BitmapFactory.Options decodeOptions = new BitmapFactory.Options();
+        Bitmap bitmap = null;
+        if (mMaxWidth == 0 && mMaxHeight == 0) {
+            decodeOptions.inPreferredConfig = mDecodeConfig;
+            bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
+        } else {
+            // If we have to resize this image, first get the natural bounds.
+            decodeOptions.inJustDecodeBounds = true;//当为TRUE时，只解析bit宽高，而不加载图片，用来获取图片实际的宽高。
+            BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
+            int actualWidth = decodeOptions.outWidth;
+            int actualHeight = decodeOptions.outHeight;
+
+            // Then compute the dimensions we would ideally like to decode to.//获取期望的宽高。
+            int desiredWidth = getResizedDimension(mMaxWidth, mMaxHeight,
+                    actualWidth, actualHeight);
+            int desiredHeight = getResizedDimension(mMaxHeight, mMaxWidth,
+                    actualHeight, actualWidth);
+
+            // Decode to the nearest power of two scaling factor.
+            decodeOptions.inJustDecodeBounds = false;
+            // TODO(ficus): Do we need this or is it okay since API 8 doesn't support it?
+            // decodeOptions.inPreferQualityOverSpeed = PREFER_QUALITY_OVER_SPEED;
+            decodeOptions.inSampleSize =
+                findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);
+            Bitmap tempBitmap =//生成最接近的压缩图，
+                BitmapFactory.decodeByteArray(data, 0, data.length, decodeOptions);
+
+            // If necessary, scale down to the maximal acceptable size. 减少内存，可以再缩一次，正适应控件。
+            if (tempBitmap != null && (tempBitmap.getWidth() > desiredWidth ||
+                    tempBitmap.getHeight() > desiredHeight)) {
+                bitmap = Bitmap.createScaledBitmap(tempBitmap,
+                        desiredWidth, desiredHeight, true);
+                tempBitmap.recycle();
+            } else {
+                bitmap = tempBitmap;
+            }
+        }
+	
+	 // Visible for testing. 取最小的所放值。
+	 static int findBestSampleSize(
+            int actualWidth, int actualHeight, int desiredWidth, int desiredHeight) {
+        double wr = (double) actualWidth / desiredWidth;
+        double hr = (double) actualHeight / desiredHeight;
+        double ratio = Math.min(wr, hr);
+        float n = 1.0f;
+        while ((n * 2) <= ratio) {
+            n *= 2;
+	 }
+
+        return (int) n;
+    }
+	//获取期望的宽高，如果不成比例，取小的值。比如50,50，加载100,120的图片，这时的期望宽高就是50/1.2,50
+	这时高与实际控件相等，宽小一些，不撑满的话，不失真。
+	private static int getResizedDimension(int maxPrimary, int maxSecondary, int actualPrimary,
+            int actualSecondary) {
+        // If no dominant value at all, just return the actual.
+        if (maxPrimary == 0 && maxSecondary == 0) {
+            return actualPrimary;
+        }
+
+        // If primary is unspecified, scale primary to match secondary's scaling ratio.
+        if (maxPrimary == 0) {
+            double ratio = (double) maxSecondary / (double) actualSecondary;
+            return (int) (actualPrimary * ratio);
+        }
+
+        if (maxSecondary == 0) {
+            return maxPrimary;
+        }
+
+        double ratio = (double) actualSecondary / (double) actualPrimary;
+        int resized = maxPrimary;
+        if (resized * ratio > maxSecondary) {
+            resized = (int) (maxSecondary / ratio);
+        }
+        return resized;
+	 }
+			
+	b、图片添加缓存：内存缓存，磁盘缓存，节省流量，减少响应时间。这是一种平衡的概念，内存，流量，流畅度
+	的综合考虑。
+	LruCache，内存缓存，近期最少使用算法。比较简单。
+	DiskLruCache android官方文档推荐。比较难搞，用到了一些java 1.8的api，但源码可以看看，不长，可以看懂
+	https://android.googlesource.com/platform/libcore/+/android-4.1.1_r1/luni/src/main/java/libcore/io/DiskLruCache.java
+	
+	DiskLruCache通过静态方法生成：
+	public static DiskLruCache open(File directory, int appVersion, int valueCount, long maxSize){
+		directory是缓存文件路径：getCacheDir();存在/dada/下，getExternalCacheDir()，存在sd卡的/sdcard/Android/package_name/cache。
+		如果是希望卸载应用之后删除缓存文件，就用上面两个方法目录，如果是其他，就可以自己自定义路径。
+		appVersion： version，当版本号发生变化时，DiskLruCache清空之前的缓存。
+		valueCount： 单个节点所对应的数据的个数。一般设置为1即可。
+		maxSize：缓存Max值，比如1024*1024=1M。
+	}
+	存文件
+	DiskLruCache cache=DiskLruCache.open(file2, 1, 1, 50*1024*1024);
+	Editor editor=cache.edit("");
+	editor.set(index, value);//字符串存入
+	editor.newOutputStream(index)//输入流的形式，存入
+	editor.commit();//提交
+	editor.abort();//失败
+
+	获取数据
+	Snapshot snapshot=cache.get("");
+	snapshot.getInputStream(index);
+	snapshot.getString(0);
+
+
+	
+	(2)图片的地址一般是url，可能包含一些特殊字符，将图片存放到本地，如何以特定的唯一的名字存储呢？
+	一般通过MD5加密：
+	/**
+	 * MD5 加密
+	 */
+	public static String getMD5Str(String str) {
+		MessageDigest messageDigest = null;
+		try {
+			if (!TextUtils.isEmpty(str)) {
+				messageDigest = MessageDigest.getInstance("MD5");
+				messageDigest.reset();
+				messageDigest.update(str.getBytes("UTF-8"));
+
+				byte[] byteArray = messageDigest.digest();
+				StringBuffer md5StrBuff = new StringBuffer();
+
+				for (int i = 0; i < byteArray.length; i++) {
+					if (Integer.toHexString(0xFF & byteArray[i]).length() == 1) {
+						md5StrBuff.append("0").append(
+								Integer.toHexString(0xFF & byteArray[i]));
+					} else {
+						md5StrBuff.append(Integer.toHexString(0xFF & byteArray[i]));
+					}
+				}
+				return md5StrBuff.toString();
+			}
+		} catch (NoSuchAlgorithmException e) {
+			System.exit(-1);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
+
+	
+	
+
+2.question
+	1.图片内存如何计算？
+	拿一张1024*1024像素的图片来说，假定采用ARGB888格式存储，那么它的内存为1024*1024*4=4M。
+	获取图片的内存：bitmap.getRowBytes()*bitmap.getHeight();
+		
+3.interst
+	DiskLruCache 源码实现，并写出自己的DiskLruCache
+	
+	
+	
+	
+
+		
+	
+	
