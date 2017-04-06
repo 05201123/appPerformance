@@ -1,0 +1,25 @@
+第13章 综合技术
+
+1.knowledge
+	(1)使用CrashHandler来获取应用的Crash信息。
+		Thread.setDefaultUncaughtExceptionHandler(UncaughtExceptionHandler handler)
+		获取整个进程的异常。
+		new Thread().setUncaughtExceptionHandler(),获取当前Thread的异常。
+		如果线程自己消费了一成，整个进程的异常就接收不到异常信息了。当然不是所有的异常都能捕捉到。
+		Throwable.getStackTrace()获取执行轨迹，主要crash的主要信息。
+		另外重要的是手机的信息，用户的信息，应用的信息。。。
+	
+
+2.question
+	
+		
+3.interst
+
+	
+	
+	
+	
+
+		
+	
+	

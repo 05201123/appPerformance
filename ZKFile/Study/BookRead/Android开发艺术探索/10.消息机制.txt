@@ -1,0 +1,77 @@
+第10章 Android的消息机制
+
+1.knowledge
+	1.ThreadLocal 是可以在每个线程中存储数据，数据存储之后，只有在指定线程中可以获取到存储的数据。
+		在这里是存储Looper的。Looper.myLooper()，就是从ThreadLocal获取Looper。
+		一般来说，当某些数据是以线程为作用域并且不同线程具有不同的数据副本的时候，就可以采用ThreadLocal。
+		另一个应用场景：复杂逻辑下的数据传递，比如监听器的传递，有些时候，一个线程的任务过于复杂，这可能表现在函数调用栈比较深以及代码入口的多样性，
+		在这种情况下，我们又需要监听器贯穿整个线程的执行过程。
+		如果采用参数函数调用，会很麻烦，传来传去？如果采用静态变量来作为监听器，如果是单线程模型还可以，如果是多线程，每个线程都需要监听器，就需要多个静态变量，
+		这无疑是不可取的。	
+	2.更新UI为何在主线程中进行？UI控件不是线程安全的。
+		（1）加锁机制会让UI访问的逻辑变得复杂。
+		（2）锁机制会降低UI访问的效率，因为锁机制会阻塞某些线程的执行。
+		最简单高效的方式就是采用单线程模型来处理UI操作。
+		当然，我的觉是UI的特性，才觉得采用单线程模型的，比如UI更改频繁，UI需要流畅，UI更改业务功能模块紧凑等特点，才是问题的原因。
+	3.MessageQueue是单链表数据结构，插入，删除遍历。
+		next()方法，是一个无限循环的方法，如果消息队列中没有消息，则next方法会一直阻塞在这里。
+	4.Looper，Looper.loop(),无限循环执行MessageQueue.next(),处理每一个消息。
+		注意：必须先执行Looper.prepare(),线程默认没有looper。
+		Looper是可以退出的，quit()方法和quitsafely（）方法。前者直接退出，后者等到当前时间之前的Message执行完之后退出。
+		Looper退出后，通过Handler发送消息，会返回false，发送失败。
+		建议不用时，手动退出looper，否则子线程一直出于等待状态。不会销毁。
+	5.Handler，初始化，必须要先确保有Looper。如果没会报报错。
+	6.Android主线程是ActivityThread，主线程的入口是main()，
+	public static void main(String[] args) {
+        SamplingProfilerIntegration.start();
+
+        // CloseGuard defaults to true and can be quite spammy.  We
+        // disable it here, but selectively enable it later (via
+        // StrictMode) on debug builds, but using DropBox, not logs.
+        CloseGuard.setEnabled(false);
+
+        Environment.initForCurrentUser();
+
+        // Set the reporter for event logging in libcore
+        EventLogger.setReporter(new EventLoggingReporter());
+
+        Security.addProvider(new AndroidKeyStoreProvider());
+
+        Process.setArgV0("<pre-initialized>");
+
+        Looper.prepareMainLooper();
+
+        ActivityThread thread = new ActivityThread();
+        thread.attach(false);
+
+        if (sMainThreadHandler == null) {
+            sMainThreadHandler = thread.getHandler();
+        }
+
+        AsyncTask.init();
+
+        if (false) {
+            Looper.myLooper().setMessageLogging(new
+                    LogPrinter(Log.DEBUG, "ActivityThread"));
+        }
+
+        Looper.loop();
+
+        throw new RuntimeException("Main thread loop unexpectedly exited");
+    }
+    
+    ActivityThread 中 private class H extends Handler {}，处理各种消息，比如Activity，Service。。。
+
+2.question
+	
+		
+3.interst
+
+	
+	
+	
+	
+
+		
+	
+	

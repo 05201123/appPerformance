@@ -1,0 +1,104 @@
+第11章 Android的线程与线程池
+
+1.knowledge
+	(1)AsyncTask封装线程池与Handler，它主要方便开发者子线程中更新UI。
+		a、AsyncTask的类必须在主线程中加载，Android 4.1及以上版本中已经被系统自动完成。ActivityThread的main方法中，会调用AsyncTask.init();
+			//用于初始化一些静态的资源，比如Handler，线程池等，可以减少异常的出现，毕竟忽略了同步，类似于主线程模型，就付出一些代价。
+		b、AsyncTask的对象必须在主线程中创建。？？？为什么？？？ 可能是避免线程不同步，而产生麻烦的处理。
+		c、execute()必须在主线程中调用，只能调用一次。//1、避免并发，2、需求决定，会回调onPreExecute（）等。
+		d、不要在程序中直接调用onPreExecute()，onPostExecute()、doInBackgroud()和onProgressUpdate()，生命周期方法或者说工作流，都有状态值，自己
+		调用，可能会发生状态出现错乱，而引起错误。
+		e、Android 1.6之前，AsyncTask是串行执行的，1.6之后，开始采用线程池来处理并行任务。3.0之后，又采用一个线程来执行串行任务。当然3.0之后，可以设置
+		执行器，可以放一个可以执行并行任务的线程池进去，从而实现并行。
+
+	AsyncTask有1个线程池（THREAD_POOL_EXECUTOR，用来执行task）和一个sHanlder（设计成静态是为了多个task复用），InternalHandler，用来切换到主线程。
+		1个任务管理器，SERIAL_EXECUTOR用于task排队。
+
+
+	(2)HandlerThread是一种具有消息循环的线程，在它的内部可以使用Handler。
+		封装了Handler的Thread，注意：用完之后要释放Looper，否者Thread无法释放，无限循环，
+		quit()或者quitsafely()...
+        (3)IntentService是一个服务，系统对其进行了封装，可以更好的执行后台任务。内部封装了一个HandlerThread来执行任务，
+	任务执行完IntentService会自动退出。
+		IntentService是一种服务，不容易被杀死，可以尽量保证任务的完成。而如果是一个后台线程，由于这个时候没有活动的四大组件，
+		那么进程的优先级就会非常低，很容易被杀死。
+	
+	(4)线程池
+		a、重用线程池中的线程，避免因为线程的创建和销毁锁带来的性能开销。
+		b、能有效的控制线程池的最大并发数，避免大量的线程之间因互相抢系统资源而导致阻塞的现象。
+		c、能够对线程进行管理，并提供定时执行以及指定间隔循环执行等功能。
+
+		ThreadPoolExecutor构造函数中重要参数
+		int corePoolSize, 核心线程数，默认一直存活。如果设置了allowCoreThreadTimeOut()为true，这时闲置的线程为等待keepAliveTime，如果超时，则线程终止。
+					注意****不能无限多的去new ThreadPoolExecutor（）（如果设置了corePoolSize，不销毁的话），会触发stack内存溢出。
+                int maximumPoolSize,最大线程数，当活动线程达到这个数值之后，后续的新任务将会阻塞。
+                long keepAliveTime,非核心线程闲置时的超时时长，超过这个时长，非核心线程就会被回收。如果设置了allowCoreThreadTimeOut()为true时，则keepAliveTime作用于核心线程。
+                TimeUnit unit,指定keepAliveTime的时间单位。
+		BlockingQueue<Runnable> workQueue, 任务队列，线程安全
+                ThreadFactory threadFactory	线程工厂，提供创建thread的方法。
+		
+
+		AsyncTask
+		private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+		private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
+		private static final int MAXIMUM_POOL_SIZE = CPU_COUNT * 2 + 1;
+		private static final int KEEP_ALIVE = 1;
+		 private static final BlockingQueue<Runnable> sPoolWorkQueue =new LinkedBlockingQueue<Runnable>(128);//任务队列容量128个
+		public static final Executor THREAD_POOL_EXECUTOR= new ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,
+                    TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
+
+		线程池规则：
+		a、如果线程中线程数量未达到核心线程数，那么会启动一个核心线程来执行任务。
+		b、如果线程池中的线程数量达到或者超过和核心线程的数量，那么任务会被插入到任务队列中排队等待执行。
+		c、如果在步骤b中，无法将任务插入到任务队列中，这往往是由于任务队列已满，这个时候如果线程数量未达到线程池规定的最大值，
+		那么会立刻启动一个非核心线程来执行任务。
+		d、如果步骤c中，线程数量已达到线程池规定的最大值，那么就会拒绝执行此任务，ThreadPoolExecutor会调用RejectedExecutionHandler中rejectedExecution
+		来通知调用者。
+
+		线程池分类：Executors
+		（1）FixedThreadPool 固定数量的线程池。适合不定时有零星任务，但不多的时候来用
+			ExecutorService newFixedThreadPool(int nThreads){
+			 return new ThreadPoolExecutor(nThreads, nThreads,
+                                      0L, TimeUnit.MILLISECONDS,
+                                      new LinkedBlockingQueue<Runnable>());
+			}；
+		（2）CachedThreadPool 执行大量而耗时少的任务。
+			ExecutorService newCachedThreadPool(){
+			return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                                      60L, TimeUnit.SECONDS,
+                                      new SynchronousQueue<Runnable>());
+			}
+		（3）SingleThread 单线程执行。
+			public static ExecutorService newSingleThreadExecutor() {
+			 return new FinalizableDelegatedExecutorService
+				(new ThreadPoolExecutor(1, 1,
+                                    0L, TimeUnit.MILLISECONDS,
+                                    new LinkedBlockingQueue<Runnable>()));
+			}
+			 }
+		（4）ScheduledThreadPool 执行定时任务和有固定周期的任务。
+			public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize) {
+				return new ScheduledThreadPoolExecutor(corePoolSize);
+			 }
+			 public ScheduledThreadPoolExecutor(int corePoolSize) {
+				super(corePoolSize, Integer.MAX_VALUE, 0, NANOSECONDS,
+			new DelayedWorkQueue());
+    }
+
+
+2.question
+	(1)Servie 中stopself（）与stopself（int startId）区别？
+	stopself()会立即停止服务，而stopSelf则会等待所有的消息都处理完才会终止服务。
+
+	
+		
+3.interst
+
+	
+	
+	
+	
+
+		
+	
+	

@@ -1,0 +1,264 @@
+第七章 动画
+
+1.knowledge
+	(1)动画分类
+		a.tween animation 补间动画
+			建议用xml来定义动画，因为xml可读性更好。
+			android：interpolator 动画运行的速率变化，加速，减速，匀速。默认是先加速再加速
+			android：shareInterpolator animation set 是否用一个动画变化率
+		
+		***rotote animation android:pivotX="50%"与android:pivotX="50"下过一致，都是View X轴的一半旋转。
+
+		***关于标签shareInterpolator默认是true，当set上设置了android：interpolator，animation也设置了android：interpolator了，
+		以set上为准，如果手动android：shareInterpolator为false，则以animation上设置的未准。
+		
+		b.frame animation 帧东动画
+			注意OOM
+		c.property animation 属性动画
+			view跟随动画移动，而不是view的影像在移动。api 11 加入，11之下，需要兼容包nineoldandroids.jar兼容。但兼容之后仍然是
+			tween动画的效果，而不是属性动画的效果。
+
+
+			Demo：
+			（1）ObjectAnimator.ofFloat(animationBT, "translationX", 100f).start(); 
+			效果：view从左向右移动100，改变view 的getTranslationX()的值为100.
+
+			（2）ValueAnimator colorAnim=ObjectAnimator.ofInt(animationBT, "backgroundColor", 0XffCC0000,
+//						0xffff6600,0Xffffcc00,0Xff00cc00,0xff99cc33,0xff3366cc);
+//				colorAnim.setDuration(2000);
+//				colorAnim.setEvaluator(new ArgbEvaluator());//色值估值器
+//				colorAnim.setRepeatCount(ValueAnimator.INFINITE);
+//				colorAnim.setRepeatMode(ValueAnimator.REVERSE);
+//				colorAnim.setInterpolator(new LinearInterpolator());//速率差值器
+//				colorAnim.start();
+			效果：view的背景色不端的变化。
+			（3）	AnimatorSet set=new AnimatorSet();
+				set.playTogether(ObjectAnimator.ofFloat(animationBT, "rotationX", 0,360),
+						ObjectAnimator.ofFloat(animationBT, "rotationY", 0,180),
+						);
+				set.setDuration(5000).start();
+		
+			效果：几个动画一起执行，AnimatorSet的用法和AnimationSet差不多。
+			（4）xml res/animator 目录下：（未测试）
+				<set
+					android：ordering="together"//动画一起执行，sequentially：动画一个个的顺序执行	
+				>
+					<objectAnimator>
+					<animator>
+			加载xml，也与tween animation相似
+			AnimatorSet set=AnimatorInflater.loadAnimator(context, id），当然animatorset继承animator，有点像view，viewgroup。
+
+	（2）android 自定义animation 集成Animation，可以自定义动画
+		其中关键的是复写 applyTransformation方法，该方法控制view的运行轨迹。
+		比如RotateAnimation
+	 protected void applyTransformation(float interpolatedTime, Transformation t) {
+		float degrees = mFromDegrees + ((mToDegrees - mFromDegrees) * interpolatedTime);
+		float scale = getScaleFactor();
+        
+		if (mPivotX == 0.0f && mPivotY == 0.0f) {
+			 t.getMatrix().setRotate(degrees);
+		} else {
+			t.getMatrix().setRotate(degrees, mPivotX * scale, mPivotY * scale);
+		}
+		}
+	  
+		android ApiDemo Rotate3DAnimation
+
+		protected void applyTransformation(float interpolatedTime, Transformation t) {
+		super.applyTransformation(interpolatedTime, t);
+		final float fromDegree=mFromDegree;
+		float degrees=fromDegree+((mToDegree-mFromDegree)*interpolatedTime);
+		final float centerX=mCenterX;
+		final float centerY=mCenterY;
+		final Camera camera=mCamera;
+		final Matrix matrix=t.getMatrix();
+		camera.save();
+		if(mReverse){
+			camera.translate(0, 0, mDepthZ*interpolatedTime);
+		}else{
+			camera.translate(0, 0, mDepthZ*(1-interpolatedTime));
+		}
+		camera.rotateY(degrees);
+		camera.getMatrix(matrix);
+		camera.restore();
+		
+		matrix.preTranslate(-centerX, -centerY);
+		matrix.postTranslate(centerX, centerY);
+	}
+        （3）LayoutAnimation
+		作用于ViewGroup，让其子元素出场都会有这种动画效果。
+		比如Listview，每一个view的动画效果设置。
+
+		layout_animation.xml
+		<?xml version="1.0" encoding="utf-8"?>
+		<layoutAnimation xmlns:android="http://schemas.android.com/apk/res/android"
+		android:delay="0.5"  //动画间的延迟时间
+		android:animationOrder="normal"	//子view执行动画的顺序
+		android:animation="@anim/listview_animation2"	//每一个子view的动画
+		>
+		</layoutAnimation>
+
+
+		listview_animation2.xml
+		<?xml version="1.0" encoding="utf-8"?>
+		<set xmlns:android="http://schemas.android.com/apk/res/android"
+		 android:fillAfter="true"
+		android:duration="300"
+		android:zAdjustment="normal"
+		android:interpolator="@android:anim/linear_interpolator"
+		android:shareInterpolator="true"
+		>
+ 			<alpha 
+ 			android:fromAlpha="0"
+ 			android:toAlpha="1"
+ 			/>
+ 		<translate 
+ 		android:fromXDelta="500"
+ 		android:toXDelta="0"
+ 		android:toYDelta="0"
+ 		android:fromYDelta="-300"
+ 		/>
+		</set>
+
+		
+		listview的用法，当setadapter或者notifydatachanged时，会触发动画。
+		 <ListView
+		 android:id="@+id/animation_lv" 
+		android:layout_below="@id/animation_bt"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		 android:layoutAnimation="@anim/layout_animation"
+		></ListView>
+
+		另外一种方式：
+		Animation animation=AnimationUtils.loadAnimation(AnimationActivity.this, R.anim.listview_animation2);
+		LayoutAnimationController controller=new LayoutAnimationController(animation);
+		controller.setDelay(0.5f);
+		controller.setOrder(LayoutAnimationController.ORDER_NORMAL);
+		listview.setLayoutAnimation(controller);
+		BaseAdapter adapter=(BaseAdapter)listview.getAdapter();
+		adapter.notifyDataSetChanged();
+
+	(4)Activity 之间动画切话
+		overridePendingTransition(enterAnim, exitAnim);
+		***只有在startactivity 和finish（）之后有效
+	
+	(5)差值器Interpolator与估值器TypeEvaluator
+		TimeInterpolator，根据时间的百分比来计算出当前属性值改变的百分比。 动画改变速率
+		我们用到的有LinearInterpolator，匀速；	
+				AccelerateDecelerateInterpolator ，先加速后减速。
+				AccelerateInterpolator,加速；
+		其实就是一个个的算法，不同的算法，决定动画运行的进度。
+
+		TypeEvaluator，根据当前属性改变的百分比，来计算改变后的属性值。
+		IntEvaluator，FloatEvaluator，ArgbEvaluator（用于颜色属性渐变）
+		******他们是实现非匀速动画的重要手段，千奇百怪。
+
+		其实View动画，可以看成一个计时器，不段的一小段时间内，将view的属性不断变化，形成动画效果。
+		这个时间段为10ms/帧（动画的默认刷新频率，不知为何定为10ms/帧，可能和视觉有关，当16ms/帧时，就可以平滑滚动）。
+		比如during=300ms，就可以看成30帧，每隔10ms，通过Interpolator，根据动画执行速率，算出百分比，再通过TypeEvaluator，
+		算出实际view的改变值。这样一帧一帧的改变，形成动画。
+
+		AccelerateInterpolator.java 代码
+		public class AccelerateInterpolator implements Interpolator {
+		private final float mFactor;
+		private final double mDoubleFactor;
+
+		public AccelerateInterpolator() {
+			mFactor = 1.0f;
+			mDoubleFactor = 2.0;
+		}
+    
+		 public AccelerateInterpolator(float factor) {
+		mFactor = factor;
+		mDoubleFactor = 2 * mFactor;
+		}
+    
+		public AccelerateInterpolator(Context context, AttributeSet attrs) {//通过xml获取
+			TypedArray a =
+			context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.AccelerateInterpolator);
+        
+			mFactor = a.getFloat(com.android.internal.R.styleable.AccelerateInterpolator_factor, 1.0f);
+			mDoubleFactor = 2 * mFactor;
+
+			a.recycle();
+		 }
+    
+		public float getInterpolation(float input) {
+			if (mFactor == 1.0f) {
+			return input * input;//平方
+			} else {
+			return (float)Math.pow(input, mDoubleFactor);//n次幂
+			}
+		}
+		}
+		随着时间的输入，百分比成幂增长
+
+
+		IntEvaluator，求取改变值
+		
+		public class IntEvaluator implements TypeEvaluator<Integer> {
+
+		    public Integer evaluate(float fraction, Integer startValue, Integer endValue) {
+			int startInt = startValue;
+			return (int)(startInt + fraction * (endValue - startInt));// 很简单的算法
+		}
+		}
+	
+	(6)实现一个类，任意属性的动画。
+		如果用property animation，重要是传递property，如果属性不存在这接崩溃。
+		如果改变属性，不能更新view，动画也不会有效果。
+
+		我们对object的abc的属性做对动画，必须满足两个条件：
+		a.object必须提供setAbc方法。如果动画的时候没有设置初始值，还需要提供getAbc，获取初始值。否则崩溃。
+		b.object设置setAbc方法，所做的改变必须通过某种方法在UI上表现出来，要不然不会有动画效果。
+
+
+		官方提供实现属性动画的三种方式：
+		（1）设置set，get方法，并且可以该表UI，如果有有权限，可继承等。。。
+		（2）包装原有的类，间接实现set，get方法。
+			包装类实现set，get方法，在set方法中实现view的变化。
+		（3）采用ValueAnimator，监听动画过程，自己实现属性改变。
+		objectAnimator.addUpdateListener(new AnimatorUpdateListener() {
+					
+			@Override
+			public void onAnimationUpdate(ValueAnimator animation) {
+				animation.getAnimatedFraction();//获取百分比，更新UI
+						
+			}		});
+
+	（7）属性动画的工作原理
+		//查看源码  源码不难，随意看看
+		ObjectAnimator--->存入属性，各种参数-----start（）-----AnimationHandler extends Runnalbe---Choreographer（通过信号啥的vsync）
+		----回调AnimationHandler run方法----AnimationHandler doAnimationFrame()----Animator doAnimationFrame()--->animateValue（）
+		差值器Interpolator与估值器TypeEvaluator
+		
+		回调AnimationHandler run方法会一帧一帧的调用，直到动画结束，或者自己终止，当然还有一些动画的监听器和控制方法。
+
+	 (8)动画注意事项
+		***OOM异常内存泄漏问题
+		***兼容性问题，api11以上
+		***不要使用px，尽量用dp，适配屏幕
+		***硬件加速，使用动画过程中，开启硬件加速，这样会提高动画流畅性。
+		***Tween动画，Tween动画是对View的影像做动画，并不是真正改变View的状态，因为有时候出现动画
+		完成后view无法隐藏的现象，即setVisiblility(View.GONE)失效，这时候需要调用view.clearAnimation()
+		清除View动画即可以解决。
+
+2.question
+	(1)ValueAnimator ObjectAnimator区别？
+		ObjectAnimator继承自ValueAnimator，
+		ValueAnimator只是一个值到另一个值之间，过度的过程。
+		ObjectAnimator多了属性的概念，我们经常用的也会对scale等属性的UI动画。也就有了getset方法的必须概念。
+		
+3.interst
+
+	（1）硬件加速是什么原理？有什么优点和缺陷
+	（2）Choreographer
+	
+	
+	
+	
+
+		
+	
+	

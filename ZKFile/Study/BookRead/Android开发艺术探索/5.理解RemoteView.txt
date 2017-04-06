@@ -1,11 +1,45 @@
 第五章 理解RemoteView
 
 1.knowledge
-	(1)RemoteView 一种View的结构，实现跨进程控制view
-		主要用在通知栏Notiifycation和桌面小部件Widget。
-		
-       （2）
- 	          
+	(1)RemoteView 一种View的结构，实现跨进程view的显示，更新。
+		主要用在通知栏Notiifycation和桌面小部件Widget，他们都是运行在SystemServer进程中。
+			
+    (2)Notifycation NotificationManager
+	
+	Demo:
+
+	private void showNotifycation() {
+		NotificationManager nm=(NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		Notification notification=new Notification();
+		notification.icon=R.drawable.ic_launcher;
+		notification.tickerText="HelloWorld";
+		notification.flags=Notification.FLAG_AUTO_CANCEL;
+		Intent intent=new Intent(this,NotifycationTwoActivity.class);
+		intent.putExtra("title", "content");
+		PendingIntent contentIntent=PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		notification.setLatestEventInfo(this, "55555", "NotifycationRemoteActivity", null);//设置默认的通知栏view
+		notification.contentIntent=contentIntent;//点击条目的pendingintent
+		RemoteViews remoteview=new RemoteViews(getPackageName(), R.layout.view_remote_notify);//自定义view （与设置默认的通知栏view必须有一个，当然新api用builder）
+		Intent intent2=new Intent(this,NotifycationTwoActivity.class);
+		intent2.putExtra("title", "icon");
+		PendingIntent contentIntent2=PendingIntent.getActivity(this, 0, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
+		remoteview.setOnClickPendingIntent(R.id.remote_iv, contentIntent2);//Icon点击事件
+		notification.contentView=remoteview;
+		nm.notify(1, notification);
+	}
+
+	***contentView点击弹出的view如果没有自定义（remoteview或者设置默认的title等），就会触发崩溃
+	E/AndroidRuntime(1350): FATAL EXCEPTION: main
+	E/java.lang.IllegalArgumentException: contentView required: pkg=com.jh.ipctest id=1 notification=Notification(pri=0 contentView=null vibrate=null sound=null defaults=0x0 flags=0x10 kind=[null])
+	E/AndroidRuntime(1350): 	at android.os.Parcel.readException(Parcel.java:1429)
+	E/AndroidRuntime(1350): 	at android.os.Parcel.readException(Parcel.java:1379)
+	E/AndroidRuntime(1350): 	at android.app.INotificationManager$Stub$Proxy.enqueueNotificationWithTag(INotificationManager.java:228)
+	E/AndroidRuntime(1350): 	at android.app.NotificationManager.notify(NotificationManager.java:132)
+	E/AndroidRuntime(1350): 	at android.app.NotificationManager.notify(NotificationManager.java:108)
+	E/AndroidRuntime(1350): 	at com.jh.ipctest.remoteview.NotifycationRemoteActivity.showNotifycation(NotifycationRemoteActivity.java:43)
+    	
+    (3)Widget AppWidgetProvider
+	是Android提供的实现桌面小部件的类，其实质是一个广播，集成Broadcast。
  	    
  		
  		
@@ -20,11 +54,19 @@
 		
 	
 2.question
-	（1）
+	(1)***长按home键杀进程与在程序管理中，强行停止的区别？
+	(2)Notifycation可以控制宽高吗？
+	(3)如果自定view如何在点击完，关闭notifycation条呢？难道是手动调用notifycation.cancel(id)？;
+	(4)widget在手机上无法显示？
 		
 3.interst
 
 	（1）
+	
+	
+	
+	
+
 		
 	
 	

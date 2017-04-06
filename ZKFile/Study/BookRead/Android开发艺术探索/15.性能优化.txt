@@ -1,0 +1,252 @@
+第15章 Android性能优化
+
+1.knowledge
+	(1)ViewStub按需加载的功能，当需要时，才会将ViewStub中的布局加载到内存，这提高了程序的初始化效率。
+		ViewStub继承了View，它非常轻量级，并且宽高都是.（如何理解？？）因此他不参与任何布局和绘制过程。
+		在实际开发中，有很多布局文件在正常情况下不会显示，比如网络异常时的页面，这个时候没有必要在整个页面初始化的时候
+		将其加载进来。
+		（（ViewStub）findviewById（））.setVisibility(View.VISIBLE)
+		或（（ViewStub）findviewById（））.inflate();
+	(2)include 标签
+		<include>标签只支持android:layout_开头的属性(除了id)，其他属性是不支持的，比如android:backgroud。
+		***注意：如果<include>指定了id的属性，同时被包围的布局文件也指定了id属性，那么以<include>指定的id为准。
+		***注意：如果<include>指定了android：layout_*这种属性，那么要求android:layout_width和android:layout_height
+			必须存在，否则android:layout_*形式的属性无法生效。
+	(3)ANR
+		响应速度优化的核心思想是避免在主线程中做耗时的操作，但也追求操作后快速响应，二者之间要达到平衡，至于16ms，还是很难的。
+		ANR ：Android规定，Activity如果5秒钟之内无法响应屏幕触摸事件或者键盘输入事件就会出现ANR异常。而Broadcast Recivier如果10s
+		之内，还未执行完操作也会出现ANR异常。
+		注意：有操作，才会有响应，才会触发ANR，如果无操作，在阻塞阶段，无需响应，就不会出现无法ANR异常。
+		如何解决ANR异常？主要还是靠日志发现问题。
+		制造一个ANR
+		onCreate（）{
+	new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				testANR();
+			}
+		}).start();
+		SystemClock.sleep(10);
+		initView();
+		
+	}
+	private synchronized void initView() {
+		// TODO Auto-generated method stub
+		
+	}
+	private synchronized void testANR() {
+		SystemClock.sleep(30000);
+		
+	}
+
+
+		首先是在开发者选项中，打开显示所有ANR的开关。
+		其次，是查看logcat中的日志，比如：
+		 E/ANRManager(568): ANR in com.jh.ipctest (com.jh.ipctest/.MainActivity)
+		 E/ANRManager(568): Reason: keyDispatchingTimedOut
+		 E/ANRManager(568): Load: 9.71 / 9.4 / 6.72
+		 E/ANRManager(568): Android time :[2013-04-05 11:38:44.854] [1086.837]
+		 E/ANRManager(568): CPU usage from 5464ms to 277ms ago:
+		 E/ANRManager(568):   9.4% 5844/com.jingdong.app.mall:jdpush: 7.1% user + 2.3% kernel / faults: 5288 minor
+		 ****
+		 可以初步定为ANR发生的位置ANR in com.jh.ipctest (com.jh.ipctest/.MainActivity)，以及原因Reason: keyDispatchingTimedOut
+		 下面是一段时间内CPU利用率，有时可以查出一些端倪。
+		  最后，还有日志就是traces.txt，在手机'/data/anr/traces.txt'中，可以pull出来
+		----- pid 5690 at 2013-04-05 11:38:43 -----
+Cmd line: com.jh.ipctest
+
+JNI: CheckJNI is off; workarounds are off; pins=0; globals=133
+
+DALVIK THREADS:
+(mutexes: tll=0 tsl=0 tscl=0 ghl=0)
+
+"main" prio=5 tid=1 MONITOR
+  | group="main" sCount=1 dsCount=0 obj=0x410a4a18 self=0x56fee010
+  | sysTid=5690 nice=0 sched=0/0 cgrp=apps handle=1074362460
+  | state=S schedstat=( 84043373 51102242 357 ) utm=6 stm=2 core=0
+  at com.jh.ipctest.MainActivity.initView(MainActivity.java:~148)
+  - waiting to lock <0x4134d2a0> (a com.jh.ipctest.MainActivity) held by tid=12 (Thread-256)
+  at com.jh.ipctest.MainActivity.onCreate(MainActivity.java:142)
+  at android.app.Activity.performCreate(Activity.java:5122)
+  at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1081)
+  at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2285)
+  at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2373)
+  at android.app.ActivityThread.access$600(ActivityThread.java:160)
+  at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1344)
+  at android.os.Handler.dispatchMessage(Handler.java:99)
+  at android.os.Looper.loop(Looper.java:153)
+  at android.app.ActivityThread.main(ActivityThread.java:5374)
+  at java.lang.reflect.Method.invokeNative(Native Method)
+  at java.lang.reflect.Method.invoke(Method.java:511)
+  at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:833)
+  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:600)
+  at dalvik.system.NativeStart.main(Native Method)
+
+"Thread-256" prio=5 tid=12 TIMED_WAIT
+  | group="main" sCount=1 dsCount=0 obj=0x41392c68 self=0x5ba0a9e8
+  | sysTid=5709 nice=0 sched=0/0 cgrp=apps handle=1534742104
+  | state=S schedstat=( 117614 210155 4 ) utm=0 stm=0 core=1
+  at java.lang.VMThread.sleep(Native Method)
+  at java.lang.Thread.sleep(Thread.java:1010)
+  at java.lang.Thread.sleep(Thread.java:992)
+  at android.os.SystemClock.sleep(SystemClock.java:115)
+  at com.jh.ipctest.MainActivity.testANR(MainActivity.java:150)
+  at com.jh.ipctest.MainActivity.access$0(MainActivity.java:149)
+  at com.jh.ipctest.MainActivity$7.run(MainActivity.java:138)
+  at java.lang.Thread.run(Thread.java:838)
+
+"Binder_3" prio=5 tid=11 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x413477f8 self=0x5ba117d8
+  | sysTid=5704 nice=0 sched=0/0 cgrp=apps handle=1537042904
+  | state=S schedstat=( 2205540 708460 12 ) utm=0 stm=0 core=1
+  #00  pc 0002066c  /system/lib/libc.so (__ioctl+8)
+  #01  pc 00040b90  /system/lib/libc.so (ioctl+28)
+  #02  pc 00016b59  /system/lib/libbinder.so (android::IPCThreadState::talkWithDriver(bool)+132)
+  #03  pc 0001734f  /system/lib/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+154)
+  #04  pc 0001b1c9  /system/lib/libbinder.so
+  #05  pc 00011267  /system/lib/libutils.so (android::Thread::_threadLoop(void*)+114)
+  #06  pc 0004d0eb  /system/lib/libandroid_runtime.so (android::AndroidRuntime::javaThreadShell(void*)+150)
+  #07  pc 00010dcd  /system/lib/libutils.so
+  #08  pc 0000e058  /system/lib/libc.so (__thread_entry+72)
+  at dalvik.system.NativeStart.run(Native Method)
+
+"Binder_2" prio=5 tid=10 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x41347338 self=0x5ba24360
+  | sysTid=5703 nice=0 sched=0/0 cgrp=apps handle=1534665624
+  | state=S schedstat=( 1062614 5134078 12 ) utm=0 stm=0 core=2
+  #00  pc 0002066c  /system/lib/libc.so (__ioctl+8)
+  #01  pc 00040b90  /system/lib/libc.so (ioctl+28)
+  #02  pc 00016b59  /system/lib/libbinder.so (android::IPCThreadState::talkWithDriver(bool)+132)
+  #03  pc 0001734f  /system/lib/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+154)
+  #04  pc 0001b1c9  /system/lib/libbinder.so
+  #05  pc 00011267  /system/lib/libutils.so (android::Thread::_threadLoop(void*)+114)
+  #06  pc 0004d0eb  /system/lib/libandroid_runtime.so (android::AndroidRuntime::javaThreadShell(void*)+150)
+  #07  pc 00010dcd  /system/lib/libutils.so
+  #08  pc 0000e058  /system/lib/libc.so (__thread_entry+72)
+  at dalvik.system.NativeStart.run(Native Method)
+
+"Binder_1" prio=5 tid=9 NATIVE
+  | group="main" sCount=1 dsCount=0 obj=0x41345a68 self=0x5ba07938
+  | sysTid=5702 nice=0 sched=0/0 cgrp=apps handle=1537188336
+  | state=S schedstat=( 1539157 9746843 21 ) utm=0 stm=0 core=2
+  #00  pc 0002066c  /system/lib/libc.so (__ioctl+8)
+  #01  pc 00040b90  /system/lib/libc.so (ioctl+28)
+  #02  pc 00016b59  /system/lib/libbinder.so (android::IPCThreadState::talkWithDriver(bool)+132)
+  #03  pc 0001734f  /system/lib/libbinder.so (android::IPCThreadState::joinThreadPool(bool)+154)
+  #04  pc 0001b1c9  /system/lib/libbinder.so
+  #05  pc 00011267  /system/lib/libutils.so (android::Thread::_threadLoop(void*)+114)
+  #06  pc 0004d0eb  /system/lib/libandroid_runtime.so (android::AndroidRuntime::javaThreadShell(void*)+150)
+  #07  pc 00010dcd  /system/lib/libutils.so
+  #08  pc 0000e058  /system/lib/libc.so (__thread_entry+72)
+  at dalvik.system.NativeStart.run(Native Method)
+
+"FinalizerWatchdogDaemon" daemon prio=5 tid=8 WAIT
+  | group="system" sCount=1 dsCount=0 obj=0x41340cf8 self=0x5ba37ff0
+  | sysTid=5701 nice=0 sched=0/0 cgrp=apps handle=1537259016
+  | state=S schedstat=( 188385 2464385 4 ) utm=0 stm=0 core=1
+  at java.lang.Object.wait(Native Method)
+  - waiting on <0x410ae2e0> (a java.lang.Daemons$FinalizerWatchdogDaemon)
+  at java.lang.Object.wait(Object.java:364)
+  at java.lang.Daemons$FinalizerWatchdogDaemon.waitForObject(Daemons.java:232)
+  at java.lang.Daemons$FinalizerWatchdogDaemon.run(Daemons.java:209)
+  at java.lang.Thread.run(Thread.java:838)
+
+"FinalizerDaemon" daemon prio=5 tid=7 WAIT
+  | group="system" sCount=1 dsCount=0 obj=0x41340b48 self=0x5ba2efd8
+  | sysTid=5700 nice=0 sched=0/0 cgrp=apps handle=1537128744
+  | state=S schedstat=( 170077 450616 3 ) utm=0 stm=0 core=0
+  at java.lang.Object.wait(Native Method)
+  - waiting on <0x4109a610> (a java.lang.ref.ReferenceQueue)
+  at java.lang.Object.wait(Object.java:401)
+  at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:102)
+  at java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:73)
+  at java.lang.Daemons$FinalizerDaemon.run(Daemons.java:172)
+  at java.lang.Thread.run(Thread.java:838)
+
+"ReferenceQueueDaemon" daemon prio=5 tid=6 WAIT
+  | group="system" sCount=1 dsCount=0 obj=0x413409e0 self=0x5ba0b1b8
+  | sysTid=5699 nice=0 sched=0/0 cgrp=apps handle=1534743144
+  | state=S schedstat=( 195231 345077 4 ) utm=0 stm=0 core=0
+  at java.lang.Object.wait(Native Method)
+  - waiting on <0x4109a538> 
+  at java.lang.Object.wait(Object.java:364)
+  at java.lang.Daemons$ReferenceQueueDaemon.run(Daemons.java:132)
+  at java.lang.Thread.run(Thread.java:838)
+
+"Compiler" daemon prio=5 tid=5 VMWAIT
+  | group="system" sCount=1 dsCount=0 obj=0x413408f0 self=0x5b9eb4d8
+  | sysTid=5698 nice=0 sched=0/0 cgrp=apps handle=1534743080
+  | state=S schedstat=( 670538 721846 6 ) utm=0 stm=0 core=1
+  #00  pc 000217a8  /system/lib/libc.so (__futex_syscall3+8)
+  #01  pc 0000e09c  /system/lib/libc.so (__pthread_cond_timedwait_relative+48)
+  #02  pc 0000e0f8  /system/lib/libc.so (__pthread_cond_timedwait+60)
+  #03  pc 00078d0d  /system/lib/libdvm.so
+  #04  pc 00054e2b  /system/lib/libdvm.so
+  #05  pc 0000e058  /system/lib/libc.so (__thread_entry+72)
+  at dalvik.system.NativeStart.run(Native Method)
+
+"JDWP" daemon prio=5 tid=4 VMWAIT
+  | group="system" sCount=1 dsCount=0 obj=0x41340808 self=0x5ba32070
+  | sysTid=5696 nice=0 sched=0/0 cgrp=apps handle=1537063784
+  | state=S schedstat=( 2441924 5152229 29 ) utm=0 stm=0 core=1
+  #00  pc 00020720  /system/lib/libc.so (select+20)
+  #01  pc 0006212b  /system/lib/libdvm.so
+  #02  pc 00064e2b  /system/lib/libdvm.so
+  #03  pc 00054e2b  /system/lib/libdvm.so
+  #04  pc 0000e058  /system/lib/libc.so (__thread_entry+72)
+  at dalvik.system.NativeStart.run(Native Method)
+
+"Signal Catcher" daemon prio=5 tid=3 RUNNABLE
+  | group="system" sCount=0 dsCount=0 obj=0x41340710 self=0x5ba2d420
+  | sysTid=5694 nice=-8 sched=0/0 cgrp=apps handle=1536996000
+  | state=R schedstat=( 11074698 1057843 34 ) utm=1 stm=0 core=0
+  at dalvik.system.NativeStart.run(Native Method)
+
+"GC" daemon prio=5 tid=2 VMWAIT
+  | group="system" sCount=1 dsCount=0 obj=0x41340630 self=0x5b9fc828
+  | sysTid=5692 nice=0 sched=0/0 cgrp=apps handle=1537032664
+  | state=S schedstat=( 374769 12769 1 ) utm=0 stm=0 core=1
+  #00  pc 000217a8  /system/lib/libc.so (__futex_syscall3+8)
+  #01  pc 0000e09c  /system/lib/libc.so (__pthread_cond_timedwait_relative+48)
+  #02  pc 0000e0f8  /system/lib/libc.so (__pthread_cond_timedwait+60)
+  #03  pc 00077ac1  /system/lib/libdvm.so
+  #04  pc 00054e2b  /system/lib/libdvm.so
+  #05  pc 0000e058  /system/lib/libc.so (__thread_entry+72)
+  at dalvik.system.NativeStart.run(Native Method)
+
+----- end 5690 -----
+	主要是查看主线程，发现  at com.jh.ipctest.MainActivity.initView(MainActivity.java:~148)
+  - waiting to lock <0x4134d2a0> (a com.jh.ipctest.MainActivity) held by tid=12 (Thread-256)，然后找到Thread-256，
+  就可以看到线程正在挂起，然后就可以发现是同步锁的原因，子线程拿到锁后等待，而主线程无法执行。
+	(4)提高程序可维护性
+		a、命名要规范，要能正确的传达出变量和方法的含义。
+		b、代码结构，风格。比如变量声明在一个类的最前面，方法位置要互相靠近。。。
+		c、注释问题
+		d、代码逻辑分层，层次清晰很重要。比如一个方法把大象发到冰箱中，这个方法中就有可以三层，
+			把冰箱门打开，把大象放进去，把冰箱门关上。如果把大象放进去的方法中的一些实现，和其他两个
+			方法并列，就在理解上不大顺了。
+		e、设计模式和扩展。
+
+	
+			
+
+
+
+
+2.question
+	(1)ViewStub与View GONE的区别？
+	
+	
+		
+3.interst
+
+	(1)ANR原理
+	
+	
+	
+
+		
+	
+	
