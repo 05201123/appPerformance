@@ -1,7 +1,7 @@
 第8章 Window与WindowManager
 
 1.knowledge
-		
+	(1)Window是一个抽象类，窗口的抽象。
 
 2.question
 	
