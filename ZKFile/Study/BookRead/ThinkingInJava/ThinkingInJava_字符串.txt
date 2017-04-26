@@ -1,0 +1,194 @@
+字符串	335
+knowledge
+1.String 对象是不可变的
+	String类中每一个看起来会修改String值的方法，实际上都是创建了一个全新的String对象，以包含修改后的字符串内容。
+		String a="abcde";
+		String aa=upcase(a);
+		System.out.println("a="+a); //a=abcde
+		System.out.println("aa="+aa);//aa=ABCDE
+		
+		String b=new String("efg");
+		String bb=upcase(b);
+		
+		System.out.println("b="+b);//b=efg
+		System.out.println("bb="+bb);//bb=EFG
+	}
+
+	private static String upcase(String a) {
+		a=a.toUpperCase();
+		return a;
+	}
+	可见，String对象是特殊的对象，参数传递过程中和常量差不多。
+	当把String对象作为传递时，实际上传递是引用的一个拷贝。其实，每当把String对象作为方法的参数时，都会复制一份引用，
+	而该引用所指的对象其实一直待在单一的物理位置上，从未动过。
+2.重载"+"与StringBuilder
+	由于String的不可变性，所以在"aa"+"bb"+"cc"时，会不断的创建新对象，然后一直加，这样就会带来效率问题。
+	可以想象一下，这段代码是这样的工作的，String 可能有一个append（）方法，它生成一个新的String对象，依次类推，
+	无疑这会产生一大堆需要释放的中间对象。
+	所以在复杂的字符串的逻辑中，使用StringBuilder。当然针对"aa"+"bb"+"cc"，这种简单的，无所谓，因为在编译器在编译代码时候，会
+	自动的用到StringBuilder，但是在好多循环的时候，编译器也不是很智能，还是会有效率问题。
+
+	比如"aa"+"bb"+"cc"，编译器会自动的用到StringBuilder，最后toString
+	String	a="";
+	但是for（）{
+		a+="aa"+"bb"+"cc"；//这时每一个循环里面都会创建StringBuilder。这样还是存在一些效率问题，远不如，把a定义为StringBuilder。
+	}
+
+	感兴趣的可以通过javap -c 去反编译.class，查看编译之后的代码是如何的？？
+
+	public class StringAndStringBuilder {
+	public String StringDemo(){
+		String a="d";
+		String b="a"+"b"+"c"+a;
+		return b;
+	}
+	public String StringBuilderDemo(){
+		String a="d";
+		StringBuilder b=new StringBuilder();
+		b.append("a").append("b").append("c").append(a);
+		return b.toString();
+	}
+	}
+
+
+
+	  public java.lang.String StringDemo();
+    Code:
+       0: ldc           #16                 // String d
+       2: astore_1
+       3: new           #18                 // class java/lang/StringBuilder
+       6: dup
+       7: ldc           #20                 // String abc
+       9: invokespecial #22                 // Method java/lang/StringBuilder."<init>":(Ljava/lang/String;)V
+      12: aload_1
+      13: invokevirtual #25                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      16: invokevirtual #29                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+      19: astore_2
+      20: aload_2
+      21: areturn
+
+  public java.lang.String StringBuilderDemo();
+    Code:
+       0: ldc           #16                 // String d
+       2: astore_1
+       3: new           #18                 // class java/lang/StringBuilder
+       6: dup
+       7: invokespecial #36                 // Method java/lang/StringBuilder."<init>":()V
+      10: astore_2
+      11: aload_2
+      12: ldc           #37                 // String a
+      14: invokevirtual #25                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      17: ldc           #38                 // String b
+      19: invokevirtual #25                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      22: ldc           #39                 // String c
+      24: invokevirtual #25                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      27: aload_1
+      28: invokevirtual #25                 // Method java/lang/StringBuilder.append:(Ljava/lang/String;)Ljava/lang/StringBuilder;
+      31: pop
+      32: aload_2
+      33: invokevirtual #29                 // Method java/lang/StringBuilder.toString:()Ljava/lang/String;
+      36: areturn
+}
+	可见，在第一个方法中abc，直接就被编译器弄成了abc，与字符串相加，用到了StringBuilder，而第二个方法，直接用的StringBuilder。
+	遍历的情况可以自行验证。
+
+
+	***StringBuffer是线程安全的，开销也要大些。
+	
+3.除非你用代码将系统实现，并让它动起来，否则你无法真正了解会有什么问题。
+
+4.关于复写toString的方法请注意：
+	public String toString() {
+		return "aaaa"+this;//这种做法会无线递归而崩溃，应该采用super.toString()；
+	}
+5.String.format，将数据以一定的规则展示
+	规则很多：http://www.cnblogs.com/fsjohnhuang/p/4094777.html
+
+6.正则表达式：是一种强大而灵活的文本处理工具。使用正则表达式，我们能够以编程的方式，构造复杂的文本模式，并对输入的字符串进行搜索。
+		语法比较麻烦，它确实是一种简洁动态的语言。
+		a、匹配
+		b、选择
+		c、编辑
+		d、验证
+		
+		基础：	查找一个数字，它可能有一个负号在最前面，	表示-?；
+			一个整数					表示\d；java中需要\\d,这里"\\"表示我要插入一个正则表达式的"\".
+			一个普通的"\"					\\\\不明白为什么如此？？？
+			一个+						表示\\+;
+			而一个特殊的+比如\\d+				比如多个数字
+		比如表示一个(-|\\+)?\\d+				表示可能以"+""—"开头的多个数字
+
+		String还有一个非常有用的正则表达式工具，split()方法，其功能“将字符串从正则表达式匹配的地方切开”。
+		正则中：
+		字符：
+		\W		表示非单词字符。
+		\w		表示单词字符
+		B		指定字符B
+		\xhh		十六机制值为oxhh的字符
+		\uhhhh		十六进制值为oxhhhh的Unicode字符
+		\t		制表符tab
+		\n		换行符
+		\r		回车
+		\f		换页
+		\e		转义（Escape）？？？？？
+		字符类：
+		*		任意字符
+		[abc]		包含a、b和c的任何字符(a|b|c的作用相同)；
+		[^abc]		除了a、b和c的任何字符(否定);
+		[a-zA-Z]	从a到z从A到Z的任何字符(范围);
+		[abc[hij]]	任意a、b、c、h、i和j字符（与a|b|c|h|i|j的作用相同）（合并）
+		[a-z&&[hij]]	任意h、i或j(交)
+		\s		空白符（空格、tab、换行、换页和回车）
+		\S		非空白符([^\s])
+		\d		数字[0-9]
+		\D		非数字[^0-9]
+		\w		词字符[a-zA-Z0-9]
+		\W		非词字符[^\w]
+		
+		逻辑操作符
+		XY		Y跟在X后面
+		X|Y		X或Y
+		(X)		捕获组，可以在表达式中用\i引用第i个捕获组
+
+		边界匹配符
+		^		一行的起始
+		$		一行的结束
+		\b		词的边界
+		\B		非词的边界
+		\G		前一个匹配的结束
+
+		
+
+
+
+
+
+
+
+		替换功能：
+		另外还有String.replaceFirst();String.replaceAll(,);
+		
+		常用的正则表达式
+		http://blog.csdn.net/onebigday/article/details/5429868
+
+
+
+			
+
+question
+1.正则表达式中的反斜杠"\"的用法。
+	java的反斜杠比较变态。在Java中，反斜杠要特殊处理。处理的方式就是多加"\"。
+	过程实质是java的语法------->正则表达式的语法------------->真正的含义。
+	比如在正则表达式中\d表示一个数字。
+	java语法就要\\d，在转义的时候，正则表达式看到就是\d，然后就可以表示一个数字了。
+		   \\\\，在转义的时候，正则表达式看到就是\\,然后就可以表示成一个\\了。
+		    \\+, 在转义的时候，正则表达式看到就是\+,然后就可以表示成一个+了。
+
+
+
+
+
+interest
+1.javap -c 如何使用的
+
+
