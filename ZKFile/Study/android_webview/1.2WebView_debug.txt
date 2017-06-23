@@ -1,0 +1,93 @@
+WebView	debug
+knowledge
+1.webview 与web 调试，一直是比较麻烦的事情，因为android只关注webview，web只关注网页，
+分属两个人开发，联调，测试，都比较麻烦。
+为了加快工作效率，调试的工具，方法，架构也就应运而生了
+
+
+2.最简单便捷的远程调试
+
+H5开发，在手机浏览器上调试，详细说明。
+https://developers.google.com/web/tools/chrome-devtools/remote-debugging/ 
+讲的很详细，（但必须翻墙才能看，翻墙很重要。）
+
+
+android开发，远程调试 WebView ，讲的很详细，(但必须翻墙才能看，翻墙很重要。)
+https://developers.google.com/web/tools/chrome-devtools/remote-debugging/webviews
+
+
+使用 Chrome 开发者工具在您的原生 Android 应用中调试 WebView。
+
+在 Android 4.4 (KitKat) 或更高版本中，使用 DevTools 可以在原生 Android 应用中调试 WebView 内容。
+
+在您的原生 Android 应用中启用 WebView 调试；在 Chrome DevTools 中调试 WebView。
+通过 chrome://inspect 访问已启用调试的 WebView 列表。
+调试 WebView 与通过远程调试调试网页相同。
+
+提示：WebView 调试不会受应用清单中 debuggable 标志的状态的影响。如果您希望仅在 debuggable 为 true 时启用 WebView 调试，请在运行时测试标志。
+
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+    if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE))
+    { WebView.setWebContentsDebuggingEnabled(true); }
+}
+
+效果:原生APP的webview会显示在chrome://inspect的界面上，点击inspect，就会完美的呈现手机上webview，以及加载的网页的html代码等等。
+	然后利用chrome dev tools，就可以实现打断点，调试，看缓存等一系列实用的操作。
+
+	手机端操作，网页上操作，同步。
+	在4.4.3以上的手机，chrome上会显示一个原生的网页，看来手机强大很大很重要，工作效率会提高很多。
+
+
+故障排除
+
+在 chrome://inspect page 上无法看到您的 WebView？
+
+验证已为您的应用启用 WebView 调试。
+在设备上，打开应用以及您想要调试的 WebView。然后，刷新 chrome://inspect 页面。
+
+inspect 之后，页面显示空白？
+需要翻墙，万恶的翻墙。
+
+
+		
+
+使用用DevTools特别重要的一点是：如果你点击inspect打开的DevTools窗口一片空白，且刷新无效时，那极有可能是由于被墙的缘故，你可以尝试appspot.com是否可以ping的通
+，如果无法ping通，那你现在就先翻墙吧（goagent 或红杏都不错，将appspot.com加入白名单），当然你还需要有google账户。
+
+ 
+
+补充说明一下，如果接上USB数据线后，没有显示任何连接的设备，请按照以下步骤排查：
+
+● 检查您的设备连接到USB，检查USB数据线。
+
+● 确保您的设备发出ADB设备命令列为可用。如果没有，检查是否有您的设备上是否启用USB调试。
+
+● 若是Windows系统，检查你的USB驱动是否安装正确。参考http://developer.android.com/tools/extras/oem-usb.html
+
+● 桌面Chrome浏览器打开 chrome://inspect检查Discover USB devices是否选中
+
+● 确保桌面浏览器版本要高于移动设备的Chrome版本号
+
+● 如果Chrome for Android版本较低，请检查移动设备上Chrome浏览器设置，确保设置中启用USB调试。高版本中无此设置项，无须设置。
+
+● 如果依然无法显示，尝试重新拔插USB数据线
+
+
+3.如果是4.4以下的手机，也可以用console输出，自己封装一个机制，将网页通过console.log("比如HelloWorld")，通过
+	 public boolean onConsoleMessage(ConsoleMessage cm) {
+		Log.d("MyApplication", cm.message() + " -- From line "
+                         + cm.lineNumber() + " of "
+                         + cm.sourceId() );
+    return true;
+  }
+	完全可以转换成log.e,log.d等，只能日志调试，不能断点调试网页。
+question
+1.
+
+
+
+
+interest
+1.https://developers.google.com/web/tools/  了解Chrome 开发网页工具
+2.http://blog.csdn.net/freshlover/article/details/42528643 很详细很不错，尤其是html5开发
+3.https://developer.android.google.cn/guide/webapps/debugging.html

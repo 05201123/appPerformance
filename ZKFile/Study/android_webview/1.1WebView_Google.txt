@@ -1,0 +1,109 @@
+WebView	
+knowledge
+1.WebView extends android.widget.AbsoluteLayout
+2.WebView的使用场景：
+	WebView 最佳使用场景：仅展示一个html网页，基本不产生与用户的互动，就是一个view。
+	当然现在有 Hybrid的开发模式，H5大行其道，很快捷，但性能上始终和原生有差距。
+	如果网页全屏，与native 业务上无啥联系，可以直接跳转到浏览器，去展示网页。
+
+	A common scenario in which using WebView is helpful is when you want to provide information in your application 
+	that you might need to update, such as an end-user agreement or a user guide. 
+	Another scenario in which WebView can help is if your application provides data to the user 
+	that always requires an Internet connection to retrieve data, such as email. 
+	In this case, you might find that it's easier to build a WebView in your Android application 
+	that shows a web page with all the user data, rather than performing a network request, 
+	then parsing the data and rendering it in an Android layout.
+	
+	可以跨平台，当性能始终不会超过原生。
+
+4.WebChromeClient :用于提供与前端交互的方法
+
+5.WebViewClient	:用于提供webview，加载网页时的各个生命周期
+
+6. WebSettings	:设置webview的参数。
+	（1）Zoom
+		To enable the built-in zoom, set WebSettings.setBuiltInZoomControls(boolean) (introduced in API level CUPCAKE).
+		NOTE: Using zoom if either the height or width is set to WRAP_CONTENT may lead to undefined behavior and should be avoided.
+	（2）addJavaScriptInterface(Object obj,String name);
+		注意点： obj中的方法必须加注解 @JavascriptInterface，
+			 ***obj中的方法必须是public，否则网页崩溃
+			 ***obj中的方法是在WebViewCoreThread线程中，而不是主线程，需要runOnUIThread()等方法转到主线程，才能操作UI。
+			 add js  始终是个有风险的事，ios就禁止这种行为。在开发的时候，最简单的一个侵入方式就是：我们的webview，加载一个其他的网页，
+			 而这个网页调用我们的js，获取一些信息，所以我们在加载非我们自己的网页时，最好是跳出到应用的浏览器中。
+			 
+		
+
+7.Building web pages to support different screen densities
+	Here's a summary of the features you can use to handle different screen densities:
+	（1）The window.devicePixelRatio DOM property. The value of this property specifies the default scaling factor used for the current device. 
+	For example, if the value of window.devicePixelRatio is "1.0", then the device is considered a medium density (mdpi) device and 
+	default scaling is not applied to the web page; 
+	if the value is "1.5", then the device is considered a high density device (hdpi) and the page content is scaled 1.5x; 
+	if the value is "0.75", then the device is considered a low density device (ldpi) and the content is scaled 0.75x.
+	（2）The -webkit-device-pixel-ratio CSS media query. Use this to specify the screen densities for which this style sheet is to be used. 
+	The corresponding value should be either "0.75", "1", or "1.5", to indicate that the styles are for devices with low density, medium density, or high density screens, respectively. 
+	For example:
+		<link rel="stylesheet" media="screen and (-webkit-device-pixel-ratio:1.5)" href="hdpi.css" />
+	The hdpi.css stylesheet is only used for devices with a screen pixel ration of 1.5, which is the high density pixel ratio.
+8.HTML5 Video support
+	In order to support inline HTML5 video in your application you need to have hardware acceleration turned on.
+	为了在应用中支持html5的视频，需要开启硬件加速
+9.Full screen support
+	In order to support full screen — for video or other HTML content — 
+	you need to set a WebChromeClient and implement both onShowCustomView(View, WebChromeClient.CustomViewCallback) and onHideCustomView().
+	If the implementation of either of these two methods is missing then the web contents will not be allowed to enter full screen. 
+	Optionally you can implement getVideoLoadingProgressView() to customize the View displayed whilst a video is loading.
+10.HTML5 Geolocation API support
+	For applications targeting Android N and later releases (API level > M) the geolocation api is only supported on secure origins such as https.
+	For such applications requests to geolocation api on non-secure origins are automatically denied without invoking 
+	the corresponding onGeolocationPermissionsShowPrompt(String, GeolocationPermissions.Callback) method.
+
+11.Layout size （不理解）
+	It is recommended to set the WebView layout height to a fixed value or to MATCH_PARENT instead of using WRAP_CONTENT. 
+	When using MATCH_PARENT for the height none of the WebView's parents should use a WRAP_CONTENT layout height since that could result in incorrect sizing of the views.
+	Setting the WebView's height to WRAP_CONTENT enables the following behaviors:
+		The HTML body layout height is set to a fixed value. This means that elements with a height relative to the HTML body may not be sized correctly.
+		For applications targeting KITKAT and earlier SDKs the HTML viewport meta tag will be ignored in order to preserve backwards compatibility.
+		Using a layout width of WRAP_CONTENT is not supported. If such a width is used the WebView will attempt to use the width of the parent instead.
+
+
+12.javascript注意： 
+	（1）If you've set your targetSdkVersion to 17 or higher, you must add the @JavascriptInterface annotation to any method that 
+	you want available to your JavaScript (the method must also be public). 
+	If you do not provide the annotation, the method is not accessible by your web page when running on Android 4.2 or higher.
+	（2）Note: The object that is bound to your JavaScript runs in another thread and not in the thread in which it was constructed.？？？
+	（3）
+			
+
+question
+1.如果不在AndroidManifest.xml申请Internet permission的话，会正常加载静态网页吗？
+	 String summary = "<html><body>You scored <b>192</b> points.</body></html>";
+	webview.loadData(summary, "text/html", null);
+2. 如何理解？When using MATCH_PARENT for the height 
+	none of the WebView's parents should use a WRAP_CONTENT layout height 
+	since that could result in incorrect sizing of the views.
+3.how  Navigating web page history  怎么维护网页加载的历史
+
+4.webview的线程
+
+
+interest
+1.http://www.cnblogs.com/yexiaochai/p/4921635.html webview Hybrid
+2.http://www.cnblogs.com/yexiaochai/p/5524783.html
+3.http://www.cnblogs.com/yexiaochai/p/5813248.html
+
+4.https://developer.android.google.cn/reference/android/webkit/WebView.html
+5.https://developer.android.google.cn/guide/webapps/index.html
+6.http://unclechen.github.io/2017/05/13/WebView%E7%BC%93%E5%AD%98%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%E5%92%8C%E5%BA%94%E7%94%A8/
+7.http://www.jianshu.com/p/5e7075f4875f
+8.http://dev.qq.com/topic/591d537a5bf956911a014c63
+http://han.guokai.blog.163.com/blog/static/136718271201321402514114/
+http://blog.csdn.net/freshlover/article/details/42528643/
+
+
+https://developers.google.com/web/tools/chrome-devtools/remote-debugging/
+
+
+ WebSettings, WebViewDatabase, CookieManager and WebStorage 
+
+ BestPractices

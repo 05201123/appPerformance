@@ -1,0 +1,118 @@
+WebView	BestPractices
+knowledge
+1.通过获取手机版本信息，来处理不同的逻辑。
+	比如通过userAgent,获取Android版本，webview内核。
+	注意****；如果userAgent中包含"mobile"则代表是手机而不是平板。
+	html5 通过navigator.userAgent，获取到userAgent。
+	app可以设置userAgent，比如上下文等，去验证native与web的合法性（客户端请求的合法性）。
+
+2.Use a valid markup DOCTYPE that's appropriate for mobile devices
+The most common markup language used for mobile web sites is XHTML Basic. 
+This standard ensures specific markup for your web site that works best on mobile devices. 
+For instance, it does not allow HTML frames or nested tables, which perform poorly on mobile devices. 
+Along with the DOCTYPE, be sure to declare the appropriate character encoding for the document (such as UTF-8).
+
+用合适大众的DOCTYPE来编写代码，以适应手机。
+
+3.Use viewport meta data to properly resize your web page
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+代表网页的宽度等于设备的宽度，初始化不缩放，用户无法缩放。
+这样可以使用户体验更好，但有些为pc设计的网页，可能无法再手机端正常显示。当然，现在好多网页都是专门为手机设计的。
+Most important is the view port width, 
+which defines the total number of horizontal pixels available from the web page's point of view (the number of CSS pixels available).
+
+Note: When your page is rendered in a WebView, it does not use wide viewport mode (the page appears at full zoom) by default. 
+You can enable wide viewport mode with setUseWideViewPort().
+
+When optimizing your site for mobile devices, 
+you should usually set the width to "device-width" so the size fits exactly on all devices, 
+then use CSS media queries to flexibly adapt layouts to suit different screen sizes.
+
+
+Note: You should disable user scaling only when you're certain 
+that your web page layout is flexible and the content will fit the width of small screens.
+
+4.Avoid multiple file requests 避免多个文件请求
+	指在<head>中，尽量不要去加载 extra files such as stylesheets and script files，要加载也要在<body>的末尾处，
+	要通过压缩来提高速度。https://github.com/mrclay/minify
+
+
+
+5.Use a vertical linear layout 网页设计要用一个垂直的线性布局，因为上下滑动比左右滑动更加适合人的习惯。
+
+6.javascript获取手机设备屏幕密度的方法，window.devicePixelRatio，已经过期。
+	if (window.devicePixelRatio == 1.5) {
+		alert("This is a high-density screen");
+	} else if (window.devicePixelRatio == 0.75) {
+		alert("This is a low-density screen");
+	}
+	css中用<link rel="stylesheet" media="screen and (-webkit-device-pixel-ratio: 1.5)" href="hdpi.css" />，
+	来在不同屏幕密度上显示不同大小的元素。
+
+	屏幕密度越大，说明屏幕上一个点的像素越多。如果window.devicePixelRatio == 1.5，对应hdpi，如果html不做处理，
+	显示的html上元素就会压缩1.5倍，只有把像素*1.5倍，才会有不同手机设备上，显示都差不多的感觉。
+7.android 19 4.4 kitkat的变化
+	（1）远程调试webview，很实用，setWebContentsDebuggingEnabled()
+	（2）User Agent 发生变化
+	（3）evaluateJavascript 的出现，以前webview执行一个网页端的js，想要等到web端执行结果再继续执行（同步执行）
+	// This code is BAD and will block the UI thread
+	webView.loadUrl("javascript:fn()");
+	while(result == null) {
+		Thread.sleep(100);
+	}
+	这种写法，发生异常，很容易造成主线程阻塞掉。（当然我们通常都是用异步回调的方式周转一下，web端执行完，在调用前端的js）
+	4.4，提供了void evaluateJavascript (String script, ValueCallback<String> resultCallback)直接带回调，省得我们周转。
+	回调的方法是在主线程中，不需要通过runOnUIThread()周转。
+	（4）https://developer.android.google.cn/guide/webapps/migrating.html 其他大都需要css知识。
+8.WebViewCoreThread 的猜测：
+	感觉android中webview是运行在WebViewCoreThread线程中，比如调用js中的方法，都是在WebViewCoreThread中，webview的每一次操作，都会以message
+	中形式添加到WebViewCoreThread线程中。比如android端调用一个js，这个js停留5s，在停留期间，android app并未阻塞，可见js方法执行在其他线程，
+	而在期间，点击页面其他按钮，js方法会在5s结束后执行，感觉是一个message机制。
+	需要以后代码查证。
+
+
+
+question
+1.For instance, it does not allow HTML frames or nested tables, which perform poorly on mobile devices. 
+手机上很难显示 html frames或者nested tables，是这样的吗？
+2.userAgent 的变化？
+3.html的生命周期，对应的webview 的WebViewClient的什么方法。
+4.setUseWideViewPort
+5.Targeting Device Density with CSS，css学习与使用
+The Android Browser and WebView support a CSS media feature that allows you to create styles 
+for specific screen densities—the -webkit-device-pixel-ratio CSS media feature. 
+The value you apply to this feature should be either "0.75", "1", or "1.5", to indicate that the styles are 
+for devices with low density, medium density, or high density screens, respectively.
+
+For example, you can create separate stylesheets for each density:
+
+<link rel="stylesheet" media="screen and (-webkit-device-pixel-ratio: 1.5)" href="hdpi.css" />
+<link rel="stylesheet" media="screen and (-webkit-device-pixel-ratio: 1.0)" href="mdpi.css" />
+Or, specify the different styles in one stylesheet:
+
+#header {
+    background:url(medium-density-image.png);
+}
+
+@media screen and (-webkit-device-pixel-ratio: 1.5) {
+    /* CSS for high-density screens */
+    #header {
+        background:url(high-density-image.png);
+    }
+}
+
+@media screen and (-webkit-device-pixel-ratio: 0.75) {
+    /* CSS for low-density screens */
+    #header {
+        background:url(low-density-image.png);
+    }
+}
+
+
+
+
+interest
+1.http://www.cnblogs.com/2050/p/3877280.html 移动前端开发之viewport的深入理解
+2.https://github.com/mrclay/minify 如何运用
+
+3.https://www.html5rocks.com/en/mobile/high-dpi/ High DPI Images for Variable Pixel Densities

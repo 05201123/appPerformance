@@ -1,4 +1,4 @@
-第二章 View 的工作机制
+第四章 View 的工作机制
 
 1.knowledge
 	(1)View的三个流程
