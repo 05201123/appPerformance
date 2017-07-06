@@ -1,0 +1,285 @@
+1.只有 <body> 区域 (白色部分) 才会在浏览器中显示。
+2.不要忘记结束标签
+即使您忘记了使用结束标签，大多数浏览器也会正确地显示 HTML：
+但不要依赖这种做法。忘记使用结束标签会产生不可预料的结果或错误。
+3.没有内容的 HTML 元素被称为空元素。空元素是在开始标签中关闭的。
+<br> 就是没有关闭标签的空元素（<br> 标签定义换行）。
+4. 一些标签的使用，切记所有标签都需要闭合，不管是单体标签还是成对标签。（尽管目前浏览器是识别有些标签不闭合的情况，但是取的最好的保证兼容性，使用闭合）
+5. 标签写法要用小写字母（有些版本对大小写可认为相同，而xhtml中强制使用小写）
+
+6.标签
+	h1---h6 标题	<h1> </h1>
+		标题很重要
+		请确保将 HTML 标题 标签只用于标题。不要仅仅是为了生成粗体或大号的文本而使用标题。
+		搜索引擎使用标题为您的网页的结构和内容编制索引。
+		因为用户可以通过标题来快速浏览您的网页，所以用标题来呈现文档结构是很重要的。
+		应该将 h1 用作主标题（最重要的），其后是 h2（次重要的），再其次是 h3，以此类推。
+	br	换行	</br>
+	p	段落	<p> </p>
+	body	主体	<body> </body>
+	a	连接	<a href=""> </a>
+	img	图像	<img src=""></img>
+	hr	分割线	<hr/>
+
+
+7.属性值应该始终被包括在引号内。
+双引号是最常用的，不过使用单引号也没有问题。
+Remark提示: 在某些个别的情况下，比如属性值本身就含有双引号，那么您必须使用单引号，例如：name='John "ShotGun" Nelson'
+
+8.浏览器在显示 HTML 时，会省略源代码中多余的空白字符（空格或回车等）。
+
+9.HTML使用标签 <a>来设置超文本链接。
+	一个未访问过的链接显示为蓝色字体并带有下划线。
+	访问过的链接显示为紫色并带有下划线。
+	点击链接时，链接显示为红色并带有下划线。
+	注意：如果为这些超链接设置了 CSS 样式，展示样式会根据 CSS 的设定而显示。
+10.url连接中有空格时，单词直接空格使用 %20 代替，以确保浏览器可以正常显示文本。
+
+11.HTML <title> 元素
+	<title> 标签定义了不同文档的标题。
+	<title> 在 HTML/XHTML 文档中是必须的。
+	<title> 元素:
+	定义了浏览器工具栏的标题
+	当网页添加到收藏夹时，显示在收藏夹中的标题
+	显示在搜索引擎结果页面的标题
+
+12.<base> 标签描述了基本的链接地址/链接目标，该标签作为HTML文档中所有的链接标签的默认链接:
+	<base href="http://www.baidu.com/" target="_blank">
+	当href设置是一个网址时，则用网址，如果不是网址时，则拼接上base href。
+	当traget 未设置时，则使用base中设置的target。
+13.<link>
+	<link> 标签定义了文档与外部资源之间的关系。
+	<link> 标签通常用于链接到样式表:
+	<link rel="stylesheet" type="text/css" href="mystyle.css">
+
+14.<style> 在页面中直接写css代码。
+<style> 标签定义了HTML文档的样式文件引用地址.
+在<style> 元素中你也可以直接添加样式来渲染 HTML 文档:
+	 <style type="text/css">
+		body{
+		background-color: #00B83F;
+		}
+		p{
+		color:red;
+		}
+	</style>
+
+样式会覆盖，同一个属性，以最后加载的为准。
+
+15.HTML <meta> 元素
+	meta标签描述了一些基本的元数据。
+	<meta> 标签提供了元数据.元数据也不显示在页面上，但会被浏览器解析。
+	META 元素通常用于指定网页的描述，关键词，文件的最后修改时间，作者，和其他元数据。
+	元数据可以使用于浏览器（如何显示内容或重新加载页面），搜索引擎（关键词），或其他Web服务。
+	<meta> 一般放置于 <head> 区域
+	<meta http-equiv="refresh" content="3"> 每隔三秒，重新刷新页面
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<meta charset="utf-8">
+16.script>标签用于加载脚本文件
+
+	<script>
+        function aa(){
+            alert("bbbbbbbbb");
+        }
+
+	</script>
+
+	<script src="myscript.js"></script>
+	同css一样，script方法也会被覆盖，相同的方法以最后加载的为准。
+17.css的三种方式
+	内联样式- 在HTML元素中使用"style" 属性
+		<h4 style="background-color: #00a5e0">我的第四个标题。。</h4>
+	内部样式表 -在HTML文档头部 <head> 区域使用<style> 元素 来包含CSS
+		<style type="text/css">
+        body{
+            background-color: #00B83F;
+        }
+        p{
+            color:red;
+        }
+
+    </style>
+	外部引用 - 使用外部 CSS 文件
+	<link rel="stylesheet" type="text/css" href="mystyle.css">
+
+	最好的方式是通过外部引用CSS文件.
+	font-family:字体
+	color：颜色
+	text-align:center;
+	font-size:20px
+
+18.<img src="url" alt="失败后的汉字" width="39" height="39" style="float: right " usemap="#mysrcmap"/>
+     <map name="mysrcmap">
+        <area shape="rect" coords="0,0,126,39" href="First.html"/> //矩形，起点w，h ，终点w，h
+        <area shape="circle" coords="128,20,5" href="First.html"> // 圆形，起点w,h, 半径r
+        <area shape="circle" coords="200,20,10" href="First.html">//坐标都是相对img左上角的点为0,0.
+    </map>
+    src         source，图片地址，可以使相对的地址图片，也可以使网络图片
+    alt		失败后的汉字
+    <img>	定义图像
+    <map>	定义图像地图
+    <area>	定义图像地图中的可点击区域 
+
+19.颜色 color rgb 代表red green blue
+	#ffffff 红绿蓝混合为白色。
+	#000000 为黑色
+同理	#ff0000 为红色
+	#00ff00 为绿色
+	#0000ff 为蓝色
+	颜色种类 255*255*255种。
+	还有一种格式为  background-color: rgb(255,255,0)
+			background-color: rgba(255,255,0,0.5) //透明度
+	当上层为透明度时，可能会被底色影响，比如底色背景是蓝色，而上面图层是半透明的黄色，则
+	显示的两者的混合色。（ 原理？？？）
+
+	颜色值由十六进制来表示红、绿、蓝（RGB）。
+	每个颜色的最低值为0(十六进制为00)，最高值为255(十六进制为FF)。
+	十六进制值的写法为#号后跟三个或六个十六进制字符。
+	三位数表示法为：#RGB，转换为6位数表示为：#RRGGBB。
+
+20.表格 <table> //表格
+		<tr> //行
+			<td></td>//列，内容	
+		</tr>
+	</table>
+
+	<th> </th> //表格的表头和<td>同级 ，只是会加黑加粗。
+	<caption> </caption>
+	 cellspacing="5" cellpadding="5"
+	<th colspan="4" >head2</th> 合并单元格（列）
+	rowspan			合并单元格 （行）
+
+21.列表
+	无序列表是一个项目的列表，此列项目使用粗体圆点（典型的小黑圆圈）进行标记。
+	无序列表使用 <ul> 标签
+	<ul style="list-style-type:circle">
+		<li>Coffee</li>
+		<li>Milk</li>
+	</ul>
+
+	有序列表也是一列项目，列表项目使用数字进行标记。 有序列表始于 <ol> 标签。每个列表项始于 <li> 标签。
+	列表项项使用数字来标记。
+	<ol start="10" type="A">
+		<li>Coffee</li>
+		<li>Milk</li>
+	</ol>
+	自定义列表  <dl><dt><dd>
+
+22.HTML <div> 元素是块级元素，它可用于组合其他 HTML 元素的容器。（是一块，但不一定是长方形，可能填充剩余的空间，是一块）
+<div> 元素没有特定的含义。除此之外，由于它属于块级元素，浏览器会在其前后显示折行。
+如果与 CSS 一同使用，<div> 元素可用于对大的内容块设置样式属性。
+<div> 元素的另一个常见的用途是文档布局。它取代了使用表格定义布局的老式方法。使用 <table> 元素进行文档布局不是表格的正确用法。<table> 元素的作用是显示表格化的数据。
+虽然我们可以使用HTML table标签来设计出漂亮的布局，但是table标签是不建议作为布局工具使用的 - 表格不是布局工具
+
+
+HTML <span> 元素是内联元素，可用作文本的容器
+<span> 元素也没有特定的含义。
+当与 CSS 一同使用时，<span> 元素可用于为部分文本设置样式属性。
+ <p>我的母亲有 <span style="color:blue">蓝色</span> 的眼睛。</p>
+
+div span只有和css合起来才神奇。
+Tip: 使用 CSS 最大的好处是，如果把 CSS 代码存放到外部样式表中，那么站点会更易于维护。通过编辑单一的文件，就可以改变所有页面的布局。如需学习更多有关 CSS 的知识，请访问我们的CSS 教程。
+Tip: 由于创建高级的布局非常耗时，使用模板是一个快速的选项。通过搜索引擎可以找到很多免费的网站模板（您可以使用这些预先构建好的网站布局，并优化它们）。
+
+23.表单
+	<form>
+		<input type="text" value="your name"/>	文本输入框
+		<input type="password"/>   密码输入框
+		<input type="radio" name="sex" value="male" checked="true" >Male<br/>单选框，其中name很重要，同一个form下，name一样的单选框维持单选状态。
+		（from之外都统一默认在一个大的form中）
+		<input type="checkbox" name="aa" value="111" checked="true"/>111<br/>
+		<input type="submit" value="提交"><br/>   将表单选中得到的内容，以参数的形式，加到跳转的url上面。（get方式）
+		<input type="reset" value="重置">
+		 <select name="adb" >
+			<option name="aaa" selected="true" value="111">111</option>
+		</select>  //会把name adb和value 111 提交过去。
+		 <input type="button"
+		 <textarea  name="eee" rows="10" cols="10"></textarea> //name eee="输入值"，如果不设置name，就不会提交上去。
+		 <optgroup>	定义选项组 给select 中的option 分组。
+
+		 <fieldset> <fieldset> 标签可以将表单内的相关元素分组。<fieldset> 标签会在相关表单元素周围绘制边框。
+		<legend>Personal information:</legend> 为 <fieldset>元素定义标题。
+
+		<label>	定义了 <input> 元素的标签，一般为输入标题
+		<label> 标签为 input 元素定义标注（标记）。
+label 元素不会向用户呈现任何特殊效果。不过，它为鼠标用户改进了可用性。如果您在 label 元素内点击文本，就会触发此控件。就是说，当用户选择该标签时，浏览器就会自动将焦点转到和标签相关的表单控件上。
+<label> 标签的 for 属性应当与相关元素的 id 属性相同。
+		
+	</form> 
+
+24.Iframe  框架，就是一个页面显示几个网页，或者将一个网页分开，解耦。
+	<iframe src="demo_iframe.htm" name="iframe_a"  width="200px" height="200px"  frameborder="0"></iframe>
+	<p><a href="http://www.runoob.com" target="iframe_a">RUNOOB.COM</a></p>
+
+	点击链接，会在iframe显示"http://www.runoob.com"
+
+25.script	<script> 元素既可包含脚本语句，也可通过 src 属性指向外部脚本文件。
+		JavaScript 最常用于图片操作、表单验证以及内容动态更新。
+	在html加载时，就会执行其中的方法，在body中加入helloworld，位置和script的位置有关。
+	<script>
+		document.write("Hello World!");
+	</script>
+	
+
+     <noscript>//当浏览器不支持script时，就会在ui上出现“抱歉，你的浏览器不支持 JavaScript!”。
+        抱歉，你的浏览器不支持 JavaScript!
+    </noscript>
+ 
+ 26.字符实体，指的是有许多字符是需要转义的，比如<> ，就需要用特殊字符，否则会认为是html标签，
+	
+显示结果	描述	实体名称	实体编号
+ 		空格	&nbsp;		&#160;
+<		小于号	&lt;		&#60;
+>		大于号	&gt;		&#62;	
+&		和号	&amp;		&#38;
+"		引号	&quot;		&#34;
+
+27.URL - 统一资源定位器
+scheme - 定义因特网服务的类型。最常见的类型是 http
+host - 定义域主机（http 的默认主机是 www）
+domain - 定义因特网域名，比如 runoob.com
+:port - 定义主机上的端口号（http 的默认端口号是 80）
+path - 定义服务器上的路径（如果省略，则文档必须位于网站的根目录中）。
+filename - 定义文档/资源的名称
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+question
+ 1.<meta http-equiv="refresh" content="3">
+	每隔三秒刷新，前端是否会重新加载url？
+ 2.image src 图片
+	网络图片加载失败，显示默认图片怎么处理。
+ 3.table border color 怎么设置？
+
+4.无序列表 ul 的小黑点如何改变？
+	<ul style="list-style-type:circle">	
+
+5.style中clear:both;是什么有意思？
+
+6. <input type="password"  name="secondname">
+如果改变默认密码的小圆圈。
+
+7.网页如何取url后面带过来的参数值比如www.aaa.com/bb?aa="";
+
+8.表单post方式，action 页面如何接收？
+
