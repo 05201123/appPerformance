@@ -1,0 +1,39 @@
+
+knowledge（canvas 拖动，cache，audio，video）
+1.<!doctype> 声明必须位于 HTML5 文档中的第一行,使用非常简单:<!DOCTYPE html>
+
+2.Html5设计的目的是为了在移动设备上支持多媒体。
+
+3.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+question
+ 1. canvas画圆时，后面两个参数是什么意思？
+ var c=document.getElementById("myCanvas");
+var ctx=c.getContext("2d");
+ctx.beginPath();
+ctx.arc(95,50,40,0,2*Math.PI); //????
+ctx.stroke();
+
+

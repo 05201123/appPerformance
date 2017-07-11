@@ -270,7 +270,7 @@ question
  2.image src 图片
 	网络图片加载失败，显示默认图片怎么处理。
  3.table border color 怎么设置？
-
+	所有的border color处理都可以 <div style="border: 1px solid #000000;width: 200px;height: 200px;"></div>
 4.无序列表 ul 的小黑点如何改变？
 	<ul style="list-style-type:circle">	
 
