@@ -1,0 +1,397 @@
+Vue.js Study
+knowledge
+1.Vue.js：是一套构建用户界面的渐进式框架。
+		只关注视图层，采用自底向上增量开发的设计。
+		目标：通过尽可能简单的api实现响应的数据绑定和组合的视图组件。
+		必备知识：Html Css Js
+2.第一个实例：文本，数据绑定最常见的形式就是使用 {{...}}（双大括号）的文本插值：
+<!DOCTYPE html>
+<html >
+<head>
+    <meta charset="UTF-8">
+    <title>Vue.jsStudy</title>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+</head>
+<body>
+   <div id="app">
+       <p id="app1">{{message}}</p>
+       <p >{{message}}</p>
+       <p >{{message}}</p>
+   </div>
+
+   <script>
+      new Vue({
+           el:'#app1',
+           data:{
+               message:"Two Vue.js"
+           }
+       }
+       )
+       new Vue({
+           el:"#app",
+           data:{
+               message:"First Vue.js"
+           }
+       })
+    </script>
+
+</body>
+</html>
+显示结果：
+	Two Vue.js
+
+	First Vue.js
+
+	First Vue.js
+
+有好多点需要注意的
+	（1）导入https://unpkg.com/vue/dist/vue.js，才能解析{{ message }}
+	（2）<srcipt> new Vue:...</script>有些类似脚本中初始化信息，不是方法，而是创建。
+		el是el而不是e1。app1前面要加#，其实就是找id为app1的对象，其中的message为Two Vue.js。
+		如果app包含app1，则以最里层的为主，应该是一种精确的关系。
+
+
+
+3.替换网页：Html 使用 v-html 指令用于输出 html 代码：
+	<div id="vue_html" v-html="message3"></div>
+	 new Vue(
+               {
+                   el:"#vue_html",
+                   data:{
+                       message3:'<h5>Three Vue.js </h5>'
+                   }
+               }
+       )
+
+4.checkbox 的绑定 v-model， v-bind:class
+     <style>
+        .class1{
+            color: #000;
+            background-color: #00a5e0;
+        }
+        .class2{
+            color: #fff;
+            background-color: #00ba0a;
+        }
+    </style>
+    <div id="vuebind">
+       <label v-bind:class="{'class2':class1}">修改颜色</label><input type="checkbox" v-model="class1"/>
+   </div>
+   <script>
+    new Vue({
+           el:'#vuebind',
+           data:{
+               class1:true
+           }
+       })
+   </script>
+
+   当执行到script，会将class1赋值为true，这是初始化数据，此时，checkbox中，v-model对应的class1 就是true，
+   checkbox属于选中状态。而label，bind：class，class1为true，label绑定的class就是class2的style了，显示白字。
+   当点击checkbox时，class1会随着选中变化，从而影响label的style变化。
+
+5.v-bind:id
+	Vue.js 都提供了完全的 JavaScript 表达式支持。
+  <div id="vuebindid">
+        {{5+5}}<br/>
+       {{ok?'yes':'no'}}<br/>
+       {{message.split('').reverse().join('')}}
+        <div v-bind:id="'list-'+id" onclick="aa()">菜鸟联盟</div>
+   </div>
+    new Vue({
+           el:'#vuebindid',
+           data:{
+               ok:true,
+               message:"abcdefg",
+               id:5
+           }
+   })
+   显示结果：
+	10
+	yes
+	gfedcba
+	菜鸟联盟
+   上面？：，三则运算符完全支持，还有message关于字符串的处理
+   v-bind：id，直接绑定了id。可以实现动态绑定id啊。
+ 
+ 6. v-if 元素显示与否
+   <div id="vueif">
+       <span v-if="show">AAAA</span>
+       <br/>
+       <span v-if="hide">bbbb</span>
+   </div>
+   new Vue({
+           el:'#vueif',
+           data:{
+               show:true,
+               hide:true
+           }
+       })
+   不难理解，就是view ，绑定，初始化。true 显示 false 隐藏
+   v-show
+	我们也可以使用 v-show 指令来根据条件展示元素：
+	v-show 指令
+	<h1 v-show="ok">Hello!</h1>
+    ***注意: v-show 不支持 <template> 语法。
+   
+   7.v-bind：href
+   div id="vuebindhref">
+       <pre> <a v-bind:href="message" target="_blank">百 度              一 下</a> </pre>
+   </div>
+   new Vue({
+           el:'#vuebindhref',
+           data:{
+               message:"http://www.baidu.com"
+           }
+    })
+
+    其中v-bind：href很好理解，然后是pre标签，不缩减空格，换行，原样输出。
+
+7.<a v-on:click="doSomething">
+	el:" 绑定元素"
+	data："绑定数据"
+	methods:{//绑定方法
+              doSomething:function(){
+                 aa()
+              }
+          }
+
+8.修饰符
+修饰符是以半角句号 . 指明的特殊后缀，用于指出一个指定应该以特殊方式绑定。
+例如，.prevent 修饰符告诉 v-on 指令对于触发的事件调用 event.preventDefault()：
+<form v-on:submit.prevent="onSubmit"></form>
+
+9.用户输入
+在 input 输入框中我们可以使用 v-model 指令来实现双向数据绑定：
+<div id="vuebindmodel">
+       <span v-text="message"></span>
+       <br/>
+       <input v-model="message"/>
+ </div>
+  new Vue({
+           el:'#vuebindmodel',
+           data:{
+               message:"abcd"
+           }
+       })
+
+双向绑定，输入框内容会在文本中显示。
+
+10.过滤器
+Vue.js 允许你自定义过滤器，被用作一些常见的文本格式化。由"管道符"指示, 格式如下：
+<!-- 在两个大括号中 -->
+{{ message | capitalize }}
+
+<!-- 在 v-bind 指令中 -->
+<div v-bind:id="rawId | formatId"></div>
+
+过滤器可以串联：
+{{ message | filterA | filterB }}
+过滤器是 JavaScript 函数，因此可以接受参数：
+{{ message | filterA('arg1', arg2) }}
+这里，message 是第一个参数，字符串 'arg1' 将传给过滤器作为第二个参数， arg2 表达式的值将被求值然后传给过滤器作为第三个参数。
+
+div id="vuefilter">
+       {{ message | capitalize2|capitalize }}
+</div>
+ new Vue({
+           el:'#vuefilter',
+           data:{
+               message:"abcdefg",
+           },
+           filters:{
+               capitalize:function(value){
+                   if(!value){
+                        return '';
+                   }else{
+                       return value.charAt(0).toUpperCase()+value.slice(1);
+                   }
+               },
+               capitalize2:function(value){
+                   if(!value){
+                       return '';
+                   }else{
+                       return 'abcd';
+                   }
+               }
+           }
+       })
+ 
+
+其实就是对第一个元素做处理，如果是过滤器串联的话，前面的过滤器操作过的数据，必须符合后面的过滤器使用否则会报错。
+
+11.属性与方法
+每个 Vue 实例都会代理其 data 对象里所有的属性：
+var data = { a: 1 }
+var vm = new Vue({
+  data: data
+})
+vm.a === data.a // -> true
+// 设置属性也会影响到原始数据
+vm.a = 2
+data.a // -> 2
+// ... 反之亦然
+data.a = 3
+vm.a // -> 3
+除了 data 属性， Vue 实例暴露了一些有用的实例属性与方法。这些属性与方法都有前缀 $，以便与代理的 data 属性区分。例如：
+var data = { a: 1 }
+var vm = new Vue({
+  el: '#example',
+  data: data
+})
+vm.$data === data // -> true
+vm.$el === document.getElementById('example') // -> true
+// $watch 是一个实例方法
+vm.$watch('a', function (newVal, oldVal) {
+  // 这个回调将在 `vm.a`  改变后调用
+})
+
+12.v-if v-else-if v-else
+ <div id="vueifelse">
+        <p v-if="flag==='A'">AAAAAA </p>
+        <p v-else-if="flag==='B'">BBBBBB</p>
+        <p v-else-if="flag==='C'">CCCCCCC</p>
+        <p v-else="flag==='D'">DDDDDDDD</p>
+    </div>
+  new Vue({
+           el:'#vueifelse',
+           data:{
+               flag:"D"
+           }
+       })
+  显示：DDDDDDDD
+
+13.循环语句
+循环使用 v-for 指令。
+v-for 指令需要以 item in items 形式的特殊语法， items 是源数据数组并且 item 是数组元素迭代的别名。
+<div id="vuefor">
+       <ol >
+           <li v-for="i in list">
+               {{ i.id }},{{ i.name}}<br/>
+               ---------------------
+           </li>
+       </ol>
+ </div>
+new Vue({
+           el:'#vuefor',
+           data:{
+               list:[
+                   {name:'张三',id:'111'},
+                   {name:'李四',id:'112'},
+                   {name:'王五',id:'113'}
+               ]
+           }
+       })
+       有一些类的概念了，格式 i in list，i就是一个对象，list是对象组。语法很简单。
+     还有一种object形式，是把对象中每一个元素，排列出来
+      <div id="vueforobject">
+       <ul >
+           <li v-for="(value,key,index) in object">
+               {{index}}.{{key}}:{{value}}
+           </li>
+       </ul>
+
+    </div>
+    new Vue({
+           el:'#vueforobject',
+           data:{
+               object:{
+                    name:'zhangsan',
+                    sex:'nan',
+                    age:15
+                }
+           }
+       })
+       这种形式(value,key,index) in object，一个参数的话是value，两个参数的话是value，key，
+       三个参数的value，key，index，即使是写成
+       <li v-for="(index,key,value) in object">，此时，index也是对象的value
+  <ul>
+    <li v-for="n in 10">
+     {{ n }}
+    </li>
+  </ul>  
+  循环10次
+
+14.计算属性关键词: computed。
+计算属性在处理一些复杂逻辑时是很有用的。
+ <div id="vuecomputed" >
+       <p>原始字符串：{{message}}</p>
+       <p>计算反转字符串：{{ remessage }}</p>
+       <p>方法反转字符串：{{ memessage() }}</p>
+       <p id="vuetmep" v-on:click="modifymsg">点击更改message</p>
+   </div>
+   var vue1=new Vue({
+           el:'#vuecomputed',
+           data:{
+               message:'abcdefg'
+           },
+           computed:{
+               remessage:function(){
+                   return this.message.split('').reverse().join('')
+               }
+           },
+           methods:{
+               memessage:function(){
+                   return this.message.split('').reverse().join('')
+               },
+               modifymsg:function(){
+                   vue1.message='opqrest';
+               }
+           }
+       })
+   个人感觉computed与methods方法实现效果是一致的，都是双向绑定的，当点击，动态更改message时，
+   和message有关联的view都会更新。霸道的框架 模式。
+
+   最好不用嵌套运用vue标签，vuecomputed，vuetmep，定义两套事件，会失效，原因？？？？
+
+   我们可以使用 methods 来替代 computed，效果上两个都是一样的，但是 computed 是基于它的依赖缓存，只有相关依赖发生改变时才会重新取值。
+   而使用 methods ，在重新渲染的时候，函数总会重新调用执行。
+   可以说使用 computed 性能会更好，但是如果你不希望缓存，你可以使用 methods 属性。？？？
+
+15.Vue.js 样式绑定
+class 与 style 是 HTML 元素的属性，用于设置元素的样式，我们可以用 v-bind 来设置样式属性。
+Vue.js v-bind 在处理 class 和 style 时， 专门增强了它。表达式的结果类型除了字符串之外，还可以是对象或数组。
+
+<div v-bind:style="styleObject">菜鸟教程</div>
+new Vue({
+  el: '#app',
+  data: {
+    styleObject: {
+      color: 'green',
+      fontSize: '30px'
+    }
+  }
+})
+
+<div id="app">
+  <div v-bind:class="classObject"></div>
+</div>
+new Vue({
+            el:'#vuestyle',
+            data:{
+                classObject:{
+                    sytle3:true
+                }
+            }
+        })
+改变起来还是比较麻烦的，不能直接更换，但如果是类操作，还是挺简单。
+
+16.
+	
+
+
+
+question
+1.<script src="https://unpkg.com/vue/dist/vue.js"/>这么写vue.js会失效。why？
+
+2.  <a v-bind:href="message" target="_blank">百 度              一 下</a> 
+	
+
+	v-bind:href在webstome上红，如何解决？
+	使用缩写没有问题，v-bind:href写成：  ：href
+	<!-- 完整语法 -->
+	<a v-on:click="doSomething"></a>
+	<!-- 缩写 -->
+<	a @click="doSomething"></a>		
+
+3.
