@@ -150,8 +150,162 @@ new Vue({
 组件（Component）是 Vue.js 最强大的功能之一。
 组件可以扩展 HTML 元素，封装可重用的代码。
 组件系统让我们可以用独立可复用的小组件来构建大型应用，几乎任意类型的应用的界面都可以抽象为一个组件树.
+注册一个全局组件语法格式如下：
+Vue.component(tagName, options)
+tagName 为组件名，options 为配置选项。注册后，我们可以使用以下方式来调用组件：
+<tagName></tagName>
+
+注册一个简单的全局组件
+  <div id="vuecomponent">
+       <aaaa></aaaa>
+   </div>
+ var aa={template:'<p>hello component</p>' }
+ Vue.component('aaaa',aa)
+ new Vue({
+      el:'#vuecomponent'
+ })
+  template关键词
+  Vue.component('aaaa',aa)等于注册了一个组件，组件名叫aaaa,
+  aa对应着这个组件的变现形式。
+  <aaaa></aaaa>就被认为是一个组件来解析，而不是自定义的标签。
+
+注册一个简单的局部组件
+   var bb={template:'<p>hello com</p>'}
+        new Vue({
+            el:'#vuecomponent2',
+            components:{
+                'aaaa':bb,
+            }
+        })
+  这个组件是在对象 new Vue注册的，也就只能在'#vuecomponent2'这个div下使用。
+  components关键词
+  当全局和局部都对'aaaa'注册组件时，当以局部的为准，全局变量和局部变量理解。
+
+  Prop
+prop 是父组件用来传递数据的一个自定义属性。
+父组件的数据需要通过 props 把数据传给子组件，子组件需要显式地用 props 选项声明 "prop"：
+   <div id="vuecomponent4">
+       <ol >
+           <!--<li  v-for="item in list">{{item.text}}</li>-->
+           <haha v-for="item in list" v-bind:message="item"></haha>
+       </ol>
+   </div>
+
+   Vue.component('haha',{
+            props:['message'],
+            template:'<li>{{message.text}}</li>'
+        })
+
+ new Vue({
+            el:'#vuecomponent4',
+            data:{
+                list:[
+                    {text:'Baidu'},
+                    {text:'Google'},
+                    {text:'Taobao'},
+                ]
+            }
+        })
+  
+  props关键词，为组件自定义一个属性
+
+注意: prop 是单向绑定的：当父组件的属性变化时，将传导给子组件，但是不会反过来。
+
+
+Prop 验证
+组件可以为 props 指定验证要求。
+prop 是一个对象而不是字符串数组时，它包含验证要求：
+Vue.component('example', {
+  props: {
+    // 基础类型检测 （`null` 意思是任何类型都可以）
+    propA: Number,
+    // 多种类型
+    propB: [String, Number],
+    // 必传且是字符串
+    propC: {
+      type: String,
+      required: true
+    },
+    // 数字，有默认值
+    propD: {
+      type: Number,
+      default: 100
+    },
+    // 数组／对象的默认值应当由一个工厂函数返回
+    propE: {
+      type: Object,
+      default: function () {
+        return { message: 'hello' }
+      }
+    },
+    // 自定义验证函数
+    propF: {
+      validator: function (value) {
+        return value > 10
+      }
+    }
+  }
+})
+type 可以是下面原生构造器：
+String
+Number
+Boolean
+Function
+Object
+Array
+type 也可以是一个自定义构造器，使用 instanceof 检测。
+
+
+
+自定义事件
+父组件是使用 props 传递数据给子组件，但如果子组件要把数据传递回去，就需要使用自定义事件！
+我们可以使用 v-on 绑定自定义事件, 每个 Vue 实例都实现了事件接口(Events interface)，即：
+使用 $on(eventName) 监听事件
+使用 $emit(eventName) 触发事件
+另外，父组件可以在使用子组件的地方直接用 v-on 来监听子组件触发的事件。
+以下实例中子组件已经和它外部完全解耦了。它所做的只是触发一个父组件关心的内部事件。
+<div id="vuecomponent6">
+        <span>{{total}}</span>
+        <buttoncounter v-on:increment="totalAll"></buttoncounter>
+        <buttoncounter v-on:increment="totalAll"></buttoncounter>
+</div>
+
+ new Vue({
+            el:'#vuecomponent6',
+            data:{
+                total:0
+            },
+            methods:{
+                totalAll:function(){
+                    this.total+=1;
+                }
+            }
+        })
+
+ Vue.component('buttoncounter',{
+            template:'<button v-on:click="increment">{{counter}}</button>',
+            data:function(){
+                return{
+                    counter:0
+                }
+
+            },
+            methods:{
+                increment:function(){
+                    this.counter+=1;
+                    this.$emit('increment')
+                }
+            }
+        });
+
+template:组件样式
+data:function(){：组件变量
+ methods:{：组件方法
+props关键词，为组件自定义一个属性
+
 
 
 
 question
-1.感觉不到修饰符的作用.trim,.number 的作用
+1.感觉不到修饰符的作用.trim,.number 的作用？
+2.Prop 验证，是如何运用的？
