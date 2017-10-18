@@ -26,6 +26,7 @@ https://developers.google.com/web/tools/chrome-devtools/remote-debugging/webview
 
 提示：WebView 调试不会受应用清单中 debuggable 标志的状态的影响。如果您希望仅在 debuggable 为 true 时启用 WebView 调试，请在运行时测试标志。
 
+//******//必须在主线程中才有效。
 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
     if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE))
     { WebView.setWebContentsDebuggingEnabled(true); }
